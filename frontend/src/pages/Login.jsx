@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/authStore'
 import { authAPI } from '../api/auth'
 import { workspaceAPI } from '../api/workspace'
 import { getApiBaseUrl, getApiUrl, getFullImageUrl } from '../utils/api'
-import { FiUser, FiLock, FiEye, FiEyeOff, FiArrowRight, FiArrowLeft, FiCheck, FiAlertCircle, FiLoader } from 'react-icons/fi'
+import { FiUser, FiLock, FiEye, FiEyeOff, FiArrowRight, FiCheck, FiAlertCircle, FiLoader } from 'react-icons/fi'
 import { auth, googleProvider, githubProvider } from '../utils/firebase'
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
 import './Login.css'
@@ -218,14 +218,6 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      {/* Floating Back Button */}
-      <button 
-        onClick={() => navigate(-1)}
-        className="fixed top-6 left-6 z-[100] w-12 h-12 rounded-2xl bg-white/10 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 flex items-center justify-center text-white/80 hover:bg-white/20 hover:scale-110 active:scale-95 transition-all group shadow-2xl"
-        title="Go Back"
-      >
-        <FiArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-      </button>
       {/* Animated Background */}
       <div className="login-background">
         {brandingLoading && <div className="branding-loader"><FiLoader className="animate-spin" size={24} /></div>}
