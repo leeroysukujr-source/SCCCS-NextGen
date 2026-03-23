@@ -1,0 +1,1185 @@
+TABLE: sqlite_sequence
+SQL: CREATE TABLE sqlite_sequence(name,seq)
+----------------------------------------
+
+TABLE: users
+SQL: CREATE TABLE users (
+	id INTEGER NOT NULL, 
+	username VARCHAR(80) NOT NULL, 
+	email VARCHAR(120) NOT NULL, 
+	password_hash VARCHAR(255), 
+	first_name VARCHAR(100), 
+	last_name VARCHAR(100), 
+	role VARCHAR(20) NOT NULL, 
+	is_active BOOLEAN NOT NULL, 
+	avatar_url VARCHAR(500), 
+	oauth_provider VARCHAR(50), 
+	oauth_id VARCHAR(255), 
+	privileges TEXT, 
+	created_at DATETIME, two_factor_enabled INTEGER NOT NULL DEFAULT 0, totp_secret TEXT, totp_encrypted INTEGER NOT NULL DEFAULT 0, admin_id INTEGER, workspace_id INTEGER REFERENCES workspaces(id), 
+	PRIMARY KEY (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'workspaces', 'workspace_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: classes
+SQL: CREATE TABLE classes (
+	id INTEGER NOT NULL, 
+	name VARCHAR(200) NOT NULL, 
+	description TEXT, 
+	code VARCHAR(20) NOT NULL, 
+	teacher_id INTEGER NOT NULL, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(teacher_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'teacher_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: rooms
+SQL: CREATE TABLE rooms (
+	id INTEGER NOT NULL, 
+	name VARCHAR(200) NOT NULL, 
+	description TEXT, 
+	host_id INTEGER NOT NULL, 
+	room_code VARCHAR(20) NOT NULL, 
+	meeting_type VARCHAR(20), 
+	scheduled_at DATETIME, 
+	max_participants INTEGER, 
+	is_active BOOLEAN, 
+	started_at DATETIME, 
+	ended_at DATETIME, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(host_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'host_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: channels
+SQL: CREATE TABLE channels (
+	id INTEGER NOT NULL, 
+	name VARCHAR(200) NOT NULL, 
+	description TEXT, 
+	type VARCHAR(20), 
+	created_by INTEGER NOT NULL, 
+	is_encrypted BOOLEAN, 
+	encryption_key TEXT, 
+	share_code VARCHAR(100), 
+	created_at DATETIME, avatar_url VARCHAR(500), updated_at DATETIME, max_members INTEGER, allow_file_sharing BOOLEAN DEFAULT 1, allow_message_editing BOOLEAN DEFAULT 1, allow_message_deletion BOOLEAN DEFAULT 1, default_message_ttl INTEGER, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(created_by) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'created_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: notifications
+SQL: CREATE TABLE notifications (
+	id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	type VARCHAR(50) NOT NULL, 
+	title VARCHAR(200) NOT NULL, 
+	content TEXT, 
+	related_id INTEGER, 
+	is_read BOOLEAN, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: groups
+SQL: CREATE TABLE groups (
+	id INTEGER NOT NULL, 
+	name VARCHAR(200) NOT NULL, 
+	description TEXT, 
+	category VARCHAR(50), 
+	created_by INTEGER NOT NULL, 
+	join_type VARCHAR(20), 
+	join_code VARCHAR(20), 
+	max_members INTEGER, 
+	is_active BOOLEAN, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(created_by) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'created_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: class_members
+SQL: CREATE TABLE class_members (
+	id INTEGER NOT NULL, 
+	class_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	role VARCHAR(20), 
+	joined_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(class_id) REFERENCES classes (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'classes', 'class_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: lessons
+SQL: CREATE TABLE lessons (
+	id INTEGER NOT NULL, 
+	class_id INTEGER NOT NULL, 
+	title VARCHAR(200) NOT NULL, 
+	description TEXT, 
+	content TEXT, 
+	due_date DATETIME, 
+	created_by INTEGER NOT NULL, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(class_id) REFERENCES classes (id), 
+	FOREIGN KEY(created_by) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'created_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'classes', 'class_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: room_participants
+SQL: CREATE TABLE room_participants (
+	id INTEGER NOT NULL, 
+	room_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	joined_at DATETIME, 
+	left_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(room_id) REFERENCES rooms (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'rooms', 'room_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: channel_members
+SQL: CREATE TABLE channel_members (
+	id INTEGER NOT NULL, 
+	channel_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	role VARCHAR(20), 
+	joined_at DATETIME, last_read_at DATETIME, is_muted BOOLEAN DEFAULT 0, notification_settings TEXT, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(channel_id) REFERENCES channels (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'channels', 'channel_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: messages
+SQL: CREATE TABLE messages (
+	id INTEGER NOT NULL, 
+	channel_id INTEGER NOT NULL, 
+	author_id INTEGER NOT NULL, 
+	content TEXT NOT NULL, 
+	message_type VARCHAR(20), 
+	thread_id INTEGER, 
+	mentions TEXT, 
+	is_encrypted BOOLEAN, 
+	created_at DATETIME, 
+	updated_at DATETIME, reply_to_id INTEGER REFERENCES messages(id), is_edited BOOLEAN DEFAULT 0, is_pinned BOOLEAN DEFAULT 0, is_forwarded BOOLEAN DEFAULT 0, original_message_id INTEGER REFERENCES messages(id), forward_count INTEGER DEFAULT 0, reaction_count INTEGER DEFAULT 0, reply_count INTEGER DEFAULT 0, view_count INTEGER DEFAULT 0, expires_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(channel_id) REFERENCES channels (id), 
+	FOREIGN KEY(author_id) REFERENCES users (id), 
+	FOREIGN KEY(thread_id) REFERENCES messages (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'messages', 'thread_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'users', 'author_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (2, 0, 'channels', 'channel_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (3, 0, 'messages', 'original_message_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (4, 0, 'messages', 'reply_to_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: group_members
+SQL: CREATE TABLE group_members (
+	id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	role VARCHAR(20), 
+	joined_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(group_id) REFERENCES groups (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'groups', 'group_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: group_join_requests
+SQL: CREATE TABLE group_join_requests (
+	id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	status VARCHAR(20), 
+	message TEXT, 
+	created_at DATETIME, 
+	reviewed_at DATETIME, 
+	reviewed_by INTEGER, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(group_id) REFERENCES groups (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id), 
+	FOREIGN KEY(reviewed_by) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'reviewed_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (2, 0, 'groups', 'group_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: lesson_links
+SQL: CREATE TABLE lesson_links (
+	id INTEGER NOT NULL, 
+	lesson_id INTEGER NOT NULL, 
+	title VARCHAR(200) NOT NULL, 
+	url VARCHAR(500) NOT NULL, 
+	description TEXT, 
+	created_by INTEGER NOT NULL, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(lesson_id) REFERENCES lessons (id), 
+	FOREIGN KEY(created_by) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'created_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'lessons', 'lesson_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: files
+SQL: CREATE TABLE files (
+	id INTEGER NOT NULL, 
+	filename VARCHAR(255) NOT NULL, 
+	original_filename VARCHAR(255) NOT NULL, 
+	file_path VARCHAR(500) NOT NULL, 
+	file_size INTEGER, 
+	mime_type VARCHAR(100), 
+	uploaded_by INTEGER NOT NULL, 
+	message_id INTEGER, 
+	lesson_id INTEGER, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(uploaded_by) REFERENCES users (id), 
+	FOREIGN KEY(message_id) REFERENCES messages (id), 
+	FOREIGN KEY(lesson_id) REFERENCES lessons (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'lessons', 'lesson_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'messages', 'message_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (2, 0, 'users', 'uploaded_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: user_activities
+SQL: CREATE TABLE user_activities (
+	id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	activity_type VARCHAR(50) NOT NULL, 
+	resource_type VARCHAR(50), 
+	resource_id INTEGER, 
+	meta_data TEXT, 
+	ip_address VARCHAR(45), 
+	user_agent VARCHAR(500), 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: system_metrics
+SQL: CREATE TABLE system_metrics (
+	id INTEGER NOT NULL, 
+	metric_type VARCHAR(50) NOT NULL, 
+	metric_value FLOAT NOT NULL, 
+	meta_data TEXT, 
+	recorded_at DATETIME, 
+	PRIMARY KEY (id)
+)
+----------------------------------------
+
+TABLE: engagement_metrics
+SQL: CREATE TABLE engagement_metrics (
+	id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	date DATE NOT NULL, 
+	messages_sent INTEGER, 
+	files_uploaded INTEGER, 
+	classes_joined INTEGER, 
+	lessons_completed INTEGER, 
+	time_spent_minutes INTEGER, 
+	login_count INTEGER, 
+	created_at DATETIME, 
+	updated_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: user_sessions
+SQL: CREATE TABLE user_sessions (
+	id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	session_token VARCHAR(255) NOT NULL, 
+	ip_address VARCHAR(45), 
+	user_agent VARCHAR(500), 
+	is_active BOOLEAN, 
+	last_activity DATETIME, 
+	expires_at DATETIME NOT NULL, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: two_factor_auth
+SQL: CREATE TABLE two_factor_auth (
+	id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	secret_key VARCHAR(255) NOT NULL, 
+	is_enabled BOOLEAN, 
+	backup_codes TEXT, 
+	created_at DATETIME, 
+	updated_at DATETIME, 
+	PRIMARY KEY (id), 
+	UNIQUE (user_id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: audit_logs
+SQL: CREATE TABLE audit_logs (
+	id INTEGER NOT NULL, 
+	user_id INTEGER, 
+	action VARCHAR(100) NOT NULL, 
+	resource_type VARCHAR(50), 
+	resource_id INTEGER, 
+	ip_address VARCHAR(45), 
+	user_agent VARCHAR(500), 
+	details_data TEXT, 
+	status VARCHAR(20), 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: security_events
+SQL: CREATE TABLE security_events (
+	id INTEGER NOT NULL, 
+	user_id INTEGER, 
+	event_type VARCHAR(50) NOT NULL, 
+	severity VARCHAR(20), 
+	ip_address VARCHAR(45), 
+	user_agent VARCHAR(500), 
+	details_data TEXT, 
+	is_resolved BOOLEAN, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: notification_preferences
+SQL: CREATE TABLE notification_preferences (
+	id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	email_enabled BOOLEAN, 
+	push_enabled BOOLEAN, 
+	in_app_enabled BOOLEAN, 
+	notification_types TEXT, 
+	quiet_hours_start TIME, 
+	quiet_hours_end TIME, 
+	created_at DATETIME, 
+	updated_at DATETIME, 
+	PRIMARY KEY (id), 
+	UNIQUE (user_id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: notifications_v2
+SQL: CREATE TABLE notifications_v2 (
+	id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	notification_type VARCHAR(50) NOT NULL, 
+	title VARCHAR(200) NOT NULL, 
+	message TEXT NOT NULL, 
+	resource_type VARCHAR(50), 
+	resource_id INTEGER, 
+	action_url VARCHAR(500), 
+	is_read BOOLEAN, 
+	is_sent_email BOOLEAN, 
+	is_sent_push BOOLEAN, 
+	priority VARCHAR(20), 
+	meta_data TEXT, 
+	created_at DATETIME, 
+	read_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: presence
+SQL: CREATE TABLE presence (
+	id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	status VARCHAR(20), 
+	current_resource_type VARCHAR(50), 
+	current_resource_id INTEGER, 
+	last_seen DATETIME, 
+	updated_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: file_versions
+SQL: CREATE TABLE file_versions (
+	id INTEGER NOT NULL, 
+	file_id INTEGER NOT NULL, 
+	version_number INTEGER NOT NULL, 
+	file_path VARCHAR(500) NOT NULL, 
+	file_size INTEGER, 
+	uploaded_by INTEGER NOT NULL, 
+	change_description TEXT, 
+	checksum VARCHAR(64), 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(file_id) REFERENCES files (id), 
+	FOREIGN KEY(uploaded_by) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'uploaded_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'files', 'file_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: collaboration_sessions
+SQL: CREATE TABLE collaboration_sessions (
+	id INTEGER NOT NULL, 
+	resource_type VARCHAR(50) NOT NULL, 
+	resource_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	cursor_position TEXT, 
+	is_active BOOLEAN, 
+	last_activity DATETIME, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: webhooks
+SQL: CREATE TABLE webhooks (
+	id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	name VARCHAR(200) NOT NULL, 
+	url VARCHAR(500) NOT NULL, 
+	secret VARCHAR(255) NOT NULL, 
+	events TEXT, 
+	is_active BOOLEAN, 
+	retry_count INTEGER, 
+	timeout_seconds INTEGER, 
+	created_at DATETIME, 
+	updated_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: api_tokens
+SQL: CREATE TABLE api_tokens (
+	id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	name VARCHAR(200) NOT NULL, 
+	token VARCHAR(255) NOT NULL, 
+	scopes TEXT, 
+	last_used_at DATETIME, 
+	expires_at DATETIME, 
+	is_active BOOLEAN, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: webhook_deliveries
+SQL: CREATE TABLE webhook_deliveries (
+	id INTEGER NOT NULL, 
+	webhook_id INTEGER NOT NULL, 
+	event_type VARCHAR(50) NOT NULL, 
+	payload TEXT NOT NULL, 
+	status VARCHAR(20), 
+	status_code INTEGER, 
+	response_body TEXT, 
+	attempt_count INTEGER, 
+	created_at DATETIME, 
+	delivered_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(webhook_id) REFERENCES webhooks (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'webhooks', 'webhook_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: direct_messages
+SQL: CREATE TABLE direct_messages (
+	id INTEGER NOT NULL, 
+	sender_id INTEGER NOT NULL, 
+	recipient_id INTEGER NOT NULL, 
+	content TEXT NOT NULL, 
+	message_type VARCHAR(20), 
+	thread_id INTEGER, 
+	is_encrypted BOOLEAN, 
+	is_read BOOLEAN, 
+	read_at DATETIME, 
+	created_at DATETIME, 
+	updated_at DATETIME, call_room_id INTEGER, call_duration INTEGER, call_status VARCHAR(20), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(sender_id) REFERENCES users (id), 
+	FOREIGN KEY(recipient_id) REFERENCES users (id), 
+	FOREIGN KEY(thread_id) REFERENCES direct_messages (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'direct_messages', 'thread_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'users', 'recipient_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (2, 0, 'users', 'sender_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: feedbacks
+SQL: CREATE TABLE feedbacks (
+	id INTEGER NOT NULL, 
+	student_id INTEGER NOT NULL, 
+	lecturer_id INTEGER NOT NULL, 
+	subject VARCHAR(200) NOT NULL, 
+	content TEXT NOT NULL, 
+	category VARCHAR(50), 
+	priority VARCHAR(20), 
+	status VARCHAR(20), 
+	is_anonymous BOOLEAN, 
+	response TEXT, 
+	responded_at DATETIME, 
+	created_at DATETIME, 
+	updated_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(student_id) REFERENCES users (id), 
+	FOREIGN KEY(lecturer_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'lecturer_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'users', 'student_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: direct_message_files
+SQL: CREATE TABLE direct_message_files (
+	id INTEGER NOT NULL, 
+	direct_message_id INTEGER NOT NULL, 
+	file_id INTEGER NOT NULL, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(direct_message_id) REFERENCES direct_messages (id), 
+	FOREIGN KEY(file_id) REFERENCES files (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'files', 'file_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'direct_messages', 'direct_message_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: message_reactions
+SQL: CREATE TABLE message_reactions (
+	id INTEGER NOT NULL, 
+	message_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	emoji VARCHAR(50) NOT NULL, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	CONSTRAINT unique_user_emoji_message UNIQUE (message_id, user_id, emoji), 
+	FOREIGN KEY(message_id) REFERENCES messages (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'messages', 'message_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: message_read_receipts
+SQL: CREATE TABLE message_read_receipts (
+	id INTEGER NOT NULL, 
+	message_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	read_at DATETIME, 
+	PRIMARY KEY (id), 
+	CONSTRAINT unique_user_message_read UNIQUE (message_id, user_id), 
+	FOREIGN KEY(message_id) REFERENCES messages (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'messages', 'message_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: pinned_messages
+SQL: CREATE TABLE pinned_messages (
+	id INTEGER NOT NULL, 
+	channel_id INTEGER NOT NULL, 
+	message_id INTEGER NOT NULL, 
+	pinned_by INTEGER NOT NULL, 
+	pinned_at DATETIME, 
+	note VARCHAR(500), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(channel_id) REFERENCES channels (id), 
+	FOREIGN KEY(message_id) REFERENCES messages (id), 
+	FOREIGN KEY(pinned_by) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'pinned_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'messages', 'message_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (2, 0, 'channels', 'channel_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: message_forwards
+SQL: CREATE TABLE message_forwards (
+	id INTEGER NOT NULL, 
+	original_message_id INTEGER NOT NULL, 
+	forwarded_message_id INTEGER NOT NULL, 
+	forwarded_by INTEGER NOT NULL, 
+	forwarded_at DATETIME, 
+	forwarded_to_channel_id INTEGER NOT NULL, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(original_message_id) REFERENCES messages (id), 
+	FOREIGN KEY(forwarded_message_id) REFERENCES messages (id), 
+	FOREIGN KEY(forwarded_by) REFERENCES users (id), 
+	FOREIGN KEY(forwarded_to_channel_id) REFERENCES channels (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'channels', 'forwarded_to_channel_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'users', 'forwarded_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (2, 0, 'messages', 'forwarded_message_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (3, 0, 'messages', 'original_message_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: message_edit_history
+SQL: CREATE TABLE message_edit_history (
+	id INTEGER NOT NULL, 
+	message_id INTEGER NOT NULL, 
+	old_content TEXT, 
+	edited_by INTEGER NOT NULL, 
+	edited_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(message_id) REFERENCES messages (id), 
+	FOREIGN KEY(edited_by) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'edited_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'messages', 'message_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: channel_polls
+SQL: CREATE TABLE channel_polls (
+	id INTEGER NOT NULL, 
+	channel_id INTEGER NOT NULL, 
+	message_id INTEGER NOT NULL, 
+	question VARCHAR(500) NOT NULL, 
+	options TEXT NOT NULL, 
+	is_multiple_choice BOOLEAN, 
+	is_anonymous BOOLEAN, 
+	expires_at DATETIME, 
+	created_by INTEGER NOT NULL, 
+	created_at DATETIME, 
+	status VARCHAR(20), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(channel_id) REFERENCES channels (id), 
+	UNIQUE (message_id), 
+	FOREIGN KEY(message_id) REFERENCES messages (id), 
+	FOREIGN KEY(created_by) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'created_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'messages', 'message_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (2, 0, 'channels', 'channel_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: channel_topics
+SQL: CREATE TABLE channel_topics (
+	id INTEGER NOT NULL, 
+	channel_id INTEGER NOT NULL, 
+	name VARCHAR(200) NOT NULL, 
+	description TEXT, 
+	icon VARCHAR(50), 
+	created_by INTEGER NOT NULL, 
+	created_at DATETIME, 
+	is_archived BOOLEAN, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(channel_id) REFERENCES channels (id), 
+	FOREIGN KEY(created_by) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'created_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'channels', 'channel_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: scheduled_messages
+SQL: CREATE TABLE scheduled_messages (
+	id INTEGER NOT NULL, 
+	channel_id INTEGER NOT NULL, 
+	author_id INTEGER NOT NULL, 
+	content TEXT NOT NULL, 
+	message_type VARCHAR(20), 
+	scheduled_for DATETIME NOT NULL, 
+	sent_at DATETIME, 
+	status VARCHAR(20), 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(channel_id) REFERENCES channels (id), 
+	FOREIGN KEY(author_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'author_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'channels', 'channel_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: channel_mutes
+SQL: CREATE TABLE channel_mutes (
+	id INTEGER NOT NULL, 
+	channel_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	muted_until DATETIME, 
+	muted_at DATETIME, 
+	PRIMARY KEY (id), 
+	CONSTRAINT unique_user_channel_mute UNIQUE (channel_id, user_id), 
+	FOREIGN KEY(channel_id) REFERENCES channels (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'channels', 'channel_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: poll_votes
+SQL: CREATE TABLE poll_votes (
+	id INTEGER NOT NULL, 
+	poll_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	option_index INTEGER NOT NULL, 
+	voted_at DATETIME, 
+	PRIMARY KEY (id), 
+	CONSTRAINT unique_user_option_vote UNIQUE (poll_id, user_id, option_index), 
+	FOREIGN KEY(poll_id) REFERENCES channel_polls (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'channel_polls', 'poll_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: password_reset_tokens
+SQL: CREATE TABLE password_reset_tokens (
+	id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	token VARCHAR(128) NOT NULL, 
+	expires_at DATETIME NOT NULL, 
+	used BOOLEAN NOT NULL, 
+	used_at DATETIME, 
+	created_at DATETIME NOT NULL, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: channel_invites
+SQL: CREATE TABLE channel_invites (
+	id INTEGER NOT NULL, 
+	channel_id INTEGER NOT NULL, 
+	token VARCHAR(128) NOT NULL, 
+	created_by INTEGER NOT NULL, 
+	email VARCHAR(255), 
+	max_uses INTEGER, 
+	uses INTEGER, 
+	expires_at DATETIME, 
+	revoked BOOLEAN, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(channel_id) REFERENCES channels (id), 
+	FOREIGN KEY(created_by) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'created_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'channels', 'channel_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: invite_audits
+SQL: CREATE TABLE invite_audits (
+	id INTEGER NOT NULL, 
+	invite_id INTEGER, 
+	channel_id INTEGER, 
+	action VARCHAR(50) NOT NULL, 
+	actor_id INTEGER, 
+	target_user_id INTEGER, 
+	ip_address VARCHAR(100), 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(invite_id) REFERENCES channel_invites (id), 
+	FOREIGN KEY(channel_id) REFERENCES channels (id), 
+	FOREIGN KEY(actor_id) REFERENCES users (id), 
+	FOREIGN KEY(target_user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'target_user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'users', 'actor_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (2, 0, 'channels', 'channel_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (3, 0, 'channel_invites', 'invite_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: message_deliveries
+SQL: CREATE TABLE message_deliveries (
+	id INTEGER NOT NULL, 
+	message_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	delivered_at DATETIME, 
+	PRIMARY KEY (id), 
+	CONSTRAINT unique_message_delivery UNIQUE (message_id, user_id), 
+	FOREIGN KEY(message_id) REFERENCES messages (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'messages', 'message_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: gpa_records
+SQL: CREATE TABLE gpa_records (
+	id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	data TEXT, 
+	created_at DATETIME, 
+	updated_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: twofactor_audits
+SQL: CREATE TABLE twofactor_audits (
+	id INTEGER NOT NULL, 
+	user_id INTEGER, 
+	action VARCHAR(50) NOT NULL, 
+	success BOOLEAN, 
+	ip_address VARCHAR(100), 
+	user_agent VARCHAR(500), 
+	details TEXT, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: device_sessions
+SQL: CREATE TABLE device_sessions (
+	id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	token_jti VARCHAR(128), 
+	device_info VARCHAR(500), 
+	ip_address VARCHAR(100), 
+	created_at DATETIME, 
+	last_seen DATETIME, 
+	revoked BOOLEAN, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: group_messages
+SQL: CREATE TABLE group_messages (
+	id INTEGER NOT NULL, 
+	group_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	content TEXT NOT NULL, 
+	message_type VARCHAR(20), 
+	file_id INTEGER, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(group_id) REFERENCES groups (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id), 
+	FOREIGN KEY(file_id) REFERENCES files (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'files', 'file_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (2, 0, 'groups', 'group_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: tutor_profiles
+SQL: CREATE TABLE tutor_profiles (
+	id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	bio TEXT, 
+	subjects TEXT, 
+	hourly_rate FLOAT, 
+	availability TEXT, 
+	rating FLOAT, 
+	review_count INTEGER, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	UNIQUE (user_id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: tutor_sessions
+SQL: CREATE TABLE tutor_sessions (
+	id INTEGER NOT NULL, 
+	tutor_id INTEGER NOT NULL, 
+	student_id INTEGER NOT NULL, 
+	subject VARCHAR(100) NOT NULL, 
+	scheduled_at DATETIME NOT NULL, 
+	status VARCHAR(20), 
+	meeting_link VARCHAR(500), 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(tutor_id) REFERENCES users (id), 
+	FOREIGN KEY(student_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'student_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'users', 'tutor_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: workspaces
+SQL: CREATE TABLE workspaces (
+	id INTEGER NOT NULL, 
+	name VARCHAR(200) NOT NULL, 
+	slug VARCHAR(100) NOT NULL, 
+	description TEXT, 
+	admin_id INTEGER, 
+	settings TEXT, 
+	created_at DATETIME, logo_url VARCHAR(500), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(admin_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'admin_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: system_settings
+SQL: CREATE TABLE system_settings (
+	id INTEGER NOT NULL, 
+	"key" VARCHAR(100) NOT NULL, 
+	value TEXT, 
+	category VARCHAR(50), 
+	value_type VARCHAR(20), 
+	description VARCHAR(255), 
+	is_public BOOLEAN, 
+	admin_only BOOLEAN, 
+	updated_at DATETIME, 
+	PRIMARY KEY (id)
+)
+----------------------------------------
+
+TABLE: report_requests
+SQL: CREATE TABLE report_requests (
+	id INTEGER NOT NULL, 
+	title VARCHAR(255) NOT NULL, 
+	description TEXT, 
+	due_date DATETIME, 
+	status VARCHAR(50), 
+	created_at DATETIME, 
+	created_by INTEGER, 
+	workspace_id INTEGER, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(created_by) REFERENCES users (id), 
+	FOREIGN KEY(workspace_id) REFERENCES workspaces (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'workspaces', 'workspace_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'users', 'created_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: report_submissions
+SQL: CREATE TABLE report_submissions (
+	id INTEGER NOT NULL, 
+	request_id INTEGER NOT NULL, 
+	workspace_id INTEGER NOT NULL, 
+	submitted_by INTEGER NOT NULL, 
+	submitted_at DATETIME, 
+	data JSON, 
+	notes TEXT, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(request_id) REFERENCES report_requests (id), 
+	FOREIGN KEY(workspace_id) REFERENCES workspaces (id), 
+	FOREIGN KEY(submitted_by) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'submitted_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'workspaces', 'workspace_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (2, 0, 'report_requests', 'request_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: study_room_documents
+SQL: CREATE TABLE study_room_documents (
+	id INTEGER NOT NULL, 
+	room_id VARCHAR(255) NOT NULL, 
+	owner_id INTEGER NOT NULL, 
+	title VARCHAR(255), 
+	content TEXT, 
+	created_at DATETIME, 
+	updated_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(owner_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'owner_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: study_room_document_collaborators
+SQL: CREATE TABLE study_room_document_collaborators (
+	id INTEGER NOT NULL, 
+	document_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	role VARCHAR(50), 
+	added_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(document_id) REFERENCES study_room_documents (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'study_room_documents', 'document_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: study_room_document_versions
+SQL: CREATE TABLE study_room_document_versions (
+	id INTEGER NOT NULL, 
+	document_id INTEGER NOT NULL, 
+	content_snapshot TEXT, 
+	created_by INTEGER, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(document_id) REFERENCES study_room_documents (id), 
+	FOREIGN KEY(created_by) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'created_by', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'study_room_documents', 'document_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+
+TABLE: study_room_document_comments
+SQL: CREATE TABLE study_room_document_comments (
+	id INTEGER NOT NULL, 
+	document_id INTEGER NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	content TEXT NOT NULL, 
+	created_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(document_id) REFERENCES study_room_documents (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id)
+)
+----------------------------------------
+FOREIGN KEYS:
+  (0, 0, 'users', 'user_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+  (1, 0, 'study_room_documents', 'document_id', 'id', 'NO ACTION', 'NO ACTION', 'NONE')
+----------------------------------------
+

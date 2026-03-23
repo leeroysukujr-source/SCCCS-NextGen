@@ -1,0 +1,21 @@
+.vb-contacts-root{display:flex;gap:18px}
+.vb-contacts-list{width:360px;padding:12px}
+.contacts-search input{width:100%;padding:8px;border-radius:8px;border:1px solid #e6eef8}
+.vb-center{padding:28px;text-align:center;color:#6b8aa2}
+.contacts-grid{display:flex;flex-direction:column;gap:8px;margin-top:8px;max-height:72vh;overflow:auto}
+.contact-card{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;cursor:pointer;border:1px solid transparent}
+.contact-card:hover{background:linear-gradient(90deg,#fbfdff,#f7fbff)}
+.contact-card.active{box-shadow:0 4px 20px rgba(30,80,140,0.06);border-color:rgba(100,140,200,0.12)}
+.contact-avatar{width:44px;height:44px;border-radius:22px;background:#dfeffb;display:flex;align-items:center;justify-content:center;font-weight:600}
+.contact-info{flex:1}
+.contact-name{font-weight:600}
+.contact-meta{font-size:12px;color:#7d9bb3}
+.vb-action.small{padding:6px 8px;font-size:13px}
+.vb-contacts-detail{flex:1;padding:18px}
+.detail-top{display:flex;gap:12px;align-items:center}
+.detail-avatar{width:80px;height:80px;border-radius:40px;background:#dfeffb;display:flex;align-items:center;justify-content:center;font-size:28px}
+.detail-actions{margin-top:12px;display:flex;gap:12px}
+.detail-section{margin-top:16px}
+.card{background:white;border-radius:12px;padding:8px;box-shadow:0 6px 18px rgba(22,50,92,0.04)}
+.vb-action{background:#f1f7fb;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+.vb-action.primary{background:linear-gradient(90deg,#3b82f6,#1e3a8a);color:white}

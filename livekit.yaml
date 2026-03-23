@@ -1,0 +1,17 @@
+
+port: 7880
+rtc:
+  tcp_port: 7881
+  udp_port: 7882
+  node_ip: 192.168.1.66
+  # In local development we don't want LiveKit to attempt external IP discovery
+  # (STUN) because it can hang/fail and block signaling. Keep everything on
+  # localhost for predictable WebSocket handshakes.
+  use_external_ip: false
+
+keys:
+  devkey: 8f3b9d6a3c1e4f2b9a7c6d5e4f2b3a1c8d7e6f5a
+
+logging:
+  json: false
+  level: info

@@ -1,0 +1,55 @@
+query ListAllCourses @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public as it only lists general course information.") {
+  courses {
+    id
+    title
+    courseCode
+    semester
+    year
+    description
+    instructor {
+      displayName
+      email
+    }
+  }
+}
+
+query GetMyStudyGroups @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users as it filters results by the authenticated user's ID.") {
+  studyGroups(where: {facilitator: {id: {eq_expr: "auth.uid"}}}) {
+    id
+    name
+    description
+    course {
+      title
+      courseCode
+    }
+    createdAt
+  }
+}
+
+mutation CreateNewAnnouncement($title: String!, $content: String!, $targetAudience: String!, $expiryDate: Timestamp) @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users as it sets the creator based on the authenticated user's ID.") {
+  announcement_insert(
+    data: {
+      title: $title,
+      content: $content,
+      targetAudience: $targetAudience,
+      createdAt_expr: "request.time",
+      creatorId_expr: "auth.uid",
+      expiryDate: $expiryDate
+    }
+  ) {
+    id
+  }
+}
+
+mutation SendMessageToStudyGroup($studyGroupId: UUID!, $content: String!) @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users as the sender is set to the authenticated user's ID and messages are group-specific.") {
+  message_insert(
+    data: {
+      studyGroupId: $studyGroupId,
+      content: $content,
+      senderId_expr: "auth.uid",
+      createdAt_expr: "request.time"
+    }
+  ) {
+    id
+  }
+}

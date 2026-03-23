@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: scccs
+      POSTGRES_PASSWORD: scccs_pass
+      POSTGRES_DB: scccs_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://scccs:scccs_pass@postgres:5432/scccs_db
+      - REDIS_URL=redis://redis:6379/0
+      - FLASK_ENV=production
+      - SECRET_KEY=change-me-in-prod
+    ports:
+      - '5000:5000'
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+
+  livekit:
+    image: livekit/livekit-server:latest
+    restart: unless-stopped
+    command: --config /livekit.yaml
+    ports:
+      - '7880:7880'
+      - '7881:7881'
+      - '7882:7882/udp'
+    volumes:
+      - ./livekit.yaml:/livekit.yaml
+    environment:
+      - "LIVEKIT_KEYS=devkey: 8f3b9d6a3c1e4f2b9a7c6d5e4f2b3a1c8d7e6f5a"
+
+volumes:
+  postgres_data:
+  redis_data:

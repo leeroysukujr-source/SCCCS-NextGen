@@ -1,0 +1,33 @@
+.dc-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+.dc-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px var(--shadow-md); }
+.dc-card-header { display:flex; align-items:center; gap:0.75rem; }
+.dc-card-icon { width:48px; height:48px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:var(--gradient-primary); color:white; flex-shrink:0 }
+.dc-card-title .dc-title { font-weight:700; font-size:1rem; color:var(--text-primary) }
+.dc-card-title .dc-subtitle { font-size:0.875rem; color:var(--text-secondary) }
+.dc-card-body { margin-top:0.75rem }
+
+.dc-quick-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:0.75rem }
+.dc-action-card { display:flex; gap:0.75rem; align-items:center; padding:0.75rem; border-radius:12px; border:1px solid var(--border-light); background:var(--bg-elevated); cursor:pointer; transition:all 0.18s }
+.dc-action-card:hover { transform:translateY(-4px); box-shadow:0 8px 20px var(--shadow-md) }
+.dc-action-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:var(--gradient-primary); color:white }
+.dc-action-title { font-weight:700; color:var(--text-primary) }
+.dc-action-sub { font-size:0.85rem; color:var(--text-secondary) }
+
+.dc-stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:0.75rem }
+.dc-stat-card { display:flex; align-items:center; gap:0.75rem; padding:0.85rem; border-radius:12px; background:var(--bg-elevated); border:1px solid var(--border-light) }
+.dc-stat-icon { width:48px; height:48px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:var(--gradient-primary); color:white; flex-shrink:0 }
+.dc-stat-value { font-weight:800; font-size:1.4rem; color:var(--text-primary) }
+.dc-stat-label { font-size:0.85rem; color:var(--text-secondary) }
+.dc-stat-trend { margin-left:auto; font-weight:700; color:var(--text-secondary) }
+
+/* Dark theme adjustments */
+[data-theme="dark"] .dc-card, [data-theme="dark"] .dc-action-card, [data-theme="dark"] .dc-stat-card {
+  background: var(--bg-elevated);
+  border-color: var(--border-light);
+}

@@ -1,0 +1,223 @@
+/* Professional Context Panel */
+.chat-context {
+    width: 320px;
+    background: var(--bg-elevated);
+    border-left: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    position: relative;
+    z-index: 5;
+    box-shadow: -4px 0 16px rgba(0, 0, 0, 0.05);
+}
+
+.chat-context.collapsed {
+    width: 0;
+    border-left: none;
+    transform: translateX(100%);
+}
+
+.context-header {
+    height: 64px;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--bg-elevated);
+    /* Sticky header effect */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.context-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.context-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.more-settings-btn,
+.close-context-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.more-settings-btn:hover {
+    background: var(--bg-hover);
+    color: var(--primary);
+    transform: rotate(15deg);
+}
+
+.close-context-btn:hover {
+    background: var(--error-light);
+    color: var(--error);
+    transform: scale(1.1);
+}
+
+.context-body {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Scrollbar refinement for context body */
+.context-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.context-body::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 3px;
+}
+
+.context-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.context-section h4 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: var(--text-tertiary);
+    margin-bottom: 0.25rem;
+}
+
+.context-section p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+}
+
+.info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.info-item:hover {
+    background: var(--bg-hover);
+    transform: translateX(4px);
+    border-color: var(--primary-light);
+}
+
+.info-item svg {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+/* Encryption specific styling */
+.info-item.encrypted {
+    background: rgba(16, 185, 129, 0.05);
+    border-color: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.info-item.encrypted svg {
+    color: #10b981;
+}
+
+/* Recent Members List */
+.context-members-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.context-member-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    transition: background 0.2s ease;
+    cursor: pointer;
+}
+
+.context-member-item:hover {
+    background: var(--bg-hover);
+}
+
+.member-avatar-small {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--gradient-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.context-member-item span {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.view-all-members-btn {
+    width: 100%;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    background: var(--bg-secondary);
+    border: 1px dashed var(--border-light);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-all-members-btn:hover {
+    background: var(--bg-hover);
+    color: var(--primary);
+    border-color: var(--primary);
+}

@@ -1,0 +1,246 @@
+.vb-root {
+  display: flex;
+  min-height: 100vh;
+  font-family: Inter, system-ui, Arial, sans-serif;
+  background: #f6f8fb;
+}
+
+.vb-sidebar {
+  width: 220px;
+  background: linear-gradient(180deg, #2f7be5, #5aa0ff);
+  color: #fff;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Streamlined Video Room styles: cleaner, concise UI */
+.vb-brand {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 8px
+}
+
+.vb-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px
+}
+
+.vb-nav-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.95);
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background 0.2s
+}
+
+.vb-nav-btn.active {
+  background: rgba(255, 255, 255, 0.06)
+}
+
+.vb-logout {
+  color: #ffdede;
+  margin-top: 12px;
+  font-weight: 600
+}
+
+.vb-main {
+  flex: 1;
+  padding: 20px
+}
+
+.vb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between
+}
+
+.vb-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700
+}
+
+.vb-avatar img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover
+}
+
+.vb-top-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 14px;
+  margin-top: 14px
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06)
+}
+
+.vb-agenda h3 {
+  margin: 0 0 8px;
+  font-size: 16px
+}
+
+.vb-agenda ul {
+  list-style: none;
+  padding: 0;
+  margin: 0
+}
+
+.vb-agenda li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f6fa
+}
+
+.vb-agenda .time {
+  color: #000000;
+  margin-left: 8px;
+  font-size: 13px
+}
+
+.vb-agenda button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px
+}
+
+.vb-right-tiles {
+  display: flex;
+  flex-direction: column;
+  gap: 12px
+}
+
+.vb-tile {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer
+}
+
+.vb-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.08)
+}
+
+.vb-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px 180px;
+  gap: 14px;
+  margin-top: 14px
+}
+
+.vb-calendar-placeholder {
+  height: 150px;
+  background: linear-gradient(180deg, #f8fbff, #ffffff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #010f26;
+  border-radius: 10px
+}
+
+.vb-invitations ul {
+  list-style: none;
+  padding: 0;
+  margin: 0
+}
+
+.vb-invitations li {
+  padding: 8px 0;
+  border-bottom: 1px solid #f4f7fb
+}
+
+.vb-insights-small {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center
+}
+
+.vb-large-num {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2b6cb0
+}
+
+.vb-right {
+  display: none
+}
+
+@media (max-width:1000px) {
+  .vb-root {
+    flex-direction: column
+  }
+
+  .vb-sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center
+  }
+
+  .vb-main {
+    max-width: 100%;
+    padding: 12px
+  }
+
+  .vb-right {
+    width: 100%;
+    order: 3
+  }
+
+  .vb-top-grid {
+    grid-template-columns: 1fr
+  }
+
+  .vb-bottom-grid {
+    grid-template-columns: 1fr
+  }
+}
+
+/* Inline meeting loader */
+.vb-spinner {
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  border: 4px solid rgba(0, 0, 0, 0.06);
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: vb-spin 1s linear infinite
+}
+
+@keyframes vb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vb-loader-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  padding: 14px
+}

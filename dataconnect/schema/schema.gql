@@ -1,0 +1,55 @@
+type User @table {
+  firebaseUid: String!
+  displayName: String!
+  email: String!
+  userType: String!
+  createdAt: Timestamp!
+  photoUrl: String
+  department: String
+}
+
+type Course @table {
+  courseCode: String!
+  title: String!
+  semester: String!
+  year: Int!
+  createdAt: Timestamp!
+  description: String
+  instructor: User
+}
+
+type Event @table {
+  title: String!
+  startDateTime: Timestamp!
+  endDateTime: Timestamp!
+  location: String!
+  eventType: String!
+  createdAt: Timestamp!
+  description: String
+  organizer: User
+}
+
+type Announcement @table {
+  title: String!
+  content: String!
+  targetAudience: String!
+  createdAt: Timestamp!
+  creator: User
+  expiryDate: Timestamp
+}
+
+type StudyGroup @table {
+  name: String!
+  createdAt: Timestamp!
+  course: Course!
+  description: String
+  facilitator: User
+}
+
+type Message @table {
+  content: String!
+  createdAt: Timestamp!
+  sender: User!
+  studyGroup: StudyGroup
+  recipient: User
+}

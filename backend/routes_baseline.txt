@@ -1,0 +1,253 @@
+static | {'HEAD', 'OPTIONS', 'GET'} | /static/<path:filename>
+auth.test | {'HEAD', 'OPTIONS', 'GET'} | /api/auth/test
+auth.register | {'OPTIONS', 'POST'} | /api/auth/register
+auth.login | {'OPTIONS', 'POST'} | /api/auth/login
+auth.request_password_reset | {'OPTIONS', 'POST'} | /api/auth/password/forgot
+auth.reset_password | {'OPTIONS', 'POST'} | /api/auth/password/reset
+auth.get_current_user | {'HEAD', 'OPTIONS', 'GET'} | /api/auth/me
+auth.list_sessions | {'HEAD', 'OPTIONS', 'GET'} | /api/auth/sessions
+auth.revoke_session | {'OPTIONS', 'POST'} | /api/auth/sessions/revoke
+auth.twofa_setup | {'OPTIONS', 'POST'} | /api/auth/2fa/setup
+auth.twofa_verify | {'OPTIONS', 'POST'} | /api/auth/2fa/verify
+auth.twofa_disable | {'OPTIONS', 'POST'} | /api/auth/2fa/disable
+auth.refresh | {'OPTIONS', 'POST'} | /api/auth/refresh
+auth.oauth_authorize | {'HEAD', 'OPTIONS', 'GET'} | /api/auth/oauth/<provider>/authorize
+auth.oauth_callback | {'OPTIONS', 'POST'} | /api/auth/oauth/<provider>/callback
+users.get_users | {'HEAD', 'OPTIONS', 'GET'} | /api/users
+users.get_user | {'HEAD', 'OPTIONS', 'GET'} | /api/users/<int:user_id>
+users.update_current_user | {'OPTIONS', 'PUT'} | /api/users/me
+users.upload_avatar | {'OPTIONS', 'POST'} | /api/users/me/avatar
+users.search_users | {'HEAD', 'OPTIONS', 'GET'} | /api/users/search
+users.get_public_teachers | {'HEAD', 'OPTIONS', 'GET'} | /api/users/list-teachers
+users.get_public_admins | {'HEAD', 'OPTIONS', 'GET'} | /api/users/list-admins
+users.get_students | {'HEAD', 'OPTIONS', 'GET'} | /api/users/students
+users.add_student | {'OPTIONS', 'POST'} | /api/users/students
+users.remove_student | {'OPTIONS', 'DELETE'} | /api/users/students/<int:student_id>
+users.update_student | {'OPTIONS', 'PUT'} | /api/users/students/<int:student_id>
+users.update_user_role | {'OPTIONS', 'PUT'} | /api/users/<int:user_id>/role
+users.update_user_privileges | {'OPTIONS', 'PUT'} | /api/users/<int:user_id>/privileges
+users.get_available_privileges | {'HEAD', 'OPTIONS', 'GET'} | /api/users/privileges/list
+users.export_users | {'HEAD', 'OPTIONS', 'GET'} | /api/users/export/<role>/<format>
+users.get_active_users | {'HEAD', 'OPTIONS', 'GET'} | /api/users/active
+users.delete_user | {'OPTIONS', 'DELETE'} | /api/users/<int:user_id>
+rooms.create_room | {'OPTIONS', 'POST'} | /api/rooms
+rooms.get_rooms | {'HEAD', 'OPTIONS', 'GET'} | /api/rooms
+rooms.get_room | {'HEAD', 'OPTIONS', 'GET'} | /api/rooms/<int:room_id>
+rooms.join_room | {'OPTIONS', 'POST'} | /api/rooms/join/<room_code>
+rooms.leave_room | {'OPTIONS', 'POST'} | /api/rooms/<int:room_id>/leave
+rooms.get_room_participants | {'HEAD', 'OPTIONS', 'GET'} | /api/rooms/<int:room_id>/participants
+rooms.get_room_by_code | {'HEAD', 'OPTIONS', 'GET'} | /api/rooms/join/<room_code>
+rooms.public_join_room | {'OPTIONS', 'POST'} | /api/rooms/public/join/<room_code>
+rooms.get_public_room | {'HEAD', 'OPTIONS', 'GET'} | /api/rooms/public/<int:room_id>
+rooms.get_meeting_link | {'HEAD', 'OPTIONS', 'GET'} | /api/rooms/<int:room_id>/link
+rooms.get_all_rooms | {'HEAD', 'OPTIONS', 'GET'} | /api/rooms/all
+rooms.delete_room | {'OPTIONS', 'DELETE'} | /api/rooms/<int:room_id>
+channels.create_channel | {'OPTIONS', 'POST'} | /api/channels
+channels.get_channels | {'HEAD', 'OPTIONS', 'GET'} | /api/channels
+channels.get_channel | {'HEAD', 'OPTIONS', 'GET'} | /api/channels/<int:channel_id>
+channels.join_channel | {'OPTIONS', 'POST'} | /api/channels/<int:channel_id>/join
+channels.create_invite | {'OPTIONS', 'POST'} | /api/channels/<int:channel_id>/invites
+channels.list_invites | {'HEAD', 'OPTIONS', 'GET'} | /api/channels/<int:channel_id>/invites
+channels.revoke_invite | {'OPTIONS', 'DELETE'} | /api/channels/<int:channel_id>/invites/<token>
+channels.join_via_invite | {'OPTIONS', 'POST'} | /api/channels/join-invite/<token>
+channels.leave_channel | {'OPTIONS', 'POST'} | /api/channels/<int:channel_id>/leave
+channels.get_channel_members | {'HEAD', 'OPTIONS', 'GET'} | /api/channels/<int:channel_id>/members
+channels.update_channel | {'OPTIONS', 'PUT'} | /api/channels/<int:channel_id>
+channels.delete_channel | {'OPTIONS', 'DELETE'} | /api/channels/<int:channel_id>
+channels.get_share_link | {'HEAD', 'OPTIONS', 'GET'} | /api/channels/<int:channel_id>/share-link
+channels.upload_channel_avatar | {'OPTIONS', 'POST'} | /api/channels/<int:channel_id>/avatar
+channels.join_via_share_code | {'OPTIONS', 'POST'} | /api/channels/join/<share_code>
+channels.add_channel_member | {'OPTIONS', 'POST'} | /api/channels/<int:channel_id>/members/add
+channels.update_member_role | {'OPTIONS', 'PUT'} | /api/channels/<int:channel_id>/members/<int:user_id>/role
+messages.create_message | {'OPTIONS', 'POST'} | /api/messages/channel/<int:channel_id>
+messages.get_messages | {'HEAD', 'OPTIONS', 'GET'} | /api/messages/channel/<int:channel_id>
+messages.schedule_message | {'OPTIONS', 'POST'} | /api/messages/channel/<int:channel_id>/schedule
+messages.list_scheduled_messages | {'HEAD', 'OPTIONS', 'GET'} | /api/messages/channel/<int:channel_id>/scheduled
+messages.cancel_scheduled_message | {'OPTIONS', 'POST'} | /api/messages/scheduled/<int:scheduled_id>/cancel
+messages.get_message | {'HEAD', 'OPTIONS', 'GET'} | /api/messages/<int:message_id>
+messages.update_message | {'OPTIONS', 'PUT'} | /api/messages/<int:message_id>
+messages.delete_message | {'OPTIONS', 'DELETE'} | /api/messages/<int:message_id>
+messages.get_thread_messages | {'HEAD', 'OPTIONS', 'GET'} | /api/messages/<int:message_id>/thread
+classes.create_class | {'OPTIONS', 'POST'} | /api/classes
+classes.get_classes | {'HEAD', 'OPTIONS', 'GET'} | /api/classes
+classes.get_class | {'HEAD', 'OPTIONS', 'GET'} | /api/classes/<int:class_id>
+classes.join_class | {'OPTIONS', 'POST'} | /api/classes/join/<class_code>
+classes.get_class_members | {'HEAD', 'OPTIONS', 'GET'} | /api/classes/<int:class_id>/members
+classes.get_all_classes | {'HEAD', 'OPTIONS', 'GET'} | /api/classes/all
+classes.delete_class | {'OPTIONS', 'DELETE'} | /api/classes/<int:class_id>
+lessons.create_lesson | {'OPTIONS', 'POST'} | /api/lessons/class/<int:class_id>
+lessons.get_lessons | {'HEAD', 'OPTIONS', 'GET'} | /api/lessons/class/<int:class_id>
+lessons.get_lesson | {'HEAD', 'OPTIONS', 'GET'} | /api/lessons/<int:lesson_id>
+lessons.update_lesson | {'OPTIONS', 'PUT'} | /api/lessons/<int:lesson_id>
+lessons.delete_lesson | {'OPTIONS', 'DELETE'} | /api/lessons/<int:lesson_id>
+lessons.get_lesson_materials | {'HEAD', 'OPTIONS', 'GET'} | /api/lessons/<int:lesson_id>/materials
+lessons.add_lesson_link | {'OPTIONS', 'POST'} | /api/lessons/<int:lesson_id>/links
+lessons.get_lesson_links | {'HEAD', 'OPTIONS', 'GET'} | /api/lessons/<int:lesson_id>/links
+lessons.delete_lesson_link | {'OPTIONS', 'DELETE'} | /api/lessons/links/<int:link_id>
+files.upload_file | {'OPTIONS', 'POST'} | /api/files/upload
+files.get_avatar | {'HEAD', 'OPTIONS', 'GET'} | /api/files/avatar/<filename>
+files.get_file | {'HEAD', 'OPTIONS', 'GET'} | /api/files/<int:file_id>
+files.delete_file | {'OPTIONS', 'DELETE'} | /api/files/<int:file_id>
+files.get_file_info | {'HEAD', 'OPTIONS', 'GET'} | /api/files/info/<int:file_id>
+groups.create_group | {'OPTIONS', 'POST'} | /api/groups
+groups.get_groups | {'HEAD', 'OPTIONS', 'GET'} | /api/groups
+groups.get_group | {'HEAD', 'OPTIONS', 'GET'} | /api/groups/<int:group_id>
+groups.update_group | {'OPTIONS', 'PUT'} | /api/groups/<int:group_id>
+groups.delete_group | {'OPTIONS', 'DELETE'} | /api/groups/<int:group_id>
+groups.join_group | {'OPTIONS', 'POST'} | /api/groups/<int:group_id>/join
+groups.join_group_by_code | {'OPTIONS', 'POST'} | /api/groups/join/<join_code>
+groups.leave_group | {'OPTIONS', 'POST'} | /api/groups/<int:group_id>/leave
+groups.get_group_members | {'HEAD', 'OPTIONS', 'GET'} | /api/groups/<int:group_id>/members
+groups.update_group_member_role | {'OPTIONS', 'PUT'} | /api/groups/<int:group_id>/members/<int:user_id>/role
+groups.get_join_requests | {'HEAD', 'OPTIONS', 'GET'} | /api/groups/<int:group_id>/requests
+groups.approve_join_request | {'OPTIONS', 'POST'} | /api/groups/<int:group_id>/requests/<int:request_id>/approve
+groups.reject_join_request | {'OPTIONS', 'POST'} | /api/groups/<int:group_id>/requests/<int:request_id>/reject
+groups.get_group_messages | {'HEAD', 'OPTIONS', 'GET'} | /api/groups/<int:group_id>/messages
+groups.create_group_message | {'OPTIONS', 'POST'} | /api/groups/<int:group_id>/messages
+ai.analyze_text | {'OPTIONS', 'POST'} | /api/ai/analyze
+ai.summarize_text | {'OPTIONS', 'POST'} | /api/ai/summarize
+ai.get_suggestions | {'OPTIONS', 'POST'} | /api/ai/suggest
+ai.get_ai_status | {'HEAD', 'OPTIONS', 'GET'} | /api/ai/status
+ai_study.study_chat | {'OPTIONS', 'POST'} | /api/ai-study/chat
+ai_study.upload_file_for_ai | {'OPTIONS', 'POST'} | /api/ai-study/upload-file
+ai_study.extract_file_text | {'HEAD', 'OPTIONS', 'GET'} | /api/ai-study/extract-text/<int:file_id>
+ai_study.generate_study_notes | {'OPTIONS', 'POST'} | /api/ai-study/generate-notes
+ai_study.generate_quiz | {'OPTIONS', 'POST'} | /api/ai-study/generate-quiz
+ai_study.summarize_document | {'OPTIONS', 'POST'} | /api/ai-study/summarize-document
+ai_study.explain_concept | {'OPTIONS', 'POST'} | /api/ai-study/explain-concept
+ai_study.get_ai_study_status | {'HEAD', 'OPTIONS', 'GET'} | /api/ai-study/status
+admin.broadcast_email | {'OPTIONS', 'POST'} | /api/admin/broadcast-email
+admin.get_email_config | {'HEAD', 'OPTIONS', 'GET'} | /api/admin/email-config
+admin.get_lecturers | {'HEAD', 'OPTIONS', 'GET'} | /api/admin/lecturers
+admin.create_lecturer | {'OPTIONS', 'POST'} | /api/admin/lecturers
+admin.update_lecturer | {'OPTIONS', 'PUT'} | /api/admin/lecturers/<int:lecturer_id>
+admin.delete_lecturer | {'OPTIONS', 'DELETE'} | /api/admin/lecturers/<int:lecturer_id>
+admin.assign_lecturer_to_class | {'OPTIONS', 'POST'} | /api/admin/lecturers/<int:lecturer_id>/assign-class/<int:class_id>
+admin.assign_lecturer_to_group | {'OPTIONS', 'POST'} | /api/admin/lecturers/<int:lecturer_id>/assign-group/<int:group_id>
+admin.get_lecturer_classes | {'HEAD', 'OPTIONS', 'GET'} | /api/admin/lecturers/<int:lecturer_id>/classes
+admin.get_lecturer_groups | {'HEAD', 'OPTIONS', 'GET'} | /api/admin/lecturers/<int:lecturer_id>/groups
+direct_messages.send_direct_message | {'OPTIONS', 'POST'} | /api/direct-messages/conversation/<int:other_user_id>
+direct_messages.get_conversation | {'HEAD', 'OPTIONS', 'GET'} | /api/direct-messages/conversation/<int:other_user_id>
+direct_messages.get_conversations | {'HEAD', 'OPTIONS', 'GET'} | /api/direct-messages/conversations
+direct_messages.mark_message_read | {'OPTIONS', 'PUT'} | /api/direct-messages/<int:message_id>/read
+direct_messages.update_direct_message | {'OPTIONS', 'PUT'} | /api/direct-messages/<int:message_id>
+direct_messages.delete_direct_message | {'OPTIONS', 'DELETE'} | /api/direct-messages/<int:message_id>
+direct_messages.initiate_call | {'OPTIONS', 'POST'} | /api/direct-messages/initiate-call
+feedback.create_feedback | {'OPTIONS', 'POST'} | /api/feedback
+feedback.get_feedbacks | {'HEAD', 'OPTIONS', 'GET'} | /api/feedback
+feedback.broadcast_feedback | {'OPTIONS', 'POST'} | /api/feedback/broadcast
+feedback.get_feedback | {'HEAD', 'OPTIONS', 'GET'} | /api/feedback/<int:feedback_id>
+feedback.respond_to_feedback | {'OPTIONS', 'PUT'} | /api/feedback/<int:feedback_id>/response
+feedback.update_feedback_status | {'OPTIONS', 'PUT'} | /api/feedback/<int:feedback_id>/status
+feedback.delete_feedback | {'OPTIONS', 'DELETE'} | /api/feedback/<int:feedback_id>
+feedback.get_feedback_stats | {'HEAD', 'OPTIONS', 'GET'} | /api/feedback/stats
+message_actions.add_reaction | {'OPTIONS', 'POST'} | /api/messages/<int:message_id>/reactions
+message_actions.mark_as_read | {'OPTIONS', 'POST'} | /api/messages/<int:message_id>/read
+message_actions.pin_message | {'OPTIONS', 'POST'} | /api/messages/<int:message_id>/pin
+message_actions.unpin_message | {'OPTIONS', 'POST'} | /api/messages/<int:message_id>/unpin
+message_actions.forward_message | {'OPTIONS', 'POST'} | /api/messages/<int:message_id>/forward
+message_actions.get_edit_history | {'HEAD', 'OPTIONS', 'GET'} | /api/messages/<int:message_id>/edit-history
+polls.create_poll | {'OPTIONS', 'POST'} | /api/polls/channel/<int:channel_id>
+polls.vote_on_poll | {'OPTIONS', 'POST'} | /api/polls/<int:poll_id>/vote
+polls.get_poll_results_endpoint | {'HEAD', 'OPTIONS', 'GET'} | /api/polls/<int:poll_id>/results
+polls.close_poll | {'OPTIONS', 'POST'} | /api/polls/<int:poll_id>/close
+message_search.search_messages | {'HEAD', 'OPTIONS', 'GET'} | /api/search/channel/<int:channel_id>
+message_search.search_all_messages | {'HEAD', 'OPTIONS', 'GET'} | /api/search/global
+channel_admin.update_member_role | {'OPTIONS', 'PUT'} | /api/channels/<int:channel_id>/members/<int:user_id>/role
+channel_admin.kick_member | {'OPTIONS', 'POST'} | /api/channels/<int:channel_id>/members/<int:user_id>/kick
+channel_admin.mute_member | {'OPTIONS', 'POST'} | /api/channels/<int:channel_id>/members/<int:user_id>/mute
+channel_admin.unmute_member | {'OPTIONS', 'POST'} | /api/channels/<int:channel_id>/members/<int:user_id>/unmute
+channel_admin.get_pinned_messages | {'HEAD', 'OPTIONS', 'GET'} | /api/channels/<int:channel_id>/pinned
+channel_admin.update_channel_settings | {'OPTIONS', 'PUT'} | /api/channels/<int:channel_id>/settings
+super_admin.list_admins | {'HEAD', 'OPTIONS', 'GET'} | /api/super-admin/admins
+super_admin.get_stats | {'HEAD', 'OPTIONS', 'GET'} | /api/super-admin/stats
+super_admin.get_workspace_analytics | {'HEAD', 'OPTIONS', 'GET'} | /api/super-admin/workspaces/<int:ws_id>/analytics
+super_admin.create_admin | {'OPTIONS', 'POST'} | /api/super-admin/admins
+super_admin.update_admin | {'OPTIONS', 'PUT'} | /api/super-admin/admins/<int:admin_id>
+super_admin.delete_admin | {'OPTIONS', 'DELETE'} | /api/super-admin/admins/<int:admin_id>
+super_admin.list_logs | {'HEAD', 'OPTIONS', 'GET'} | /api/super-admin/logs
+gpa.get_gpa | {'HEAD', 'OPTIONS', 'GET'} | /api/gpa
+gpa.save_gpa | {'OPTIONS', 'POST', 'PUT'} | /api/gpa
+reporting.create_report_request | {'OPTIONS', 'POST'} | /api/reports/requests
+reporting.get_report_requests | {'HEAD', 'OPTIONS', 'GET'} | /api/reports/requests
+reporting.submit_report | {'OPTIONS', 'POST'} | /api/reports/requests/<int:request_id>/submit
+reporting.download_export | {'OPTIONS', 'POST'} | /api/reports/export/download
+study_documents.create_document | {'OPTIONS', 'POST'} | /api/study-rooms/<room_id>/documents
+study_documents.list_documents | {'HEAD', 'OPTIONS', 'GET'} | /api/study-rooms/<room_id>/documents
+study_documents.get_document | {'HEAD', 'OPTIONS', 'GET'} | /api/documents/<int:document_id>
+study_documents.update_document | {'OPTIONS', 'PUT'} | /api/documents/<int:document_id>
+study_documents.delete_document | {'OPTIONS', 'DELETE'} | /api/documents/<int:document_id>
+study_documents.list_collaborators | {'HEAD', 'OPTIONS', 'GET'} | /api/documents/<int:document_id>/collaborators
+study_documents.add_collaborator | {'OPTIONS', 'POST'} | /api/documents/<int:document_id>/collaborators
+study_documents.remove_collaborator | {'OPTIONS', 'DELETE'} | /api/documents/<int:document_id>/collaborators/<int:user_id>
+study_documents.list_comments | {'HEAD', 'OPTIONS', 'GET'} | /api/documents/<int:document_id>/comments
+study_documents.add_comment | {'OPTIONS', 'POST'} | /api/documents/<int:document_id>/comments
+workspace.list_workspaces | {'HEAD', 'OPTIONS', 'GET'} | /api/super-admin/workspaces
+workspace.get_workspace | {'HEAD', 'OPTIONS', 'GET'} | /api/super-admin/workspaces/<int:ws_id>
+workspace.create_workspace | {'OPTIONS', 'POST'} | /api/super-admin/workspaces
+workspace.update_workspace | {'OPTIONS', 'PUT'} | /api/super-admin/workspaces/<int:ws_id>
+workspace.delete_workspace | {'OPTIONS', 'DELETE'} | /api/super-admin/workspaces/<int:ws_id>
+workspace.update_workspace_branding | {'PATCH', 'OPTIONS'} | /api/super-admin/workspaces/<int:ws_id>/settings
+workspace.update_workspace_config | {'PATCH', 'OPTIONS'} | /api/super-admin/workspaces/<int:ws_id>/config
+workspace.upload_workspace_logo | {'OPTIONS', 'POST'} | /api/super-admin/workspaces/<int:ws_id>/logo
+branding.get_public_branding | {'HEAD', 'OPTIONS', 'GET'} | /api/branding/workspace/<slug>
+tutoring.register_tutor | {'OPTIONS', 'POST'} | /api/tutoring/tutors
+tutoring.get_tutors | {'HEAD', 'OPTIONS', 'GET'} | /api/tutoring/tutors
+tutoring.get_tutor_profile | {'HEAD', 'OPTIONS', 'GET'} | /api/tutoring/tutors/<int:tutor_id>
+tutoring.book_session | {'OPTIONS', 'POST'} | /api/tutoring/tutors/<int:tutor_profile_id>/book
+tutoring.get_my_sessions | {'HEAD', 'OPTIONS', 'GET'} | /api/tutoring/sessions
+tutoring.update_session | {'OPTIONS', 'PUT'} | /api/tutoring/sessions/<int:session_id>
+analytics.get_user_engagement | {'HEAD', 'OPTIONS', 'GET'} | /api/analytics/user/engagement
+analytics.get_user_activity | {'HEAD', 'OPTIONS', 'GET'} | /api/analytics/user/activity
+analytics.get_system_overview | {'HEAD', 'OPTIONS', 'GET'} | /api/analytics/system/overview
+analytics.record_metric | {'OPTIONS', 'POST'} | /api/analytics/system/metrics
+analytics.get_user_growth | {'HEAD', 'OPTIONS', 'GET'} | /api/analytics/user/growth
+analytics.get_activity_trends | {'HEAD', 'OPTIONS', 'GET'} | /api/analytics/activity/trends
+notifications.get_notifications | {'HEAD', 'OPTIONS', 'GET'} | /api/notifications
+notifications.mark_notification_read | {'OPTIONS', 'PUT'} | /api/notifications/<int:notification_id>/read
+notifications.mark_all_read | {'OPTIONS', 'PUT'} | /api/notifications/read-all
+notifications.get_notification_preferences | {'HEAD', 'OPTIONS', 'GET'} | /api/notifications/preferences
+notifications.update_notification_preferences | {'OPTIONS', 'PUT'} | /api/notifications/preferences
+notifications.get_unread_count | {'HEAD', 'OPTIONS', 'GET'} | /api/notifications/unread-count
+search.global_search | {'HEAD', 'OPTIONS', 'GET'} | /api/search
+security.get_sessions | {'HEAD', 'OPTIONS', 'GET'} | /api/security/sessions
+security.revoke_session | {'OPTIONS', 'DELETE'} | /api/security/sessions/<int:session_id>
+security.revoke_all_sessions | {'OPTIONS', 'POST'} | /api/security/sessions/revoke-all
+security.setup_2fa | {'HEAD', 'OPTIONS', 'GET'} | /api/security/2fa/setup
+security.verify_2fa | {'OPTIONS', 'POST'} | /api/security/2fa/verify
+security.disable_2fa | {'OPTIONS', 'POST'} | /api/security/2fa/disable
+security.get_2fa_status | {'HEAD', 'OPTIONS', 'GET'} | /api/security/2fa/status
+security.get_audit_logs | {'HEAD', 'OPTIONS', 'GET'} | /api/security/audit-logs
+security.get_security_events | {'HEAD', 'OPTIONS', 'GET'} | /api/security/security-events
+webhooks.get_webhooks | {'HEAD', 'OPTIONS', 'GET'} | /api/webhooks
+webhooks.create_webhook | {'OPTIONS', 'POST'} | /api/webhooks
+webhooks.update_webhook | {'OPTIONS', 'PUT'} | /api/webhooks/<int:webhook_id>
+webhooks.delete_webhook | {'OPTIONS', 'DELETE'} | /api/webhooks/<int:webhook_id>
+webhooks.get_webhook_deliveries | {'HEAD', 'OPTIONS', 'GET'} | /api/webhooks/<int:webhook_id>/deliveries
+webhooks.test_webhook | {'OPTIONS', 'POST'} | /api/webhooks/<int:webhook_id>/test
+presence.update_presence | {'OPTIONS', 'POST'} | /api/presence/update
+presence.get_online_users | {'HEAD', 'OPTIONS', 'GET'} | /api/presence/online
+presence.get_user_presence | {'HEAD', 'OPTIONS', 'GET'} | /api/presence/<int:user_id>
+settings.list_settings | {'HEAD', 'OPTIONS', 'GET'} | /api/settings
+settings.get_public_settings | {'HEAD', 'OPTIONS', 'GET'} | /api/settings/public
+settings.update_setting | {'PATCH', 'OPTIONS'} | /api/settings/<key>
+settings.get_categories | {'HEAD', 'OPTIONS', 'GET'} | /api/settings/categories
+settings.upload_global_logo | {'OPTIONS', 'POST'} | /api/settings/logo
+meeting_livekit.get_token | {'OPTIONS', 'POST'} | /api/meeting-livekit/token
+meeting_livekit.start_recording | {'OPTIONS', 'POST'} | /api/meeting-livekit/start-recording
+meeting_livekit.stop_recording | {'OPTIONS', 'POST'} | /api/meeting-livekit/stop-recording
+meeting_livekit.remote_mute | {'OPTIONS', 'POST'} | /api/meeting-livekit/remote-mute
+meeting_livekit.remove_participant | {'OPTIONS', 'POST'} | /api/meeting-livekit/remove-participant
+meeting_agora.get_token | {'OPTIONS', 'POST'} | /api/meeting-agora/token
+health.health_check | {'HEAD', 'OPTIONS', 'GET'} | /health
+health.system_status | {'HEAD', 'OPTIONS', 'GET'} | /status
+health.readiness_check | {'HEAD', 'OPTIONS', 'GET'} | /ready
+health.liveness_check | {'HEAD', 'OPTIONS', 'GET'} | /live
+health.socket_health | {'HEAD', 'OPTIONS', 'GET'} | /socket/health
+health.infra_status | {'HEAD', 'OPTIONS', 'GET'} | /infra
+health.socket_health_api_alias | {'HEAD', 'OPTIONS', 'GET'} | /api/health/socket/health
+health.google_oauth_check | {'HEAD', 'OPTIONS', 'GET'} | /oauth/google
+api_docs.get_api_docs | {'HEAD', 'OPTIONS', 'GET'} | /api/docs
+admin_twofactor.list_twofactor_audits | {'HEAD', 'OPTIONS', 'GET'} | /api/admin/twofactor/audits
+admin_twofactor.export_twofactor_audits | {'HEAD', 'OPTIONS', 'GET'} | /api/admin/twofactor/audits/export
+admin_analytics.analytics_overview | {'HEAD', 'OPTIONS', 'GET'} | /api/admin/analytics/overview

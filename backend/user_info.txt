@@ -1,0 +1,3 @@
+Found 1 users for leeroysukujr@gmail.com:
+ID: 4, Username: leeroysukujr, Role: host, Workspace: 1, Status: active
+  Workspace Name: University of Lay Adventist of Kigali, Code: UNILAK-edu

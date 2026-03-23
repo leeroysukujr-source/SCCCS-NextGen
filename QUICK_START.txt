@@ -1,0 +1,57 @@
+================================================================================
+                    QUICK START GUIDE - START THE SERVER
+================================================================================
+
+ERROR: ERR_CONNECTION_REFUSED
+This means the backend server is NOT running!
+
+================================================================================
+STEP 1: START BACKEND SERVER
+================================================================================
+
+Open a NEW terminal/command prompt and run:
+
+    cd backend
+    python run.py
+
+Wait until you see: "Running on http://0.0.0.0:5000"
+
+================================================================================
+STEP 2: VERIFY SERVER IS RUNNING
+================================================================================
+
+Open browser and go to:
+    http://localhost:5000/api/auth/test
+
+You should see: {"status": "success", "message": "API is working"}
+
+================================================================================
+STEP 3: REFRESH FRONTEND
+================================================================================
+
+Go back to your frontend (usually http://localhost:5173) and refresh the page.
+
+The connection error should be gone!
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+If port 5000 is already in use:
+    - Close the other application using port 5000, OR
+    - Change SERVER_PORT in backend/config.py
+
+If you get "Module not found" errors:
+    cd backend
+    pip install -r requirements.txt
+
+If database errors occur:
+    cd backend
+    python migrate_new_tables.py
+
+================================================================================
+
+For more details, see: START_SERVER.md
+
+================================================================================
+

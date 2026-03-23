@@ -1,0 +1,561 @@
+/* ============================================================================
+   MEETING CSS - MODERN VIDEO INTERFACE
+   ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* ============================================================================
+   LIVEKIT COMPONENT OVERRIDES
+   ============================================================================ */
+
+.lk-video-container {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%) !important;
+}
+
+.lk-video-container:hover {
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.2) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  transform: translateY(-4px) !important;
+}
+
+.lk-participant-placeholder {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+}
+
+.lk-participant {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+.lk-participant-name {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.5), transparent) !important;
+  padding: 1rem 1.25rem !important;
+  font-weight: 700 !important;
+  font-size: 0.9375rem !important;
+  color: white !important;
+  letter-spacing: -0.01em !important;
+}
+
+.lk-grid-layout {
+  gap: 1.25rem !important;
+  padding: 1.25rem !important;
+  background: transparent !important;
+}
+
+/* ============================================================================
+   LIVEKIT CONTROL BAR
+   ============================================================================ */
+
+.lk-control-bar {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  flex-direction: row !important;
+}
+
+.lk-button {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+  color: rgba(226, 232, 240, 0.8) !important;
+  border-radius: 12px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  padding: 0.75rem 1rem !important;
+  font-weight: 600 !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.9rem !important;
+  height: 56px !important;
+  width: 56px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.lk-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent);
+  pointer-events: none;
+}
+
+.lk-button:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%) !important;
+  color: #ffffff !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  transform: translateY(-4px) scale(1.08) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+.lk-button:active {
+  transform: translateY(-2px) scale(0.96) !important;
+}
+
+.lk-button.lk-active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(139, 92, 246, 0.9) 100%) !important;
+  color: #ffffff !important;
+  border-color: rgba(59, 130, 246, 0.6) !important;
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.3) !important;
+}
+
+.lk-button.lk-active:hover {
+  border-color: rgba(59, 130, 246, 0.8) !important;
+  box-shadow: 0 16px 40px rgba(59, 130, 246, 0.4) !important;
+}
+
+.lk-button:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* ============================================================================
+   CHAT & MESSAGE STYLING
+   ============================================================================ */
+
+.chat-message {
+  animation: slideInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+
+.chat-message:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ============================================================================
+   FORM & INPUT ENHANCEMENTS
+   ============================================================================ */
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: rgba(59, 130, 246, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  outline: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(226, 232, 240, 0.5) !important;
+  font-weight: 500 !important;
+}
+
+/* ============================================================================
+   BUTTON ENHANCEMENTS
+   ============================================================================ */
+
+button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-family: 'Inter', sans-serif;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   BADGE STYLES
+   ============================================================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(226, 232, 240, 0.8);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.badge.active {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #60a5fa;
+}
+
+.badge.recording {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ============================================================================
+   TEXT & TYPOGRAPHY UTILITIES
+   ============================================================================ */
+
+.gradient-text {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* ============================================================================
+   EFFECTS & FILTERS
+   ============================================================================ */
+
+.backdrop-blur-xl {
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.glass:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+}
+
+.shadow-glow {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.shadow-glow-lg {
+  box-shadow: 0 0 40px rgba(59, 130, 246, 0.4);
+}
+
+/* ============================================================================
+   SCROLLBAR STYLING
+   ============================================================================ */
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thumb-slate-700 {
+  scrollbar-color: rgba(51, 65, 85, 0.7) transparent;
+}
+
+.message-scroll::-webkit-scrollbar,
+.participant-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.message-scroll::-webkit-scrollbar-track,
+.participant-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.message-scroll::-webkit-scrollbar-thumb,
+.participant-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.3s;
+}
+
+.message-scroll::-webkit-scrollbar-thumb:hover,
+.participant-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+  background-clip: padding-box;
+}
+
+/* ============================================================================
+   ANIMATIONS & TRANSITIONS
+   ============================================================================ */
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+/* ============================================================================
+   FOCUS STATES FOR ACCESSIBILITY
+   ============================================================================ */
+
+.lk-button:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.6) !important;
+  outline-offset: 2px !important;
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 1024px) {
+  .lk-grid-layout {
+    gap: 1rem !important;
+    padding: 1rem !important;
+  }
+
+  .lk-button {
+    width: 52px !important;
+    height: 52px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .lk-grid-layout {
+    gap: 0.75rem !important;
+    padding: 0.75rem !important;
+  }
+
+  .lk-button {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 1rem !important;
+  }
+
+  .lk-participant-name {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .lk-button {
+    width: 44px !important;
+    height: 44px !important;
+  }
+}
+
+/* ============================================================================
+   VIDEO SCALING & LAYOUT FIXES
+   These overrides keep participant video centered, prevent cropped heads
+   by using `object-fit: contain`, and ensure grid tiles don't stretch
+   beyond reasonable max heights.
+   ============================================================================ */
+
+/* Fix video scaling - Use cover to fill the tile, mirroring standard video call apps */
+.lk-video-container video,
+.lk-video-element video,
+.lk-participant video,
+.lk-video-container .lk-video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+
+.lk-grid-layout {
+  align-items: center !important;
+  justify-items: center !important;
+  gap: 1rem !important;
+}
+
+.lk-participant,
+.lk-video-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Allow tiles to size naturally based on grid */
+.lk-video-container {
+  max-height: none !important;
+}
+
+/* Ensure local/self preview is pinned but sized reasonably */
+.lk-participant.local {
+  max-height: none !important;
+  width: auto !important;
+}
+
+/* Fallback for browsers that may still crop due to transform rules */
+.lk-video-container video {
+  transform: none !important;
+}
+
+
+/* ============================================================================
+   MOTION PREFERENCES
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================================================ */
+
+.lk-video-container video {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.lk-participant {
+  will-change: auto;
+}
+
+/* ============================================================================
+   DARK MODE SUPPORT (EXPLICIT)
+   ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+
+/* ============================================================================
+   HIGH CONTRAST MODE SUPPORT
+   ============================================================================ */
+
+@media (prefers-contrast: more) {
+  .lk-button {
+    border-width: 2px !important;
+  }
+
+  .badge {
+    border-width: 2px !important;
+  }
+}
+
+/* Print styles */
+@media print {
+
+  .meeting,
+  .meeting-controls,
+  .meeting-chat,
+  .meeting-participants {
+    display: none !important;
+  }
+}
+
+/* ============================================================================
+   LAYOUT UTILITIES
+   ============================================================================ */
+
+.meeting-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  background: var(--bg-app, #0f172a);
+  color: white;
+  overflow: hidden;
+  position: relative;
+  font-family: 'Inter', sans-serif;
+}
+
+.glass-panel {
+  background: rgba(15, 23, 42, 0.6);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.text-shadow-sm {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}

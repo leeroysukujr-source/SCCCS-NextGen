@@ -1,0 +1,42 @@
+.gpa-page {
+  padding: 1.25rem;
+  color: var(--text-color, #0f172a);
+}
+.gpa-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.gpa-header h1 { margin: 0; }
+.gpa-actions .btn { margin-left: 0.5rem; }
+
+.gpa-controls { margin-bottom: 1rem; }
+.control-row { display:flex; align-items:center; gap:0.75rem; }
+.control-row label { font-weight:600; }
+.control-row .spacer { flex:1 }
+.summary { display:flex; gap:1rem; align-items:center }
+
+.gpa-table table { width: 100%; border-collapse: collapse; background:#fff; }
+.gpa-table th, .gpa-table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #e6e6e6; text-align: left }
+.gpa-table input[type="text"], .gpa-table input[type="number"] { width: 100%; padding: 6px 8px; border-radius:6px; border:1px solid #ddd }
+.gpa-table tr.planned { background: #fbfbf6 }
+
+.gpa-results { display:flex; gap:1rem; margin-top:1rem }
+.results-left { flex: 0 0 260px; background:#fff; padding:1rem; border-radius:8px }
+.results-right { flex:1; background:#fff; padding:1rem; border-radius:8px }
+.result-row { display:flex; justify-content:space-between; padding:0.4rem 0 }
+
+.chart { display:flex; align-items:flex-end; gap:8px; padding-top:12px; height:120px }
+.chart-bar { width:46px; background:linear-gradient(180deg,#60a5fa,#3b82f6); display:flex; align-items:flex-end; justify-content:center; border-radius:6px 6px 0 0; position:relative }
+.chart-bar .bar-label { position:absolute; bottom:-20px; font-size:11px; width:100%; text-align:center }
+
+.btn { background:transparent; border:1px solid #ccd; padding:0.4rem 0.6rem; border-radius:6px; cursor:pointer }
+.btn-primary { background:#2563eb; color:#fff; border-color:transparent }
+.btn-danger { background:#ef4444; color:#fff; border-color:transparent }
+.btn-icon { padding:6px; border-radius:6px }
+
+@media (max-width:800px) {
+  .gpa-results { flex-direction:column }
+  .results-left { width:100% }
+}

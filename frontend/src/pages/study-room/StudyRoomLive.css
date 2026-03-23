@@ -1,0 +1,300 @@
+/* Full-screen immersive container */
+.study-live-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background: #000;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    /* Ensure it stays on top */
+}
+
+/* Sidebar - Collapsible nicely */
+.study-live-sidebar {
+    width: 280px;
+    background: #1a1b26;
+    /* Darker theme */
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1.5rem;
+    z-index: 20;
+    transition: transform 0.3s ease;
+}
+
+/* Header */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.back-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-2px);
+}
+
+.sidebar-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Navigation Pills */
+.nav-pills {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nav-pills button {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    color: #94a3b8;
+    cursor: pointer;
+    font-weight: 500;
+    text-align: left;
+    transition: all 0.2s;
+}
+
+.nav-pills button:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.nav-pills button.active {
+    background: var(--primary-purple);
+    color: white;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+/* Pomodoro Widget */
+.pomodoro-widget {
+    background: rgba(15, 23, 42, 0.6);
+    padding: 1.5rem;
+    border-radius: 16px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: auto;
+}
+
+.pomodoro-display {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+.pomodoro-controls button {
+    padding: 0.8rem 2rem;
+    background: white;
+    color: var(--bg-dark);
+    border: none;
+    border-radius: 24px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    width: 100%;
+    transition: transform 0.2s;
+}
+
+.pomodoro-controls button:hover {
+    transform: scale(1.02);
+}
+
+.pomodoro-controls span {
+    display: block;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Main Content Area */
+.study-live-main {
+    flex: 1;
+    position: relative;
+    background: #0f1014;
+    display: flex;
+    flex-direction: column;
+}
+
+/* LiveKit Custom Overrides */
+.lk-video-conference {
+    height: 100%;
+    width: 100%;
+}
+
+.lk-video-conference-inner {
+    height: 100%;
+}
+
+.lk-control-bar {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(26, 27, 38, 0.9) !important;
+    border-radius: 20px !important;
+    padding: 0.5rem 1rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    /* Fallback for browsers without backdrop-filter */
+    background-clip: padding-box;
+    z-index: 50;
+    display: flex;
+    gap: 1rem;
+}
+
+.lk-control-bar button {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+}
+
+.lk-disconnect-button {
+    background: #ef4444 !important;
+    color: white !important;
+    border-radius: 12px !important;
+    /* Pill shape for leave */
+    width: auto !important;
+    padding: 0 1.5rem !important;
+    font-weight: 600;
+}
+
+.lk-disconnect-button:hover {
+    background: #dc2626 !important;
+}
+
+/* Hide default LiveKit control bar - use custom control bar instead */
+.lk-control-bar,
+.lk-bottom-controls,
+.lk-button-group {
+    display: none !important;
+}
+
+/* Adjust LiveKit room to take full height without control bar */
+.lk-room {
+    height: 100% !important;
+}
+
+/* Layout modes */
+.room-content.layout-grid .lk-video-conference-inner {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+    align-items: stretch;
+    padding: 1rem;
+}
+
+.room-content.layout-speaker .lk-video-conference-inner {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    padding: 1rem;
+}
+
+.room-content.layout-speaker .lk-video-conference-inner > *:first-child {
+    flex: 2 1 0%;
+}
+.room-content.layout-speaker .lk-video-conference-inner > *:not(:first-child) {
+    flex: 1 1 0%;
+    max-width: 360px;
+}
+
+.room-content.layout-focus .lk-video-conference-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+.room-content.layout-focus .lk-video-conference-inner > * {
+    display: none;
+}
+.room-content.layout-focus .lk-video-conference-inner > *:first-child {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Whiteboard Overlay */
+.whiteboard-wrapper {
+    width: 100%;
+    height: 100%;
+    background: white;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Loading State */
+.study-live-loading {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #0f1014;
+    color: white;
+}
+
+.error-state {
+    text-align: center;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.back-btn-error {
+    background: white;
+    color: black;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1rem;
+}

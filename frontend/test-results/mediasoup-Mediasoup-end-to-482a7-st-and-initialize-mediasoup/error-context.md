@@ -1,0 +1,68 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e10]:
+    - img [ref=e14]
+    - heading "SCCCS NextGen" [level=1] [ref=e17]:
+      - generic [ref=e18]: SCCCS
+      - generic [ref=e19]: NextGen
+    - paragraph [ref=e20]: Experience the future of collaborative learning
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e24]: 🎥
+        - generic [ref=e25]:
+          - heading "HD Video Conferencing" [level=3] [ref=e26]
+          - paragraph [ref=e27]: Crystal clear video meetings
+      - generic [ref=e28]:
+        - generic [ref=e30]: 💬
+        - generic [ref=e31]:
+          - heading "Real-time Collaboration" [level=3] [ref=e32]
+          - paragraph [ref=e33]: Instant messaging & chat rooms
+      - generic [ref=e34]:
+        - generic [ref=e36]: 📚
+        - generic [ref=e37]:
+          - heading "Course Management" [level=3] [ref=e38]
+          - paragraph [ref=e39]: Organized learning experience
+  - generic [ref=e42]:
+    - generic [ref=e43]:
+      - heading "Welcome Back" [level=2] [ref=e44]
+      - paragraph [ref=e45]: Sign in to access your dashboard
+    - generic [ref=e46]:
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - img [ref=e49]
+          - generic [ref=e52]: Username
+        - textbox "Username" [ref=e54]:
+          - /placeholder: Enter your username
+      - generic [ref=e55]:
+        - generic [ref=e56]:
+          - img [ref=e57]
+          - generic [ref=e60]: Password
+        - generic [ref=e61]:
+          - textbox "Password" [ref=e62]:
+            - /placeholder: Enter your password
+          - button "Show password" [ref=e63] [cursor=pointer]:
+            - img [ref=e64]
+      - generic [ref=e67]:
+        - generic [ref=e68] [cursor=pointer]:
+          - checkbox "Remember me" [ref=e69]
+          - generic [ref=e70]: Remember me
+        - link "Forgot password?" [ref=e71] [cursor=pointer]:
+          - /url: /forgot-password
+      - button "Sign In" [ref=e72] [cursor=pointer]:
+        - generic [ref=e73]: Sign In
+        - img [ref=e74]
+    - generic [ref=e78]: Or continue with
+    - generic [ref=e80]:
+      - button "Google" [ref=e81] [cursor=pointer]:
+        - img [ref=e82]
+        - generic [ref=e87]: Google
+      - button "GitHub" [ref=e88] [cursor=pointer]:
+        - img [ref=e89]
+        - generic [ref=e91]: GitHub
+    - paragraph [ref=e92]:
+      - text: Don't have an account?
+      - link "Create account" [ref=e93] [cursor=pointer]:
+        - /url: /signup
+```

@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: scccs
+      POSTGRES_PASSWORD: scccs_pass
+      POSTGRES_DB: scccs_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
+  # Optional: elasticsearch for search/indexing
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - '9200:9200'
+
+  messaging:
+    build:
+      context: ./services/messaging
+    restart: unless-stopped
+    depends_on:
+      - redis
+    ports:
+      - '8001:8001'
+    environment:
+      - PORT=8001
+      - REDIS_URL=redis://redis:6379/0
+
+  vault:
+    image: hashicorp/vault:1.14.0
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: 'root-token'
+      VAULT_DEV_LISTEN_ADDRESS: '0.0.0.0:8200'
+    command: server -dev -dev-root-token-id=root-token -dev-listen-address=0.0.0.0:8200
+    ports:
+      - '8200:8200'
+    volumes:
+      - vault_data:/vault/data
+
+  # Seed the vault with a TOTP key for local development (runs once)
+  vault-seed:
+    image: curlimages/curl:8.2.1
+    depends_on:
+      - vault
+    entrypoint: ["/bin/sh", "-c"]
+    command: >-
+      for i in 1 2 3 4 5; do
+        STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://vault:8200/v1/sys/health || echo 000);
+        if [ "$STATUS" = "200" ] || [ "$STATUS" = "429" ]; then break; fi;
+        echo 'waiting for vault...'; sleep 1;
+      done;
+      TOKEN=root-token;
+      VAULT_ADDR=http://vault:8200;
+      KEY=$(python -c "import base64,secrets; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())");
+      echo "Writing key to Vault: $KEY";
+      curl -s -X POST --header "X-Vault-Token: $TOKEN" --data '{"data": {"TOTP_ENC_KEY": "'"$KEY"'"}}' "$VAULT_ADDR/v1/secret/data/totp_key";
+      echo 'seed complete';
+
+volumes:
+  postgres_data:
+  redis_data:
+  vault_data:
+  minio_data:
+
+# Usage:
+# docker compose up -d
+# This starts Postgres, Redis, MinIO (S3 API) and Elasticsearch for local development

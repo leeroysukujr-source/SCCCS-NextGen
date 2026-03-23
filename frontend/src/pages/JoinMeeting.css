@@ -1,0 +1,364 @@
+/* Modern Join Meeting Page - Captivating Design */
+
+.join-meeting-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-primary);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.join-meeting-page::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.join-container {
+  background: var(--bg-elevated);
+  backdrop-filter: blur(40px);
+  border-radius: 32px;
+  padding: 3.5rem;
+  max-width: 540px;
+  width: 100%;
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  z-index: 1;
+  animation: scaleIn 0.5s ease-out;
+}
+
+.join-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.meeting-icon {
+  font-size: 5rem;
+  color: var(--primary-purple);
+  margin-bottom: 1.5rem;
+  animation: float 4s ease-in-out infinite;
+  filter: drop-shadow(0 8px 16px rgba(124, 58, 237, 0.3));
+}
+
+.join-header h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.03em;
+}
+
+.meeting-info {
+  text-align: left;
+  background: var(--bg-secondary);
+  padding: 2rem;
+  border-radius: 20px;
+  margin-top: 1.5rem;
+  border: 2px solid var(--border-light);
+  transition: all 0.3s ease;
+}
+
+.meeting-info:hover {
+  border-color: var(--primary-purple);
+  box-shadow: 0 4px 12px var(--shadow-purple);
+}
+
+.meeting-info h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.meeting-description {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.meeting-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+}
+
+.meeting-code {
+  color: var(--primary-purple);
+  font-weight: 800;
+  font-size: 1.125rem;
+  letter-spacing: 0.1em;
+  padding: 0.5rem 1rem;
+  background: rgba(124, 58, 237, 0.1);
+  border-radius: 12px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.meeting-host {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.error-state {
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 5rem;
+  color: var(--error);
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
+}
+
+.error-state h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.error-state p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+.guest-form {
+  margin: 2rem 0;
+  text-align: left;
+}
+
+.guest-form label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-primary);
+  margin-bottom: 0.875rem;
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.guest-form label svg {
+  font-size: 1.25rem;
+  color: var(--primary-purple);
+}
+
+.guest-form .input {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-light);
+  border-radius: 16px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+}
+
+.guest-form .input:focus {
+  outline: none;
+  border-color: var(--primary-purple);
+  background: var(--bg-primary);
+  box-shadow: 0 0 0 4px var(--shadow-purple);
+  transform: translateY(-1px);
+}
+
+.guest-form .input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.guest-note {
+  margin-top: 0.875rem;
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+  text-align: center;
+  font-weight: 500;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: rgba(124, 58, 237, 0.1);
+  border: 2px solid rgba(124, 58, 237, 0.3);
+  border-radius: 16px;
+  color: var(--primary-purple);
+  margin: 1.5rem 0;
+  font-weight: 700;
+}
+
+.user-info svg {
+  font-size: 1.5rem;
+}
+
+.btn-join {
+  width: 100%;
+  padding: 1.25rem 2rem;
+  background: var(--gradient-primary);
+  color: var(--white);
+  border: none;
+  border-radius: 16px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 1.5rem;
+  box-shadow: 0 4px 14px var(--shadow-purple);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-join::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-join:hover::before {
+  width: 400px;
+  height: 400px;
+}
+
+.btn-join:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--shadow-purple);
+}
+
+.btn-join:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background: rgba(239, 68, 68, 0.1);
+  border: 2px solid rgba(239, 68, 68, 0.3);
+  color: var(--error);
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
+  margin: 1rem 0;
+  font-weight: 600;
+  animation: slideIn 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.auth-prompt {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid var(--border-light);
+  text-align: center;
+}
+
+.auth-prompt p {
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--primary-purple);
+  cursor: pointer;
+  font-weight: 700;
+  text-decoration: underline;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.btn-link:hover {
+  color: var(--primary-purple-dark);
+  text-decoration: none;
+}
+
+.spinner,
+.spinner-small {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid var(--white);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1rem;
+}
+
+.spinner-small {
+  width: 24px;
+  height: 24px;
+  border-width: 2px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .join-meeting-page {
+    padding: 1rem;
+  }
+  
+  .join-container {
+    padding: 2.5rem 1.5rem;
+    border-radius: 24px;
+  }
+  
+  .meeting-icon {
+    font-size: 4rem;
+  }
+  
+  .join-header h1 {
+    font-size: 2rem;
+  }
+  
+  .meeting-info {
+    padding: 1.5rem;
+  }
+  
+  .meeting-info h2 {
+    font-size: 1.5rem;
+  }
+}

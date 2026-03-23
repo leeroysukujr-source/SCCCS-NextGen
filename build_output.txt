@@ -1,0 +1,84 @@
+﻿
+> scccs-frontend@1.0.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 151 modules transformed.
+node.exe : [31mx[39m Build failed 
+in 12.79s
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" "C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSp 
+   ecified: ([31mx[39m Build fai  
+  led in 12.79s:String) [], Remot   
+ eException
+    + FullyQualifiedErrorId : Nativ 
+   eCommandError
+ 
+[31merror during build:
+[31m[vite:esbuild] Transform 
+failed with 2 errors:
+C:/Users/PC/Desktop/dd/frontend/src/
+pages/dashboards/SuperAdminDashboard
+.jsx:1638:10: ERROR: Unexpected 
+closing fragment tag does not match 
+opening "div" tag
+C:/Users/PC/Desktop/dd/frontend/src/
+pages/dashboards/SuperAdminDashboard
+.jsx:1643:0: ERROR: Unexpected end 
+of file before a closing fragment 
+tag[31m
+file: [36mC:/Users/PC/Desktop/dd/fr
+ontend/src/pages/dashboards/SuperAdm
+inDashboard.jsx:1638:10[31m
+[33m
+[33mUnexpected closing fragment 
+tag does not match opening "div" 
+tag[33m
+1636|                  workspaceId={
+workspaceAnalytics?.workspace?.id}
+1637|              />
+1638|          </>
+   |            ^
+1639|      );
+1640|  };
+
+[33mUnexpected end of file before 
+a closing fragment tag[33m
+1641|  
+1642|  export default 
+SuperAdminDashboard;
+1643|  
+   |  ^
+[31m
+    at failureErrorWithLog (C:\Users
+\PC\Desktop\dd\frontend\node_modules
+\esbuild\lib\main.js:1472:15)
+    at C:\Users\PC\Desktop\dd\fronte
+nd\node_modules\esbuild\lib\main.js:
+755:50
+    at responseCallbacks.<computed> 
+(C:\Users\PC\Desktop\dd\frontend\nod
+e_modules\esbuild\lib\main.js:622:9)
+    at handleIncomingPacket (C:\User
+s\PC\Desktop\dd\frontend\node_module
+s\esbuild\lib\main.js:677:12)
+    at Socket.readFromStdout (C:\Use
+rs\PC\Desktop\dd\frontend\node_modul
+es\esbuild\lib\main.js:600:7)
+    at Socket.emit 
+(node:events:518:28)
+    at addChunk (node:internal/strea
+ms/readable:561:12)
+    at readableAddChunkPushByteMode 
+(node:internal/streams/readable:512:
+3)
+    at Readable.push (node:internal/
+streams/readable:392:5)
+    at Pipe.onStreamRead (node:inter
+nal/stream_base_commons:189:23)[39m
