@@ -22,10 +22,10 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # CORS
-    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'https://sccc-nextgen.web.app,https://494c2d4c-102-22-140-15.serveousercontent.com,http://localhost:5173,http://localhost:3000').split(',')
-    # Socket.IO async mode (eventlet|gevent|threading). Default to auto-detect.
-    # Socket.IO async mode (eventlet|gevent|threading). Default to auto-detect.
-    SOCKETIO_ASYNC_MODE = os.getenv('SOCKETIO_ASYNC_MODE', 'threading')
+    # CORS
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS', '*').split(',')
+    # Socket.IO async mode (eventlet|gevent|threading). 
+    SOCKETIO_ASYNC_MODE = os.getenv('SOCKETIO_ASYNC_MODE', 'eventlet')
     
     # AI Configuration
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
