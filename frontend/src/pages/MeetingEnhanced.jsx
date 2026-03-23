@@ -28,7 +28,7 @@ import {
   FaVolumeOff, FaCheck, FaBrain, FaSpinner, FaSignOutAlt, FaChartLine, FaRobot, FaLock, FaUser
 } from 'react-icons/fa';
 import { IoNotifications, IoSwapHorizontal } from 'react-icons/io5';
-import { FiShare2, FiArrowLeft, FiEdit3, FiFile, FiClock, FiVideo, FiMessageSquare } from 'react-icons/fi';
+import { FiShare2, FiChevronDown, FiEdit3, FiFile, FiClock, FiVideo, FiMessageSquare } from 'react-icons/fi';
 import AISummaryButton from '../components/AISummaryButton';
 import LiveCaptions from '../components/LiveCaptions';
 import Whiteboard from './video-buddy/Whiteboard';
@@ -504,22 +504,7 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
         onReturn={() => onSwitchRoom(roomInfo?.parent_id)}
       />
 
-      {/* Floating Back Button */}
-      <div className="fixed top-6 left-6 z-[200]">
-        <button 
-          onClick={() => {
-              if (roomInfo?.is_breakout && roomInfo?.parent_id) {
-                  onSwitchRoom(roomInfo.parent_id);
-              } else {
-                  onLeave();
-              }
-          }}
-          className="w-12 h-12 rounded-2xl bg-black/40 backdrop-blur-2xl border border-white/20 flex items-center justify-center text-white/90 hover:bg-white/10 hover:scale-110 active:scale-95 transition-all group shadow-2xl"
-          title={roomInfo?.is_breakout ? "Return to Main Room" : "Exit to Dashboard"}
-        >
-          <FiArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-        </button>
-      </div>
+      {/* No button here to avoid icon mismatch */}
 
       <div className="flex flex-1 overflow-hidden relative">
         <div className="flex-1 flex flex-col relative">
@@ -1728,7 +1713,7 @@ function DeviceSettingsModal({
                   ))}
                 </select>
                 <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-                  <FiArrowLeft className="rotate-[270deg]" />
+                  <FiChevronDown />
                 </div>
               </div>
             </div>
@@ -1751,7 +1736,7 @@ function DeviceSettingsModal({
                   ))}
                 </select>
                 <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-                  <FiArrowLeft className="rotate-[270deg]" />
+                  <FiChevronDown />
                 </div>
               </div>
             </div>

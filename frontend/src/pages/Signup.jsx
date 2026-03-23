@@ -239,7 +239,7 @@ export default function Signup() {
 
             <div className="form-actions mt-8 flex justify-between gap-4">
               <button type="button" className="text-btn flex items-center gap-2" onClick={() => setStep(1)}>
-                <FiArrowLeft /> Back
+                Back
               </button>
               <button type="button" className="submit-btn px-10" onClick={() => setStep(3)} disabled={!formData.password || passStrength < 2}>
                 Next <FiArrowRight />
