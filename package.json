@@ -1,0 +1,24 @@
+{
+  "name": "scccs-nextgen",
+  "version": "1.0.0",
+  "description": "SCCCS NextGen System - Complete Educational Collaboration Platform",
+  "scripts": {
+    "install:all": "npm install && cd frontend && npm install",
+    "dev:backend": "cd backend && python run.py",
+    "dev:frontend": "cd frontend && npm run dev",
+    "init:db": "cd backend && python init_db.py",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "keywords": [
+    "education",
+    "collaboration",
+    "video-conferencing",
+    "chat",
+    "classroom"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "firebase": "^12.10.0"
+  }
+}
