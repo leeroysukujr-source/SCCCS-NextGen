@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAuthStore } from './store/authStore'
 import Login from './pages/Login'
-import Signup from './pages/Signup'
+const Signup = lazy(() => import('./pages/Signup'))
 import OAuthCallback from './pages/OAuthCallback'
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const VideoBuddy = lazy(() => import('./pages/VideoBuddy'))
@@ -16,7 +16,7 @@ const WorkspaceEntry = lazy(() => import('./pages/WorkspaceEntry.jsx'))
 const Whiteboard = lazy(() => import('./pages/video-buddy/Whiteboard'))
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
-import Meeting from './pages/MeetingEnhanced'
+const Meeting = lazy(() => import('./pages/MeetingEnhanced'))
 const Chat = lazy(() => import('./pages/Chat'))
 import Classes from './pages/Classes'
 import ClassDetail from './pages/ClassDetail'

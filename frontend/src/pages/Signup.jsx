@@ -3,7 +3,7 @@ import { useNavigate, Link, useSearchParams, useLocation } from 'react-router-do
 import { useAuthStore } from '../store/authStore'
 import { authAPI } from '../api/auth'
 import { getFullImageUrl } from '../utils/api'
-import { FiUser, FiMail, FiLock, FiKey, FiArrowRight, FiArrowLeft, FiCheck, FiLoader, FiAlertCircle, FiBriefcase, FiHash, FiSearch, FiInfo, FiCheckCircle } from 'react-icons/fi'
+import { FiUser, FiMail, FiLock, FiKey, FiArrowRight, FiCheck, FiLoader, FiAlertCircle, FiBriefcase, FiHash, FiSearch, FiInfo, FiCheckCircle } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { auth, googleProvider } from '../utils/firebase'
 import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
@@ -347,7 +347,7 @@ export default function Signup() {
 
             <div className="form-actions mt-8 flex justify-between gap-4">
               <button type="button" className="text-btn flex items-center gap-2" onClick={() => { if(selectedWorkspace) setSelectedWorkspace(null); else setStep(2); }}>
-                <FiArrowLeft /> Back
+                Back
               </button>
               <button type="submit" className="submit-btn px-10 flex items-center gap-2" disabled={loading || !selectedWorkspace || !workspaceCode}>
                 {loading ? <span className="btn-spinner"></span> : <>Complete Onboarding <FiCheckCircle /></>}
@@ -360,14 +360,6 @@ export default function Signup() {
 
   return (
     <div className="login-page">
-      {/* Floating Back Button */}
-      <button 
-        onClick={() => navigate(-1)}
-        className="fixed top-6 left-6 z-[100] w-12 h-12 rounded-2xl bg-white/10 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 flex items-center justify-center text-white/80 hover:bg-white/20 hover:scale-110 active:scale-95 transition-all group shadow-2xl"
-        title="Go Back"
-      >
-        <FiArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-      </button>
       {/* Animated Background - Shared with Login */}
       <div className="login-background">
         <div className="gradient-mesh"></div>
