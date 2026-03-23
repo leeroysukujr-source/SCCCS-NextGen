@@ -52,7 +52,6 @@ backend/firebase-service-account.json
 .env
 
 .env
-*.json
 instance/
 __pycache__/
 *.pyc
