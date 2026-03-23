@@ -2,16 +2,40 @@ import firebase_admin
 from firebase_admin import credentials, auth
 import os
 
+import json
+
 def init_firebase():
     if not firebase_admin._apps:
-        # Path to the downloaded service account key
+        # 1. Try environment variable first (Best for Render/Vercel)
+        service_account_json = os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON')
+        
+        if service_account_json:
+            try:
+                # Handle potential base64 or raw JSON
+                if service_account_json.startswith('{'):
+                    service_info = json.loads(service_account_json)
+                else:
+                    import base64
+                    service_info = json.loads(base64.b64decode(service_account_json).decode('utf-8'))
+                
+                cred = credentials.Certificate(service_info)
+                firebase_admin.initialize_app(cred)
+                print("[Firebase] Admin SDK initialized successfully via Environment Variable.")
+                return
+            except Exception as e:
+                print(f"[Firebase] Error initializing via Env Var: {e}")
+
+        # 2. Fallback to the local file
         cert_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'firebase-service-account.json')
         if os.path.exists(cert_path):
-            cred = credentials.Certificate(cert_path)
-            firebase_admin.initialize_app(cred)
-            print("[Firebase] Admin SDK initialized.")
+            try:
+                cred = credentials.Certificate(cert_path)
+                firebase_admin.initialize_app(cred)
+                print("[Firebase] Admin SDK initialized via local file.")
+            except Exception as e:
+                print(f"[Firebase] Error initializing via file: {e}")
         else:
-            print("[Firebase] WARNING: Service account file not found at", cert_path)
+            print("[Firebase] WARNING: No Service Account provided (Neither Env Var nor file). Verification will use un-checked fallback.")
 
 def verify_token(id_token):
     try:
