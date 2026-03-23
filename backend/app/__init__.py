@@ -311,7 +311,10 @@ def create_app(config_class=Config):
     
     # Create tables
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all()
+        except Exception as e:
+            print(f"Skipping DDL create_all due to Pooler Exception: {e}")
         # Ensure rooms table has correct breakout columns
         from app.utils.db_fix import fix_room_schema
         fix_room_schema()
