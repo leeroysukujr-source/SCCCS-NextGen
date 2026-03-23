@@ -691,20 +691,32 @@ def firebase_login():
         return error_response('Email not found in Firebase token', status_code=400)
         
     # Find all accounts associated with this email across all workspaces
+    # Ensure case-insensitive match for email
     users = User.query.filter((func.lower(User.email) == email.lower()) | (User.oauth_id == firebase_uid)).all()
     
     # Workspace Resolution (if workspace_code provided)
     target_workspace_id = None
     if workspace_code:
-         ws = Workspace.query.filter(func.lower(Workspace.code) == workspace_code.strip().lower()).first()
-         if ws:
-             target_workspace_id = ws.id
+        # Check if workspace_code is actually an ID (from selection screen)
+        if str(workspace_code).isdigit():
+            target_workspace_id = int(workspace_code)
+        else:
+            ws = Workspace.query.filter(func.lower(Workspace.code) == workspace_code.strip().lower()).first()
+            if ws:
+                target_workspace_id = ws.id
     
     # Logic for selecting the correct account
     user = None
+    
+    # CRITICAL: If any of the accounts is a Platform Super Admin, prioritize it if no workspace is targeted
+    platform_admin = next((u for u in users if u.platform_role == 'SUPER_ADMIN' or u.role == 'super_admin'), None)
+    
     if target_workspace_id:
         # Filter from the list of accounts we found
         user = next((u for u in users if u.workspace_id == target_workspace_id), None)
+    elif platform_admin:
+        # If user is a super admin, let them in directly to the platform
+        user = platform_admin
     elif len(users) == 1:
         user = users[0]
     elif len(users) > 1:
@@ -719,12 +731,17 @@ def firebase_login():
                     'role': u.role
                 })
         
-        return success_response({
-            'require_selection': True,
-            'workspaces': workspace_list,
-            'email': email,
-            'id_token': id_token # Pass back for the final step
-        }, message='Multiple accounts found. Please select a workspace.')
+        # If we have accounts but no workspace info (shouldn't happen with strict schema but safety first)
+        if not workspace_list and users:
+            # If they are just ghost accounts without workspaces, take the first one or create new
+            user = users[0]
+        else:
+            return success_response({
+                'require_selection': True,
+                'workspaces': workspace_list,
+                'email': email,
+                'id_token': id_token 
+            }, message='Multiple accounts found. Please select a workspace.')
 
     if not user:
         # Create user if they don't exist (Only if no accounts were found at all)
