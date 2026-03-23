@@ -5,7 +5,7 @@ import { groupsAPI } from '../../api/groups'
 import { useAuthStore } from '../../store/authStore'
 import { useSocket } from '../../contexts/SocketProvider'
 import {
-    FiArrowLeft, FiVideo, FiMessageSquare, FiFileText, FiUsers,
+    FiArrowRight, FiVideo, FiMessageSquare, FiFileText, FiUsers,
     FiPaperclip, FiSend, FiEdit3, FiPenTool,
     FiFolder, FiLayers, FiMaximize2, FiMinimize2, FiPhoneOff,
     FiBookOpen, FiActivity, FiShield, FiMoreVertical, FiShare2, FiMonitor

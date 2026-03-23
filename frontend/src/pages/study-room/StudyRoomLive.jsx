@@ -13,7 +13,7 @@ import MeetingControlBar from './MeetingControlBar'
 import StudyDocsPanel from '../../features/study-room-docs/StudyDocsPanel'
 import GoalsWidget from '../../features/study-room-docs/GoalsWidget'
 import './StudyRoomLive.css'
-import { FiEdit2, FiClock, FiGrid, FiArrowLeft, FiAlertTriangle, FiFileText } from 'react-icons/fi'
+import { FiEdit2, FiClock, FiGrid, FiArrowRight, FiAlertTriangle, FiFileText } from 'react-icons/fi'
 import { features } from '../../config/features'
 
 export default function StudyRoomLive() {
@@ -152,7 +152,7 @@ export default function StudyRoomLive() {
         <div className="study-live-container">
             <div className="study-live-sidebar">
                 <div className="sidebar-header">
-                    <button onClick={handleDisconnect} className="back-btn"><FiArrowLeft /></button>
+                    <button onClick={handleDisconnect} className="back-btn"><FiArrowRight /></button>
                     <h3 title={roomName}>{roomName.length > 12 ? roomName.substring(0, 12) + '...' : roomName}</h3>
                 </div>
 

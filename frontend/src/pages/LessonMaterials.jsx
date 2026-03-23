@@ -7,7 +7,7 @@ import { classesAPI } from '../api/classes'
 import { useAuthStore } from '../store/authStore'
 import DocumentViewer from '../components/DocumentViewer'
 import AIStudyAssistant from '../components/AIStudyAssistant'
-import { FiArrowLeft, FiFile, FiDownload, FiEye, FiZap, FiBook, FiFileText } from 'react-icons/fi'
+import { FiArrowRight, FiFile, FiDownload, FiEye, FiZap, FiBook, FiFileText } from 'react-icons/fi'
 import './LessonMaterials.css'
 import { useNotify } from '../components/NotificationProvider'
 
@@ -106,7 +106,7 @@ export default function LessonMaterials() {
       {/* Header */}
       <div className="materials-header">
         <button className="back-btn" onClick={() => navigate(-1)}>
-          <FiArrowLeft /> Back
+          <FiArrowRight /> Back
         </button>
         <div className="header-content">
           <h1>{lesson.title}</h1>

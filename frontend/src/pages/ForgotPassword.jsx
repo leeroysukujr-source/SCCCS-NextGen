@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { authAPI } from '../api/auth'
-import { FiMail, FiArrowLeft, FiShield, FiCheckCircle, FiAlertCircle, FiCpu } from 'react-icons/fi'
+import { FiMail, FiArrowRight, FiShield, FiCheckCircle, FiAlertCircle, FiCpu } from 'react-icons/fi'
 import './Login.css'
 
 export default function ForgotPassword() {
@@ -113,7 +113,7 @@ export default function ForgotPassword() {
                 <div className="mt-3">
                   <Link to={`/reset-password?token=${resetToken}`} className="text-blue-400 hover:text-blue-300 text-xs flex items-center gap-1 font-bold">
                     <span>Initialize Reset Link</span>
-                    <FiArrowLeft className="rotate-180" />
+                    <FiArrowRight className="rotate-180" />
                   </Link>
                 </div>
               </div>
@@ -157,7 +157,7 @@ export default function ForgotPassword() {
 
             <div className="auth-links">
               <Link to="/login" className="flex items-center gap-2 hover:text-white transition-colors">
-                <FiArrowLeft />
+                <FiArrowRight />
                 <span>Return to Command Center</span>
               </Link>
             </div>

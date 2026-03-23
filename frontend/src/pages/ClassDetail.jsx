@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { classesAPI } from '../api/classes'
 import { lessonsAPI } from '../api/lessons'
 import { useAuthStore } from '../store/authStore'
-import { FiPlus, FiBook, FiCalendar, FiUsers, FiArrowLeft, FiFile, FiEye, FiZap, FiEdit3, FiUsers as FiGroups } from 'react-icons/fi'
+import { FiPlus, FiBook, FiCalendar, FiUsers, FiArrowRight, FiFile, FiEye, FiZap, FiEdit3, FiUsers as FiGroups } from 'react-icons/fi'
 import { assignmentsAPI } from '../api/assignments'
 import GroupJoiningInterface from '../components/assignments/GroupJoiningInterface'
 import './ClassDetail.css'
@@ -68,7 +68,7 @@ export default function ClassDetail() {
   return (
     <div className="class-detail">
       <button className="back-btn" onClick={() => navigate('/classes')}>
-        <FiArrowLeft /> Back to Classes
+        <FiArrowRight /> Back to Classes
       </button>
 
       <div className="class-header">
@@ -174,7 +174,7 @@ export default function ClassDetail() {
                 className="back-to-list-btn"
                 onClick={() => setSelectedAssignment(null)}
               >
-                <FiArrowLeft /> Back to Assignments
+                <FiArrowRight /> Back to Assignments
               </button>
               <GroupJoiningInterface assignment={selectedAssignment} />
             </div>

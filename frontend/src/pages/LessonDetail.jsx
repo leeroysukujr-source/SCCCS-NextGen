@@ -5,7 +5,7 @@ import { lessonsAPI } from '../api/lessons'
 import { filesAPI } from '../api/files'
 import { useAuthStore } from '../store/authStore'
 import { 
-  FiArrowLeft, FiUpload, FiDownload, FiFile, FiX, FiCheckCircle,
+  FiArrowRight, FiUpload, FiDownload, FiFile, FiX, FiCheckCircle,
   FiFileText, FiImage, FiVideo, FiMusic, FiArchive, FiTrash2
 } from 'react-icons/fi'
 import './LessonDetail.css'
@@ -122,7 +122,7 @@ export default function LessonDetail() {
   return (
     <div className="lesson-detail">
       <button className="back-btn" onClick={() => navigate(`/classes/${classId}`)}>
-        <FiArrowLeft /> Back to Class
+        <FiArrowRight /> Back to Class
       </button>
 
       <div className="lesson-header">

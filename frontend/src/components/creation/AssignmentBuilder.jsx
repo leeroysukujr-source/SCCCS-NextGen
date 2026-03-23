@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import apiClient from '../../api/client';
-import { FiSave, FiArrowLeft, FiPlus, FiTrash2, FiPieChart, FiCalendar, FiSearch, FiFileText, FiInfo, FiUpload, FiCheck, FiX, FiUser, FiCheckCircle, FiZap } from 'react-icons/fi';
+import { FiSave, FiArrowRight, FiPlus, FiTrash2, FiPieChart, FiCalendar, FiSearch, FiFileText, FiInfo, FiUpload, FiCheck, FiX, FiUser, FiCheckCircle, FiZap } from 'react-icons/fi';
 import { useNotify } from '../NotificationProvider';
 
 const AssignmentBuilder = ({ docId, onBack }) => {
@@ -273,7 +273,7 @@ const AssignmentBuilder = ({ docId, onBack }) => {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200 dark:border-slate-800">
                     <div className="flex items-center gap-6">
-                        <button onClick={onBack} className="p-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition-all"><FiArrowLeft size={24} /></button>
+                        <button onClick={onBack} className="p-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition-all"><FiArrowRight size={24} /></button>
                         <div>
                             <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Assignment Builder</h1>
                             <p className="text-sm font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-    FiSave, FiArrowLeft, FiPlus, FiDownload, FiGrid, FiTrash2, FiUsers, FiCpu,
+    FiSave, FiArrowRight, FiPlus, FiDownload, FiGrid, FiTrash2, FiUsers, FiCpu,
     FiPrinter, FiRotateCcw, FiRotateCw, FiSearch, FiDollarSign, FiPercent,
     FiChevronDown, FiBold, FiItalic, FiAlignLeft, FiAlignCenter, FiAlignRight,
     FiFilter, FiMoreVertical, FiMenu, FiTable, FiFileText, FiHash, FiMaximize2
@@ -376,7 +376,7 @@ const DataSheetEditor = ({ docId, onBack, onSuccess, onShare }) => {
                     </div>
                 </div>
                 <div className="ml-auto flex items-center gap-4 text-slate-400">
-                    <FiArrowLeft size={16} className="cursor-not-allowed opacity-50" />
+                    <FiArrowRight size={16} className="cursor-not-allowed opacity-50" />
                 </div>
             </div>
         </div>

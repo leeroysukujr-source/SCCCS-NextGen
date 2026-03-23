@@ -8,7 +8,7 @@ import { filesAPI } from '../api/files'
 import { useAuthStore } from '../store/authStore'
 import { getSocketUrl } from '../utils/api'
 import {
-  FiSend, FiSearch, FiUser, FiMessageCircle, FiX, FiArrowLeft,
+  FiSend, FiSearch, FiUser, FiMessageCircle, FiX, FiArrowRight,
   FiPaperclip, FiImage, FiFile, FiTrash2, FiEdit2, FiMoreVertical,
   FiHeart, FiCopy, FiShare2, FiCornerUpLeft, FiCornerDownRight,
   FiStar, FiBookmark, FiClock, FiPhone, FiVideo, FiMic, FiPlus, FiUserPlus
@@ -1019,7 +1019,7 @@ export default function DirectMessages() {
               <div className="dm-header-info">
                 {isMobile && (
                   <button className="mobile-back-btn" onClick={() => setIsSidebarOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', marginRight: '10px', display: 'flex', alignItems: 'center' }}>
-                    <FiArrowLeft size={20} />
+                    <FiArrowRight size={20} />
                   </button>
                 )}
                 <div

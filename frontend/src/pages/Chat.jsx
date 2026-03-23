@@ -23,7 +23,7 @@ import {
   FiCopy, FiShare2, FiCornerUpLeft, FiHeart, FiMessageCircle, FiPhone, FiCornerDownRight,
   FiBookmark, FiClock, FiZap, FiStar,
   FiTrendingUp,
-  FiPlus, FiSettings, FiArrowLeft, FiEye
+  FiPlus, FiSettings, FiArrowRight, FiEye
 } from 'react-icons/fi'
 import { FiList } from 'react-icons/fi'
 import { useSocket } from '../contexts/SocketProvider'
@@ -1603,7 +1603,7 @@ export default function Chat() {
               <div className="header-info">
                 {isMobile && (
                   <button className="mobile-back-btn" onClick={() => setIsSidebarOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', marginRight: '10px', display: 'flex', alignItems: 'center' }}>
-                    <FiArrowLeft size={20} />
+                    <FiArrowRight size={20} />
                   </button>
                 )}
                 <div className="channel-header-avatar">

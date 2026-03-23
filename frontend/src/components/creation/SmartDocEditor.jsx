@@ -24,7 +24,7 @@ import { WebsocketProvider } from 'y-websocket';
 import apiClient from '../../api/client';
 import {
     FiTable, FiLink, FiPercent, FiHash, FiPlus, FiCast, FiDownload,
-    FiArrowLeft, FiList, FiCheckSquare, FiCode, FiBold, FiItalic, FiSave, FiMaximize2,
+    FiArrowRight, FiList, FiCheckSquare, FiCode, FiBold, FiItalic, FiSave, FiMaximize2,
     FiUnderline, FiType, FiAlignLeft, FiAlignCenter, FiAlignRight, FiAlignJustify, FiPrinter, FiRotateCcw, FiRotateCw,
     FiSearch, FiCornerDownRight, FiMoreHorizontal, FiFileText, FiCalendar, FiMail, FiLayers, FiUsers, FiMessageSquare, FiCpu,
     FiX
@@ -793,7 +793,7 @@ const SmartDocEditor = ({ docId, onBack, onSuccess, onShare }) => {
                         onClick={() => setShowTabs(!showTabs)}
                         className={`absolute left-0 top-1/2 -translate-y-1/2 p-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-r-lg shadow-sm z-10 transition-transform ${showTabs ? 'rotate-180' : 'translate-x-0'}`}
                     >
-                        <FiArrowLeft size={16} className="text-slate-400" />
+                        <FiArrowRight size={16} className="text-slate-400" />
                     </button>
 
                     {/* Canvas Wrapper */}
