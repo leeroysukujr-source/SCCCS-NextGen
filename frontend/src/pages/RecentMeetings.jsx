@@ -5,7 +5,7 @@ import { roomsAPI } from '../api/rooms'
 import { useAuthStore } from '../store/authStore'
 import { 
   FiVideo, FiTrash2, FiClock, FiUsers, FiCalendar, 
-  FiArrowRight, FiSearch, FiFilter, FiMoreVertical,
+  FiArrowRight, FiArrowLeft, FiSearch, FiFilter, FiMoreVertical,
   FiCopy, FiCheck, FiShare2, FiPlay
 } from 'react-icons/fi'
 import { useConfirm, useNotify } from '../components/NotificationProvider'
@@ -130,7 +130,7 @@ export default function RecentMeetings() {
     <div className="recent-meetings">
       <div className="meetings-header">
         <button className="back-btn" onClick={() => navigate('/')}>
-          <FiArrowRight className="rotate-180" /> Back to Dashboard
+          <FiArrowLeft /> Back to Dashboard
         </button>
         <h1>Recent Meetings</h1>
         <p>View and manage your meeting history</p>

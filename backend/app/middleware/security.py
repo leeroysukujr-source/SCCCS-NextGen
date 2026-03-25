@@ -22,6 +22,12 @@ def security_headers(response):
     # Relaxed for development to allow http/ws connections to localhost
     response.headers['Content-Security-Policy'] = "default-src 'self' https: http: wss: ws:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; font-src 'self' data: https:; connect-src 'self' https: wss: http: ws:;"
     
+    # Allow Firebase Auth popups (Cross-Origin-Opener-Policy)
+    # Firebase is most compatible with 'unsafe-none' or 'same-origin-allow-popups'
+    response.headers['Cross-Origin-Opener-Policy'] = 'unsafe-none'
+    # COEP can also cause issues if not set or set too strictly with COOP
+    response.headers['Cross-Origin-Embedder-Policy'] = 'unsafe-none'
+    
     # Remove Server header to reduce fingerprinting
     # Note: Modern WSGI servers may overwrite this, but we try.
     response.headers.pop('Server', None)

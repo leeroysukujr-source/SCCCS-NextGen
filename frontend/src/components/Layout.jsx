@@ -4,7 +4,7 @@ import { Outlet, Link, useNavigate, useLocation, NavLink } from 'react-router-do
 import { useAuthStore } from '../store/authStore'
 import { getApiBaseUrl, getFullImageUrl } from '../utils/api'
 import {
-  FiHome, FiVideo, FiMessageSquare, FiMessageCircle, FiBook, FiUser, FiLogOut, FiArrowRight,
+  FiHome, FiVideo, FiMessageSquare, FiMessageCircle, FiBook, FiUser, FiLogOut, FiArrowRight, FiArrowLeft,
   FiUsers, FiSettings, FiSearch, FiTrendingUp, FiAlertCircle, FiMonitor, FiLayers, FiMail,
   FiShield, FiBarChart2, FiDatabase, FiSun, FiMoon, FiGrid, FiBookOpen, FiActivity, FiCpu, FiBriefcase
 } from 'react-icons/fi'
@@ -249,7 +249,7 @@ export default function Layout() {
         <PresenceManager />
         {location.pathname !== '/' && location.pathname !== '/dashboard' && (
           <button className="premium-back-btn" onClick={handleBack} title="Go Back">
-            <FiArrowRight />
+            <FiArrowLeft />
           </button>
         )}
         <div className="content-container">

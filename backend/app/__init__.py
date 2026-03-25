@@ -56,7 +56,7 @@ def create_app(config_class=Config):
             cors_origins = cors_origins.split(',')
     
     # Configure CORS - Use a flexible but secure check
-    CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "*"}})
+    CORS(app, supports_credentials=True, resources={r"/api/.*": {"origins": []}})
 
     @app.before_request
     def handle_preflight():
