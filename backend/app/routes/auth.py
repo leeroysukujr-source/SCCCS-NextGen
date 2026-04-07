@@ -342,7 +342,7 @@ def register():
         
         # Calculate Redirect URL
         redirect_url = '/dashboard'
-        if user.role == 'super_admin':
+        if user.effective_role == 'super_admin':
             redirect_url = '/superadmin/control-center'
         elif not user.workspace_id:
             # Force workspace selection for global signups
@@ -525,13 +525,13 @@ def login():
         
         # Calculate Redirect URL
         redirect_url = '/dashboard'
-        if user.role == 'super_admin':
+        if user.effective_role == 'super_admin':
             redirect_url = '/superadmin/control-center'
         elif not user.workspace_id:
             redirect_url = '/workspace-entry'
         elif user.status == 'pending_verification':
             redirect_url = '/verification-pending'
-        elif user.role == 'admin':
+        elif user.effective_role == 'admin':
             redirect_url = '/dashboard'
 
         return success_response(
@@ -813,13 +813,13 @@ def firebase_login():
     
     # Calculate Redirect URL
     redirect_url = '/dashboard'
-    if user.role == 'super_admin':
+    if user.effective_role == 'super_admin':
         redirect_url = '/superadmin/control-center'
     elif not user.workspace_id:
         redirect_url = '/workspace-entry'
     elif user.status == 'pending_verification':
         redirect_url = '/verification-pending'
-    elif user.role == 'admin':
+    elif user.effective_role == 'admin':
         redirect_url = '/dashboard'
 
     return success_response(
