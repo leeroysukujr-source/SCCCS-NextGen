@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import SuperAdminSidebar from './SuperAdminSidebar';
 import { initializeTheme } from '../store/themeStore';
 import ThemeToggle from './ThemeToggle';
-import { FiMenu, FiGrid, FiArrowRight, FiArrowLeft } from 'react-icons/fi';
+import { FiMenu, FiGrid, FiArrowRight, FiChevronLeft } from 'react-icons/fi';
 import './SuperAdminLayout.css';
 
 const SuperAdminLayout = () => {
@@ -36,13 +36,15 @@ const SuperAdminLayout = () => {
                         className="fixed top-4 left-4 lg:left-8 z-[100] w-10 h-10 rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 shadow-xl hover:scale-110 active:scale-95 transition-all group"
                         title="Go Back"
                     >
-                        <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
+                        <FiChevronLeft className="group-hover:-translate-x-1 transition-transform" />
                     </button>
                     <div className="absolute top-4 right-8 z-50 hidden lg:block">
                         <ThemeToggle />
                     </div>
-                    <div className="sa-content p-4 md:p-6 lg:p-8 pt-16 lg:pt-8">
-                        <Outlet />
+                    <div className="sa-content p-4 md:p-6 lg:p-8 pt-16 lg:pt-8 text-slate-800 dark:text-slate-200">
+                        <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh] text-slate-500 animate-pulse">Initializing Interface...</div>}>
+                            <Outlet />
+                        </Suspense>
                     </div>
                 </main>
             </div>

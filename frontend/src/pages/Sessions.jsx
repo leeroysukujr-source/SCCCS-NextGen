@@ -8,7 +8,9 @@ import {
   FiXCircle, 
   FiLoader,
   FiActivity,
-  FiMapPin
+  FiMapPin,
+  FiCheckCircle,
+  FiAlertCircle
 } from 'react-icons/fi'
 import './SecurityNexus.css'
 

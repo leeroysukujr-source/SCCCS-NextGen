@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { groupsAPI } from '../api/groups'
 import { useAuthStore } from '../store/authStore'
-import { FiUsers, FiSearch, FiPlus, FiX, FiClock, FiLink, FiCheck, FiCopy } from 'react-icons/fi'
+import { FiUsers, FiSearch, FiPlus, FiX, FiClock, FiLink, FiCheck, FiCopy, FiTarget } from 'react-icons/fi'
 import './Groups.css'
 import { useConfirm, useNotify } from '../components/NotificationProvider'
 

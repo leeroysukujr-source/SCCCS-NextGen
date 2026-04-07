@@ -146,7 +146,16 @@ function App() {
             <Route path="/video-buddy/*" element={<Navigate to="/video-room" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/:slug/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+            <Route path="/signup" element={
+              <Suspense fallback={<div className="flex items-center justify-center h-screen bg-slate-900 text-white">Initializing...</div>}>
+                <Signup />
+              </Suspense>
+            } />
+            <Route path="/:slug/signup" element={
+              <Suspense fallback={<div className="flex items-center justify-center h-screen bg-slate-900 text-white">Initializing...</div>}>
+                <Signup />
+              </Suspense>
+            } />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth/callback" element={<OAuthCallback />} />

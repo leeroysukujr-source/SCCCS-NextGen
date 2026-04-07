@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, Link, useSearchParams, useLocation } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams, useLocation, useParams } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { authAPI } from '../api/auth'
+import { workspaceAPI } from '../api/workspace'
 import { getFullImageUrl } from '../utils/api'
 import { FiUser, FiMail, FiLock, FiKey, FiArrowRight, FiCheck, FiLoader, FiAlertCircle, FiBriefcase, FiHash, FiSearch, FiInfo, FiCheckCircle } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -11,8 +12,37 @@ import './Login.css'
 
 export default function Signup() {
   const [searchParams] = useSearchParams()
+  const { slug } = useParams()
   const navigate = useNavigate()
   const { setAuth } = useAuthStore()
+  const location = useLocation()
+
+  const [branding, setBranding] = useState(null)
+  const [brandingLoading, setBrandingLoading] = useState(false)
+
+  // Fetch workspace branding if search param 'w' is present
+  useEffect(() => {
+    const fetchBranding = async () => {
+      // Support route param /:slug/signup and search param ?w=slug
+      const workspaceSlug = slug || searchParams.get('w')
+      if (!workspaceSlug) {
+        setBranding(null)
+        return
+      }
+
+      try {
+        setBrandingLoading(true)
+        const data = await workspaceAPI.getBranding(workspaceSlug)
+        setBranding(data)
+      } catch (err) {
+        console.error('Failed to fetch branding:', err)
+        setBranding(null)
+      } finally {
+        setBrandingLoading(false)
+      }
+    }
+    fetchBranding()
+  }, [slug, searchParams])
 
   // Steps: 1=Details, 2=Security, 3=Workspace
   const [step, setStep] = useState(1)

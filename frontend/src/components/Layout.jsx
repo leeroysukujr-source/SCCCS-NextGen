@@ -1,10 +1,10 @@
 import axios from '../api/client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { Outlet, Link, useNavigate, useLocation, NavLink } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { getApiBaseUrl, getFullImageUrl } from '../utils/api'
 import {
-  FiHome, FiVideo, FiMessageSquare, FiMessageCircle, FiBook, FiUser, FiLogOut, FiArrowRight, FiArrowLeft,
+  FiHome, FiVideo, FiMessageSquare, FiMessageCircle, FiBook, FiUser, FiLogOut, FiArrowRight, FiChevronLeft,
   FiUsers, FiSettings, FiSearch, FiTrendingUp, FiAlertCircle, FiMonitor, FiLayers, FiMail,
   FiShield, FiBarChart2, FiDatabase, FiSun, FiMoon, FiGrid, FiBookOpen, FiActivity, FiCpu, FiBriefcase
 } from 'react-icons/fi'
@@ -249,11 +249,13 @@ export default function Layout() {
         <PresenceManager />
         {location.pathname !== '/' && location.pathname !== '/dashboard' && (
           <button className="premium-back-btn" onClick={handleBack} title="Go Back">
-            <FiArrowLeft />
+            <FiChevronLeft />
           </button>
         )}
         <div className="content-container">
-          <Outlet />
+          <Suspense fallback={<div className="flex items-center justify-center h-64 text-slate-500 animate-pulse">Initializing Interface...</div>}>
+            <Outlet />
+          </Suspense>
         </div>
       </main>
 
