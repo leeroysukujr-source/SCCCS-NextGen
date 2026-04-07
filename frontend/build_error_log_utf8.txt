@@ -1,0 +1,68 @@
+﻿
+> scccs-frontend@1.0.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 347 modules transformed.
+node.exe : [31mx[39m Build failed in 11.29s
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([ 
+   31mx[39m Build failed in 11.29s:String) []  
+  , RemoteException
+    + FullyQualifiedErrorId : NativeCommandErro 
+   r
+ 
+[31merror during build:
+[31m[vite:esbuild] Transform failed with 1 
+error:
+C:/Users/PC/Desktop/dd/frontend/src/components/c
+reation/PresentationBuilder.jsx:4:4: ERROR: The 
+symbol "FiArrowRight" has already been 
+declared[31m
+file: [36mC:/Users/PC/Desktop/dd/frontend/src/c
+omponents/creation/PresentationBuilder.jsx:4:4[
+31m
+[33m
+[33mThe symbol "FiArrowRight" has already been 
+declared[33m
+2  |  import {
+3  |      FiSave, FiArrowRight, FiPlus, 
+FiMonitor, FiType, FiImage, FiGrid, FiUsers, 
+FiPlay, FiStopCircle,
+4  |      FiArrowRight, FiArrowRight as 
+FiArrowRightIcon, FiMaximize2, FiChevronDown, 
+FiPlusSquare,
+   |      ^
+5  |      FiLayout, FiSmile, FiSquare, 
+FiLayers, FiX, FiActivity, FiYoutube, FiCheck, 
+FiRotateCcw, FiRotateCw
+6  |  } from 'react-icons/fi';
+[31m
+    at failureErrorWithLog (C:\Users\PC\Desktop\
+dd\frontend\node_modules\esbuild\lib\main.js:147
+2:15)
+    at C:\Users\PC\Desktop\dd\frontend\node_modu
+les\esbuild\lib\main.js:755:50
+    at responseCallbacks.<computed> (C:\Users\PC
+\Desktop\dd\frontend\node_modules\esbuild\lib\ma
+in.js:622:9)
+    at handleIncomingPacket (C:\Users\PC\Desktop
+\dd\frontend\node_modules\esbuild\lib\main.js:67
+7:12)
+    at Socket.readFromStdout (C:\Users\PC\Deskto
+p\dd\frontend\node_modules\esbuild\lib\main.js:6
+00:7)
+    at Socket.emit (node:events:508:28)
+    at addChunk 
+(node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode 
+(node:internal/streams/readable:514:3)
+    at Readable.push 
+(node:internal/streams/readable:394:5)
+    at Pipe.onStreamRead 
+(node:internal/stream_base_commons:189:23)[39m

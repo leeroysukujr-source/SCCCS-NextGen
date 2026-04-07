@@ -1,0 +1,470 @@
+﻿File: c:\Users\PC\Desktop\dd\frontend\src\components\ActiveRooms.jsx
+  Used: {'Video', 'Play'}
+  Imported: {'FiVideo', 'FiX', 'FiPlay'}
+  Missing: {'Video', 'Play'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\AIStudyAssistant.jsx
+  Used: {'HelpCircle', 'Trash2', 'Zap', 'Loader', 'Send', 'CheckCircle', 'FileText', 'Copy', 'Book', 'Download'}
+  Imported: {'FiDownload', 'FiZap', 'FiList', 'FiFileText', 'FiSend', 'FiTrash2', 'FiBook', 'FiX', 'FiCheckCircle', 'FiHelpCircle', 'FiCopy', 'FiLoader'}
+  Missing: {'HelpCircle', 'Trash2', 'Zap', 'Loader', 'Send', 'CheckCircle', 'FileText', 'Copy', 'Book', 'Download'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\AssignmentBuilderModal.jsx
+  Used: {'Clock', 'FileText'}
+  Imported: {'FiFileText', 'FiPlus', 'FiTrash2', 'FiX', 'FiClock'}
+  Missing: {'Clock', 'FileText'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\BroadcastEmailModal.jsx
+  Used: {'CheckCircle', 'AlertCircle', 'Send', 'Mail'}
+  Imported: {'FiSend', 'FiX', 'FiCheckCircle', 'FiAlertCircle', 'FiMail'}
+  Missing: {'CheckCircle', 'AlertCircle', 'Send', 'Mail'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\ChannelSettings.jsx
+  Used: {'Edit2', 'Check', 'Share2', 'LogOut', 'TrendingUp', 'File', 'CheckCircle', 'Info', 'Copy', 'Link', 'Upload', 'User', 'MessageCircle', 'Calendar', 'Download', 'Image', 'Lock', 'Users'}
+  Imported: {'FiCalendar', 'FiUpload', 'FiUsers', 'FiLogOut', 'FiSettings', 'FiUser', 'FiShare2', 'FiBellOff', 'FiInfo', 'FiDownload', 'FiX', 'FiCopy', 'FiImage', 'FiBell', 'FiMessageCircle', 'FiLock', 'FiCheckCircle', 'FiCheck', 'FiTrendingUp', 'FiLink', 'FiEdit2', 'FiFile', 'FiClock'}
+  Missing: {'Edit2', 'Share2', 'Image', 'LogOut', 'TrendingUp', 'File', 'CheckCircle', 'Info', 'Copy', 'Link', 'Upload', 'User', 'MessageCircle', 'Calendar', 'Download', 'Check', 'Lock', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\CreateChatroomModal.jsx
+  Used: {'Globe', 'Plus', 'MessageCircle', 'Search', 'Lock'}
+  Imported: {'FiUsers', 'FiPlus', 'FiMessageCircle', 'FiLock', 'FiX', 'FiSearch', 'FiGlobe'}
+  Missing: {'Globe', 'Plus', 'MessageCircle', 'Search', 'Lock'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\CreateMeetingModal.jsx
+  Used: {'Globe', 'Video', 'Clock', 'Calendar', 'Lock', 'Users'}
+  Imported: {'FiUsers', 'FiVideo', 'FiX', 'FiLock', 'FiCalendar', 'FiClock', 'FiGlobe'}
+  Missing: {'Globe', 'Video', 'Clock', 'Calendar', 'Lock', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\DirectMessageBubble.jsx
+  Used: {'Edit2', 'Heart', 'CornerUpLeft', 'Trash2', 'Video', 'File', 'Copy', 'Image'}
+  Imported: {'FiSmile', 'FiDownload', 'FiCornerUpLeft', 'FiMoreVertical', 'FiImage', 'FiTrash2', 'FiFile', 'FiVideo', 'FiHeart', 'FiShare2', 'FiEdit2', 'FiCopy', 'FiPaperclip'}
+  Missing: {'Edit2', 'Heart', 'Trash2', 'CornerUpLeft', 'Video', 'File', 'Copy', 'Image'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\DocumentViewer.jsx
+  Used: {'Cast', 'Eye', 'Maximize2', 'Cpu', 'EyeOff', 'Minimize2', 'ZoomIn', 'ZoomOut', 'RotateCw', 'Download', 'Monitor'}
+  Imported: {'FiDownload', 'FiEyeOff', 'FiRotateCw', 'FiZoomIn', 'FiZoomOut', 'FiMinimize2', 'FiX', 'FiEye', 'FiCpu', 'FiCast', 'FiMaximize2', 'FiMonitor'}
+  Missing: {'Eye', 'Cast', 'Maximize2', 'EyeOff', 'Minimize2', 'ZoomIn', 'Download', 'ZoomOut', 'RotateCw', 'Cpu', 'Monitor'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\InstitutionalStats.jsx
+  Used: {'Shield', 'Video', 'Book', 'MessageSquare', 'Users'}
+  Imported: {'FiShield', 'FiUsers', 'FiBook', 'FiVideo', 'FiMessageSquare'}
+  Missing: {'Shield', 'Video', 'Book', 'MessageSquare', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\Layout.jsx
+  Used: {'Settings', 'Activity', 'Moon', 'Shield', 'Video', 'Search', 'BookOpen', 'LogOut', 'Briefcase', 'ArrowLeft', 'MessageCircle', 'User', 'MessageSquare', 'Grid', 'Sun', 'Users'}
+  Imported: {'FiShield', 'FiBriefcase', 'FiActivity', 'FiGrid', 'FiSearch', 'FiArrowLeft', 'FiUsers', 'FiArrowRight', 'FiLogOut', 'FiBook', 'FiSettings', 'FiVideo', 'FiUser', 'FiBarChart2', 'FiMail', 'FiDatabase', 'FiLayers', 'FiAlertCircle', 'FiCpu', 'FiHome', 'FiMessageCircle', 'FiMoon', 'FiSun', 'FiTrendingUp', 'FiBookOpen', 'FiMessageSquare', 'FiMonitor'}
+  Missing: {'Settings', 'Users', 'Activity', 'Moon', 'Shield', 'Video', 'BookOpen', 'LogOut', 'Briefcase', 'Sun', 'User', 'MessageSquare', 'MessageCircle', 'Search', 'ArrowLeft', 'Grid'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\LiveActivityFeed.jsx
+  Used: {'Activity', 'Trash2', 'Zap', 'Plus', 'RefreshCw', 'User', 'Edit'}
+  Imported: {'FiPlus', 'FiEdit', 'FiTrash2', 'FiSettings', 'FiUser', 'FiRefreshCw', 'FiActivity', 'FiZap'}
+  Missing: {'Activity', 'Trash2', 'Zap', 'Plus', 'RefreshCw', 'User', 'Edit'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\LogoUpload.jsx
+  Used: {'Upload', 'Image'}
+  Imported: {'FiX', 'FiCheck', 'FiImage', 'FiUpload'}
+  Missing: {'Upload', 'Image'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\ScheduledMessagesModal.jsx
+  Used: {'Trash2'}
+  Imported: {'FiX', 'FiTrash2'}
+  Missing: {'Trash2'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\SearchBar.jsx
+  Used: {'Hash', 'File', 'Book', 'MessageSquare', 'Search'}
+  Imported: {'FiHash', 'FiBook', 'FiX', 'FiMessageSquare', 'FiFile', 'FiSearch'}
+  Missing: {'Hash', 'File', 'Book', 'MessageSquare', 'Search'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\SuperAdminLayout.jsx
+  Used: {'ArrowLeft', 'Menu'}
+  Imported: {'FiMenu', 'FiGrid', 'FiArrowLeft', 'FiArrowRight'}
+  Missing: {'ArrowLeft', 'Menu'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\SuperAdminSidebar.jsx
+  Used: {'Settings', 'Activity', 'Shield', 'Box', 'LogOut', 'BarChart2', 'Sliders', 'User', 'Lock', 'Users'}
+  Imported: {'FiSliders', 'FiShield', 'FiUsers', 'FiLogOut', 'FiHome', 'FiSettings', 'FiLock', 'FiBox', 'FiUser', 'FiBarChart2', 'FiActivity'}
+  Missing: {'Settings', 'Activity', 'Shield', 'Box', 'LogOut', 'BarChart2', 'Sliders', 'User', 'Lock', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\ThemeToggle.jsx
+  Used: {'Sun', 'Moon'}
+  Imported: {'FiSun', 'FiMoon'}
+  Missing: {'Sun', 'Moon'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\UserListModal.jsx
+  Used: {'CheckCircle', 'User', 'AlertCircle'}
+  Imported: {'FiX', 'FiCheckCircle', 'FiUser', 'FiAlertCircle', 'FiMail'}
+  Missing: {'CheckCircle', 'User', 'AlertCircle'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\VoicePlayer.jsx
+  Used: {'Play', 'Pause'}
+  Imported: {'FiPlay', 'FiPause', 'FiVolume2', 'FiDownload'}
+  Missing: {'Play', 'Pause'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\assignments\GroupJoiningInterface.jsx
+  Used: {'ArrowRight', 'Check', 'Lock', 'Users'}
+  Imported: {'FiUsers', 'FiArrowRight', 'FiLock', 'FiX', 'FiCheck'}
+  Missing: {'ArrowRight', 'Check', 'Lock', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\creation\AssignmentBuilder.jsx
+  Used: {'Trash2', 'Zap', 'Save', 'PieChart', 'ArrowRight', 'FileText', 'Info', 'CheckCircle', 'Upload', 'Calendar', 'Check'}
+  Imported: {'FiArrowRight', 'FiPieChart', 'FiPlus', 'FiFileText', 'FiTrash2', 'FiSave', 'FiX', 'FiCheck', 'FiUser', 'FiCheckCircle', 'FiCalendar', 'FiInfo', 'FiUpload', 'FiSearch', 'FiZap'}
+  Missing: {'Trash2', 'Zap', 'Save', 'PieChart', 'ArrowRight', 'FileText', 'Info', 'CheckCircle', 'Upload', 'Calendar', 'Check'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\creation\DataSheetEditor.jsx
+  Used: {'Bold', 'Hash', 'ChevronDown', 'Save', 'Menu', 'Maximize2', 'Printer', 'Italic', 'AlignCenter', 'Plus', 'ArrowRight', 'DollarSign', 'Grid', 'Table', 'Percent', 'RotateCw', 'RotateCcw', 'Users'}
+  Imported: {'FiDollarSign', 'FiPercent', 'FiRotateCw', 'FiAlignLeft', 'FiAlignCenter', 'FiGrid', 'FiMaximize2', 'FiSearch', 'FiItalic', 'FiUsers', 'FiArrowRight', 'FiPrinter', 'FiTrash2', 'FiHash', 'FiDownload', 'FiMoreVertical', 'FiFileText', 'FiPlus', 'FiSave', 'FiTable', 'FiMenu', 'FiBold', 'FiFilter', 'FiCpu', 'FiAlignRight', 'FiRotateCcw', 'FiChevronDown'}
+  Missing: {'Bold', 'Hash', 'ChevronDown', 'Save', 'Maximize2', 'Printer', 'Italic', 'AlignCenter', 'Plus', 'ArrowRight', 'DollarSign', 'Grid', 'Table', 'Percent', 'RotateCw', 'RotateCcw', 'Menu', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\creation\LecturerCoursesSection.jsx
+  Used: {'Trash2', 'Plus', 'RefreshCw', 'Layers', 'Book', 'MessageSquare', 'Download', 'Check', 'Users'}
+  Imported: {'FiDownload', 'FiUsers', 'FiArrowRight', 'FiPieChart', 'FiPlus', 'FiTrash2', 'FiBook', 'FiCheck', 'FiRefreshCw', 'FiMessageSquare', 'FiLayers'}
+  Missing: {'Trash2', 'Plus', 'RefreshCw', 'Layers', 'Book', 'MessageSquare', 'Download', 'Check', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\creation\PresentationBuilder.jsx
+  Used: {'Activity', 'Check', 'ChevronDown', 'Monitor', 'Square', 'Maximize2', 'Plus', 'Save', 'Type', 'ArrowRight', 'Layers', 'ArrowRightIcon', 'RotateCw', 'Image', 'PlusSquare', 'RotateCcw', 'Users'}
+  Imported: {'FiLayout', 'FiRotateCw', 'FiPlusSquare', 'FiStopCircle', 'FiActivity', 'FiGrid', 'FiMaximize2', 'FiUsers', 'FiArrowRight', 'FiType', 'FiSquare', 'FiArrowRight as FiArrowRightIcon', 'FiSmile', 'FiPlus', 'FiSave', 'FiX', 'FiLayers', 'FiImage', 'FiPlay', 'FiYoutube', 'FiCheck', 'FiRotateCcw', 'FiMonitor', 'FiChevronDown'}
+  Missing: {'Users', 'Activity', 'Square', 'ChevronDown', 'Save', 'Maximize2', 'Plus', 'PlusSquare', 'Type', 'ArrowRight', 'Layers', 'ArrowRightIcon', 'RotateCw', 'Image', 'Check', 'RotateCcw', 'Monitor'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\creation\QuickNotes.jsx
+  Used: {'Edit3', 'Plus', 'Trash2', 'Save'}
+  Imported: {'FiPlus', 'FiTrash2', 'FiSave', 'FiX', 'FiEdit3'}
+  Missing: {'Save', 'Plus', 'Trash2', 'Edit3'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\creation\RubricCreator.jsx
+  Used: {'Plus', 'Trash2', 'Info', 'Save'}
+  Imported: {'FiPlus', 'FiTrash2', 'FiSave', 'FiCheckCircle', 'FiInfo'}
+  Missing: {'Save', 'Plus', 'Trash2', 'Info'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\creation\ShareModal.jsx
+  Used: {'Globe', 'UserPlus', 'Mail', 'Link', 'Search', 'Check', 'Lock', 'Users'}
+  Imported: {'FiUsers', 'FiUserPlus', 'FiLock', 'FiX', 'FiCheck', 'FiChevronDown', 'FiLink', 'FiLayers', 'FiGlobe', 'FiMail', 'FiSearch'}
+  Missing: {'Globe', 'UserPlus', 'Mail', 'Link', 'Search', 'Check', 'Lock', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\creation\SmartDocEditor.jsx
+  Used: {'Save', 'Maximize2', 'Printer', 'AlignCenter', 'AlignJustify', 'Underline', 'Calendar', 'Bold', 'Code', 'Layers', 'Percent', 'RotateCw', 'Users', 'Mail', 'Italic', 'List', 'CheckSquare', 'Type', 'ArrowRight', 'FileText', 'MessageSquare', 'AlignLeft', 'RotateCcw', 'Hash', 'Plus', 'AlignRight', 'Table', 'Cpu'}
+  Imported: {'FiPercent', 'FiRotateCw', 'FiAlignLeft', 'FiAlignJustify', 'FiAlignCenter', 'FiMaximize2', 'FiCalendar', 'FiSearch', 'FiItalic', 'FiUsers', 'FiArrowRight', 'FiPrinter', 'FiType', 'FiHash', 'FiCode', 'FiUnderline', 'FiRotateCcw', 'FiMail', 'FiCheckSquare', 'FiDownload', 'FiMoreHorizontal', 'FiList', 'FiFileText', 'FiPlus', 'FiTable', 'FiSave', 'FiX', 'FiBold', 'FiLayers', 'FiCpu', 'FiAlignRight', 'FiCornerDownRight', 'FiLink', 'FiMessageSquare', 'FiCast'}
+  Missing: {'Save', 'Maximize2', 'Printer', 'AlignCenter', 'AlignJustify', 'Underline', 'Calendar', 'Bold', 'Code', 'Layers', 'Percent', 'RotateCw', 'Users', 'Mail', 'Italic', 'List', 'CheckSquare', 'Type', 'ArrowRight', 'FileText', 'MessageSquare', 'AlignLeft', 'RotateCcw', 'Hash', 'Plus', 'AlignRight', 'Table', 'Cpu'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\creation\VersionHistorySidebar.jsx
+  Used: {'Clock', 'Tag', 'RotateCcw', 'Save'}
+  Imported: {'FiTag', 'FiSave', 'FiX', 'FiCheck', 'FiRotateCcw', 'FiClock'}
+  Missing: {'Clock', 'Tag', 'RotateCcw', 'Save'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\components\Meeting\PreviewRoom.jsx
+  Used: {'Settings', 'Mic', 'Video', 'MicOff', 'VideoOff'}
+  Imported: {'FiSettings', 'FiVideo', 'FiVideoOff', 'FiCheck', 'FiMic', 'FiMicOff'}
+  Missing: {'Settings', 'Mic', 'Video', 'MicOff', 'VideoOff'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\features\study-room-docs\CollaborativeEditor.jsx
+  Used: {'Printer', 'MessageSquare'}
+  Imported: {'FiPrinter', 'FiMessageSquare'}
+  Missing: {'Printer', 'MessageSquare'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\features\study-room-docs\CollaboratorModal.jsx
+  Used: {'UserPlus', 'Trash2'}
+  Imported: {'FiShield', 'FiTrash2', 'FiUserPlus', 'FiX', 'FiUser'}
+  Missing: {'UserPlus', 'Trash2'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\features\study-room-docs\DocumentComments.jsx
+  Used: {'Send'}
+  Imported: {'FiSend'}
+  Missing: {'Send'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\features\study-room-docs\GoalsWidget.jsx
+  Used: {'Plus', 'Trash', 'Target'}
+  Imported: {'FiPlus', 'FiTrash', 'FiCheckSquare', 'FiTarget'}
+  Missing: {'Plus', 'Target', 'Trash'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\features\study-room-docs\StudyDocsPanel.jsx
+  Used: {'FileText', 'Plus', 'Check', 'Share2'}
+  Imported: {'FiFileText', 'FiPlus', 'FiTrash2', 'FiSave', 'FiX', 'FiCheck', 'FiShare2'}
+  Missing: {'FileText', 'Check', 'Plus', 'Share2'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\Analytics.jsx
+  Used: {'Users', 'Activity', 'File', 'MessageSquare'}
+  Imported: {'FiUsers', 'FiTrendingUp', 'FiMessageSquare', 'FiActivity', 'FiFile'}
+  Missing: {'MessageSquare', 'Activity', 'File', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\Chat.jsx
+  Used: {'Settings', 'Trash2', 'Share2', 'Search', 'CornerUpLeft', 'Zap', 'Paperclip', 'File', 'Copy', 'MessageCircle', 'Play', 'Download', 'Pause', 'Lock', 'Users', 'Edit2', 'Heart', 'MoreVertical', 'Eye', 'List', 'ArrowRight', 'Image', 'Bookmark', 'Mic', 'Hash', 'Video', 'Plus', 'Phone', 'TrendingUp', 'Send', 'Clock'}
+  Imported: {'FiSearch', 'FiMic', 'FiPhone', 'FiUsers', 'FiArrowRight', 'FiHash', 'FiTrash2', 'FiSettings', 'FiVideo', 'FiEye', 'FiUser', 'FiShare2', 'FiHeart', 'FiPaperclip', 'FiDownload', 'FiMoreVertical', 'FiStar', 'FiList', 'FiPlus', 'FiX', 'FiBookmark', 'FiCopy', 'FiPause', 'FiZap', 'FiImage', 'FiCornerUpLeft', 'FiCornerDownRight', 'FiPlay', 'FiSend', 'FiMessageCircle', 'FiLock', 'FiTrendingUp', 'FiEdit2', 'FiFile', 'FiClock'}
+  Missing: {'Settings', 'Trash2', 'Share2', 'Search', 'CornerUpLeft', 'Zap', 'Paperclip', 'File', 'Copy', 'MessageCircle', 'Play', 'Pause', 'Download', 'Lock', 'Users', 'Edit2', 'Heart', 'MoreVertical', 'Eye', 'List', 'ArrowRight', 'Image', 'Bookmark', 'Mic', 'Hash', 'Video', 'Plus', 'Phone', 'TrendingUp', 'Send', 'Clock'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\ClassDetail.jsx
+  Used: {'Zap', 'Eye', 'Plus', 'File', 'ArrowRight', 'Book', 'Edit3', 'Groups', 'Calendar', 'Users'}
+  Imported: {'FiUsers as FiGroups', 'FiUsers', 'FiArrowRight', 'FiPlus', 'FiBook', 'FiEye', 'FiEdit3', 'FiFile', 'FiCalendar', 'FiZap'}
+  Missing: {'Calendar', 'Zap', 'Eye', 'Plus', 'File', 'ArrowRight', 'Book', 'Edit3', 'Groups', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\Classes.jsx
+  Used: {'Plus', 'BookOpen', 'ArrowRight', 'Book', 'Search', 'Users'}
+  Imported: {'FiUsers', 'FiArrowRight', 'FiPlus', 'FiBook', 'FiBookOpen', 'FiSearch'}
+  Missing: {'Plus', 'BookOpen', 'ArrowRight', 'Book', 'Search', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\DirectMessages.jsx
+  Used: {'Mic', 'UserPlus', 'Trash2', 'Video', 'Phone', 'Paperclip', 'Plus', 'File', 'Send', 'ArrowRight', 'Clock', 'User', 'MessageCircle'}
+  Imported: {'FiSearch', 'FiPhone', 'FiMic', 'FiArrowRight', 'FiTrash2', 'FiUserPlus', 'FiVideo', 'FiUser', 'FiHeart', 'FiShare2', 'FiPaperclip', 'FiMoreVertical', 'FiStar', 'FiPlus', 'FiX', 'FiBookmark', 'FiCopy', 'FiImage', 'FiCornerUpLeft', 'FiCornerDownRight', 'FiSend', 'FiMessageCircle', 'FiEdit2', 'FiFile', 'FiClock'}
+  Missing: {'Mic', 'UserPlus', 'Trash2', 'Video', 'Phone', 'Paperclip', 'Plus', 'File', 'Send', 'ArrowRight', 'Clock', 'User', 'MessageCircle'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\Feedback.jsx
+  Used: {'Plus', 'AlertCircle', 'Send', 'Clock', 'CheckCircle', 'MessageSquare', 'Search'}
+  Imported: {'FiStar', 'FiArrowDown', 'FiAlertCircle', 'FiPlus', 'FiSend', 'FiTrash2', 'FiArrowUp', 'FiCheckCircle', 'FiX', 'FiUser', 'FiMessageSquare', 'FiEdit2', 'FiFilter', 'FiClock', 'FiSearch'}
+  Missing: {'Plus', 'AlertCircle', 'Send', 'Clock', 'CheckCircle', 'MessageSquare', 'Search'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\ForgotPassword.jsx
+  Used: {'Shield', 'Mail', 'AlertCircle', 'CheckCircle', 'ArrowRight', 'Cpu'}
+  Imported: {'FiShield', 'FiArrowRight', 'FiCheckCircle', 'FiAlertCircle', 'FiMail', 'FiCpu'}
+  Missing: {'Mail', 'Shield', 'AlertCircle', 'CheckCircle', 'ArrowRight', 'Cpu'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\Groups.jsx
+  Used: {'Target', 'Clock', 'Link', 'Search', 'Check', 'Users'}
+  Imported: {'FiUsers', 'FiPlus', 'FiX', 'FiCheck', 'FiLink', 'FiCopy', 'FiClock', 'FiSearch'}
+  Missing: {'Target', 'Clock', 'Link', 'Search', 'Check', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\JoinMeeting.jsx
+  Used: {'Video', 'User', 'ArrowRight', 'Lock'}
+  Imported: {'FiVideo', 'FiUser', 'FiLock', 'FiArrowRight'}
+  Missing: {'Video', 'User', 'ArrowRight', 'Lock'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\LessonDetail.jsx
+  Used: {'Trash2', 'Video', 'Music', 'File', 'ArrowRight', 'FileText', 'Download', 'Upload', 'Image', 'Archive'}
+  Imported: {'FiDownload', 'FiImage', 'FiArrowRight', 'FiFileText', 'FiTrash2', 'FiArchive', 'FiVideo', 'FiX', 'FiCheckCircle', 'FiMusic', 'FiFile', 'FiUpload'}
+  Missing: {'Trash2', 'Video', 'Music', 'File', 'ArrowRight', 'FileText', 'Upload', 'Archive', 'Download', 'Image'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\LessonMaterials.jsx
+  Used: {'Zap', 'Eye', 'File', 'ArrowRight', 'FileText', 'Book', 'Download'}
+  Imported: {'FiDownload', 'FiArrowRight', 'FiFileText', 'FiBook', 'FiEye', 'FiFile', 'FiZap'}
+  Missing: {'Zap', 'Eye', 'File', 'ArrowRight', 'FileText', 'Book', 'Download'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\Login.jsx
+  Used: {'Loader', 'Eye', 'AlertCircle', 'EyeOff', 'ArrowRight', 'User', 'Check', 'Lock'}
+  Imported: {'FiEyeOff', 'FiArrowLeft', 'FiArrowRight', 'FiLock', 'FiEye', 'FiCheck', 'FiUser', 'FiAlertCircle', 'FiLoader'}
+  Missing: {'Eye', 'Loader', 'AlertCircle', 'EyeOff', 'ArrowRight', 'User', 'Check', 'Lock'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\MeetingEnhanced.jsx
+  Used: {'File', 'ChevronDown', 'Share2'}
+  Imported: {'FiVideo', 'FiShare2', 'FiEdit3', 'FiMessageSquare', 'FiFile', 'FiClock', 'FiChevronDown'}
+  Missing: {'Share2', 'File', 'ChevronDown'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\Profile.jsx
+  Used: {'Upload'}
+  Imported: {'FiX', 'FiUser', 'FiUpload'}
+  Missing: {'Upload'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\RecentMeetings.jsx
+  Used: {'MoreVertical', 'Trash2', 'Share2', 'Video', 'Clock', 'Copy', 'Play', 'Search', 'ArrowLeft', 'Calendar', 'Check', 'Users'}
+  Imported: {'FiArrowLeft', 'FiMoreVertical', 'FiUsers', 'FiArrowRight', 'FiPlay', 'FiTrash2', 'FiVideo', 'FiCheck', 'FiShare2', 'FiFilter', 'FiCopy', 'FiCalendar', 'FiClock', 'FiSearch'}
+  Missing: {'MoreVertical', 'Trash2', 'Share2', 'Video', 'Search', 'Clock', 'Copy', 'Play', 'ArrowLeft', 'Calendar', 'Check', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\ResetPassword.jsx
+  Used: {'Shield', 'Loader', 'AlertCircle', 'Key', 'CheckCircle', 'User', 'Lock'}
+  Imported: {'FiShield', 'FiLock', 'FiCheckCircle', 'FiUser', 'FiAlertCircle', 'FiKey', 'FiCpu', 'FiLoader'}
+  Missing: {'Loader', 'Shield', 'AlertCircle', 'Key', 'CheckCircle', 'User', 'Lock'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\Sessions.jsx
+  Used: {'Activity', 'Globe', 'XCircle', 'Loader', 'Shield', 'AlertCircle', 'CheckCircle', 'Clock', 'Monitor'}
+  Imported: {'FiLoader', 'FiShield', 'FiMapPin', 'FiActivity', 'FiMonitor', 'FiClock', 'FiGlobe', 'FiXCircle'}
+  Missing: {'Activity', 'Globe', 'Loader', 'Shield', 'Monitor', 'AlertCircle', 'CheckCircle', 'Clock', 'XCircle'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\Settings.jsx
+  Used: {'Bell', 'Globe', 'Shield', 'Save', 'User', 'Check'}
+  Imported: {'FiShield', 'FiBell', 'FiSave', 'FiCheck', 'FiUser', 'FiKey', 'FiGlobe'}
+  Missing: {'Bell', 'Globe', 'Shield', 'Save', 'User', 'Check'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\Signup.jsx
+  Used: {'Hash', 'Loader', 'Briefcase', 'AlertCircle', 'ArrowRight', 'Info', 'User', 'CheckCircle', 'Search', 'Lock'}
+  Imported: {'FiArrowRight', 'FiBriefcase', 'FiHash', 'FiKey', 'FiLock', 'FiCheckCircle', 'FiCheck', 'FiUser', 'FiAlertCircle', 'FiMail', 'FiInfo', 'FiSearch', 'FiLoader'}
+  Missing: {'Hash', 'Loader', 'Briefcase', 'AlertCircle', 'ArrowRight', 'Info', 'User', 'CheckCircle', 'Search', 'Lock'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\StudyRoom.jsx
+  Used: {'Video', 'BookOpen', 'Clock', 'MessageCircle', 'Cpu', 'Users'}
+  Imported: {'FiUsers', 'FiMessageCircle', 'FiVideo', 'FiBookOpen', 'FiCpu', 'FiClock'}
+  Missing: {'Video', 'BookOpen', 'Clock', 'MessageCircle', 'Cpu', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\TwoFactor.jsx
+  Used: {'Shield', 'AlertCircle', 'CheckCircle', 'RefreshCw', 'Copy', 'Smartphone', 'Cpu', 'Lock', 'XCircle'}
+  Imported: {'FiShield', 'FiLock', 'FiSmartphone', 'FiCheckCircle', 'FiRefreshCw', 'FiAlertCircle', 'FiCopy', 'FiCpu', 'FiXCircle'}
+  Missing: {'Shield', 'AlertCircle', 'CheckCircle', 'Copy', 'RefreshCw', 'Smartphone', 'Cpu', 'Lock', 'XCircle'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\VideoBuddy.jsx
+  Used: {'Settings', 'Layout', 'Video', 'Home', 'Calendar', 'Users'}
+  Imported: {'FiLayout', 'FiUsers', 'FiHome', 'FiSettings', 'FiVideo', 'FiCalendar'}
+  Missing: {'Settings', 'Layout', 'Video', 'Home', 'Calendar', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\WorkspaceEntry.jsx
+  Used: {'Hash', 'Loader', 'ChevronLeft', 'LogOut', 'Video', 'Briefcase', 'ArrowRight', 'Info', 'CheckCircle', 'Layers', 'MessageCircle', 'Search'}
+  Imported: {'FiShield', 'FiArrowRight', 'FiPlus', 'FiLogOut', 'FiBriefcase', 'FiHash', 'FiMessageCircle', 'FiChevronLeft', 'FiVideo', 'FiCheckCircle', 'FiUser', 'FiLayers', 'FiInfo', 'FiSearch', 'FiLoader'}
+  Missing: {'Hash', 'ChevronLeft', 'Loader', 'LogOut', 'Video', 'Briefcase', 'ArrowRight', 'Info', 'CheckCircle', 'Layers', 'MessageCircle', 'Search'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\admin\AdminManagement.jsx
+  Used: {'Trash2', 'UserPlus', 'Check', 'Shield'}
+  Imported: {'FiMoreVertical', 'FiShield', 'FiUserPlus', 'FiTrash2', 'FiX', 'FiCheck', 'FiEdit2'}
+  Missing: {'Shield', 'Trash2', 'Check', 'UserPlus'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\admin\CreationHubAudit.jsx
+  Used: {'Activity', 'Shield', 'Clock', 'FileText', 'Download', 'Cpu', 'Users'}
+  Imported: {'FiDownload', 'FiShield', 'FiFileText', 'FiUsers', 'FiActivity', 'FiCpu', 'FiClock'}
+  Missing: {'Activity', 'Shield', 'Cpu', 'Clock', 'FileText', 'Download', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\admin\CreationPolicyManager.jsx
+  Used: {'Settings', 'Shield', 'Save', 'ToggleLeft', 'AlertCircle', 'CheckCircle', 'ToggleRight', 'Cpu'}
+  Imported: {'FiShield', 'FiSave', 'FiSettings', 'FiCheckCircle', 'FiToggleLeft', 'FiAlertCircle', 'FiToggleRight', 'FiCpu', 'FiXCircle'}
+  Missing: {'Settings', 'ToggleLeft', 'Shield', 'Save', 'AlertCircle', 'CheckCircle', 'ToggleRight', 'Cpu'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\admin\ManageClasses.jsx
+  Used: {'Trash2', 'Eye', 'Book', 'Search', 'Users'}
+  Imported: {'FiUsers', 'FiTrash2', 'FiBook', 'FiEye', 'FiX', 'FiSearch'}
+  Missing: {'Trash2', 'Eye', 'Book', 'Search', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\admin\ManageGroups.jsx
+  Used: {'Edit2', 'Activity', 'Globe', 'Filter', 'Shield', 'Trash2', 'Plus', 'Clock', 'Search', 'Cpu', 'Check', 'Lock', 'Users'}
+  Imported: {'FiShield', 'FiActivity', 'FiSearch', 'FiUsers', 'FiTrash2', 'FiUserPlus', 'FiUserMinus', 'FiGlobe', 'FiMoreVertical', 'FiPlus', 'FiX', 'FiFilter', 'FiCopy', 'FiCpu', 'FiLock', 'FiCheck', 'FiLink', 'FiEdit2', 'FiClock'}
+  Missing: {'Edit2', 'Activity', 'Globe', 'Filter', 'Shield', 'Trash2', 'Plus', 'Clock', 'Search', 'Cpu', 'Check', 'Lock', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\admin\ManageRooms.jsx
+  Used: {'Trash2', 'Eye', 'Video', 'Search', 'Calendar', 'Users'}
+  Imported: {'FiUsers', 'FiTrash2', 'FiVideo', 'FiEye', 'FiX', 'FiCalendar', 'FiSearch'}
+  Missing: {'Trash2', 'Eye', 'Video', 'Search', 'Calendar', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\admin\ManageStudents.jsx
+  Used: {'Trash2', 'Plus', 'Search', 'Edit', 'Download', 'Users'}
+  Imported: {'FiDownload', 'FiUsers', 'FiPlus', 'FiEdit', 'FiTrash2', 'FiX', 'FiSearch'}
+  Missing: {'Trash2', 'Plus', 'Search', 'Edit', 'Download', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\admin\ManageUsers.jsx
+  Used: {'Settings', 'Trash2', 'Shield', 'Search', 'Edit', 'Download', 'Users'}
+  Imported: {'FiDownload', 'FiShield', 'FiUsers', 'FiEdit', 'FiTrash2', 'FiSettings', 'FiX', 'FiCheck', 'FiSearch'}
+  Missing: {'Settings', 'Trash2', 'Shield', 'Search', 'Edit', 'Download', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\admin\Reports.jsx
+  Used: {'CheckCircle', 'Download', 'Send', 'Clock'}
+  Imported: {'FiDownload', 'FiUsers', 'FiFileText', 'FiBriefcase', 'FiSend', 'FiCheckCircle', 'FiBox', 'FiTrendingUp', 'FiActivity', 'FiCalendar', 'FiClock', 'FiGlobe'}
+  Missing: {'CheckCircle', 'Download', 'Send', 'Clock'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\admin\SystemSettings.jsx
+  Used: {'Settings', 'Globe', 'Shield', 'Save', 'Video', 'Briefcase', 'ToggleRight', 'FileText', 'Info', 'MessageSquare', 'Cpu', 'Check', 'Lock', 'HardDrive'}
+  Imported: {'FiImage', 'FiHardDrive', 'FiServer', 'FiFileText', 'FiShield', 'FiBriefcase', 'FiSave', 'FiSettings', 'FiLock', 'FiKey', 'FiVideo', 'FiCheck', 'FiX', 'FiMessageSquare', 'FiToggleRight', 'FiCpu', 'FiInfo', 'FiGlobe'}
+  Missing: {'Settings', 'Globe', 'Shield', 'Save', 'Video', 'Briefcase', 'ToggleRight', 'FileText', 'Info', 'MessageSquare', 'Cpu', 'Check', 'Lock', 'HardDrive'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\admin\WorkspaceSettings.jsx
+  Used: {'Save', 'Monitor'}
+  Imported: {'FiX', 'FiMonitor', 'FiSave', 'FiSettings'}
+  Missing: {'Monitor', 'Save'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\creation\CreationHub.jsx
+  Used: {'Trash2', 'PieChart', 'CheckCircle', 'PenTool', 'Star', 'Search', 'Calendar', 'BookOpen', 'Layers', 'Users', 'Edit2', 'MoreVertical', 'UserCheck', 'Filter', 'Folder', 'FileText', 'MessageSquare', 'Grid', 'Monitor', 'Plus', 'Clock', 'Cpu'}
+  Imported: {'FiLayout', 'FiGrid', 'FiCalendar', 'FiSearch', 'FiUsers', 'FiTrash2', 'FiShare2', 'FiUserCheck', 'FiStar', 'FiMoreVertical', 'FiFileText', 'FiPieChart', 'FiPlus', 'FiX', 'FiLayers', 'FiFilter', 'FiCpu', 'FiClock', 'FiCheckCircle', 'FiBookOpen', 'FiMessageSquare', 'FiEdit2', 'FiPenTool', 'FiMonitor', 'FiFolder'}
+  Missing: {'Trash2', 'PieChart', 'CheckCircle', 'PenTool', 'Star', 'Search', 'Calendar', 'BookOpen', 'Layers', 'Users', 'Edit2', 'MoreVertical', 'UserCheck', 'Filter', 'Folder', 'FileText', 'MessageSquare', 'Grid', 'Monitor', 'Plus', 'Clock', 'Cpu'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\dashboards\AdminDashboard.jsx
+  Used: {'Settings', 'Globe', 'Shield', 'Mail', 'Video', 'Plus', 'AlertCircle', 'Code', 'ArrowRight', 'Clock', 'User', 'Book', 'MessageCircle', 'Search', 'Calendar', 'Users'}
+  Imported: {'FiShield', 'FiTarget', 'FiActivity', 'FiCalendar', 'FiSearch', 'FiUsers', 'FiArrowRight', 'FiCode', 'FiBook', 'FiSettings', 'FiVideo', 'FiUser', 'FiMail', 'FiGlobe', 'FiPieChart', 'FiPlus', 'FiLayers', 'FiCopy', 'FiAlertCircle', 'FiCpu', 'FiZap', 'FiMessageCircle', 'FiCheck', 'FiTrendingUp', 'FiMessageSquare', 'FiMonitor', 'FiClock'}
+  Missing: {'Settings', 'Globe', 'Mail', 'Shield', 'Video', 'Plus', 'AlertCircle', 'Code', 'ArrowRight', 'Clock', 'User', 'Book', 'MessageCircle', 'Search', 'Calendar', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\dashboards\FeatureLab.jsx
+  Used: {'Settings', 'Box', 'Save', 'Video', 'AlertCircle', 'RefreshCw', 'CheckCircle', 'PenTool', 'Layers', 'MessageSquare', 'Cpu'}
+  Imported: {'FiShield', 'FiSave', 'FiSettings', 'FiVideo', 'FiCheckCircle', 'FiBox', 'FiRefreshCw', 'FiMessageSquare', 'FiLayers', 'FiAlertCircle', 'FiPenTool', 'FiCpu'}
+  Missing: {'Settings', 'Box', 'Save', 'Video', 'AlertCircle', 'RefreshCw', 'CheckCircle', 'PenTool', 'Layers', 'MessageSquare', 'Cpu'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\dashboards\InstitutionalSettings.jsx
+  Used: {'Settings', 'Edit3', 'Unlock', 'Zap', 'Shield', 'Save', 'AlertCircle', 'RefreshCw', 'CheckCircle', 'MessageSquare', 'Search', 'RotateCcw', 'Lock', 'Monitor'}
+  Imported: {'FiShield', 'FiSearch', 'FiSave', 'FiSettings', 'FiLock', 'FiCheckCircle', 'FiRefreshCw', 'FiMessageSquare', 'FiEdit3', 'FiAlertCircle', 'FiRotateCcw', 'FiMonitor', 'FiUnlock', 'FiZap'}
+  Missing: {'Settings', 'Unlock', 'Zap', 'Shield', 'Save', 'Lock', 'AlertCircle', 'RefreshCw', 'CheckCircle', 'MessageSquare', 'Edit3', 'Search', 'RotateCcw', 'Monitor'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\dashboards\SecurityAuditCenter.jsx
+  Used: {'Activity', 'Shield', 'ChevronLeft', 'ChevronRight', 'RefreshCw', 'Database', 'Calendar', 'Download'}
+  Imported: {'FiDownload', 'FiChevronRight', 'FiShield', 'FiAlertTriangle', 'FiDatabase', 'FiChevronLeft', 'FiUser', 'FiRefreshCw', 'FiActivity', 'FiFilter', 'FiCalendar', 'FiSearch'}
+  Missing: {'Activity', 'ChevronLeft', 'Shield', 'ChevronRight', 'RefreshCw', 'Database', 'Calendar', 'Download'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\dashboards\SettingsDashboard.jsx
+  Used: {'Settings', 'Shield', 'Save', 'AlertCircle', 'RefreshCw', 'CheckCircle', 'MessageSquare', 'Monitor'}
+  Imported: {'FiShield', 'FiSave', 'FiSettings', 'FiCheckCircle', 'FiRefreshCw', 'FiMessageSquare', 'FiAlertCircle', 'FiMonitor'}
+  Missing: {'Settings', 'Shield', 'Save', 'AlertCircle', 'RefreshCw', 'CheckCircle', 'MessageSquare', 'Monitor'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\dashboards\StudentDashboard.jsx
+  Used: {'Globe', 'Award', 'PieChart', 'Plus', 'Video', 'Code', 'CheckCircle', 'ArrowRight', 'User', 'Clock', 'Book', 'MessageSquare', 'Search', 'Users'}
+  Imported: {'FiShield', 'FiTarget', 'FiActivity', 'FiCalendar', 'FiSearch', 'FiUsers', 'FiArrowRight', 'FiCode', 'FiBook', 'FiVideo', 'FiUser', 'FiGlobe', 'FiFileText', 'FiPieChart', 'FiPlus', 'FiAward', 'FiLayers', 'FiCpu', 'FiZap', 'FiCheckCircle', 'FiTrendingUp', 'FiMessageSquare', 'FiClock'}
+  Missing: {'Globe', 'Award', 'PieChart', 'Plus', 'Video', 'Code', 'CheckCircle', 'ArrowRight', 'User', 'Clock', 'Book', 'MessageSquare', 'Search', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\dashboards\TeacherDashboard.jsx
+  Used: {'Globe', 'Award', 'Video', 'Plus', 'Code', 'ArrowRight', 'FileText', 'User', 'Clock', 'Upload', 'Book', 'MessageSquare', 'Search', 'Calendar', 'Users'}
+  Imported: {'FiShield', 'FiTarget', 'FiActivity', 'FiCalendar', 'FiUpload', 'FiSearch', 'FiUsers', 'FiArrowRight', 'FiCode', 'FiBook', 'FiSettings', 'FiVideo', 'FiUser', 'FiGlobe', 'FiDownload', 'FiFileText', 'FiPieChart', 'FiPlus', 'FiAward', 'FiLayers', 'FiCpu', 'FiZap', 'FiEdit', 'FiBarChart', 'FiCheckCircle', 'FiTrendingUp', 'FiMessageSquare', 'FiFile', 'FiMonitor', 'FiClock'}
+  Missing: {'Globe', 'Award', 'Video', 'Plus', 'Code', 'ArrowRight', 'FileText', 'User', 'Clock', 'Upload', 'Book', 'MessageSquare', 'Search', 'Calendar', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\study-room\AssignmentGroupRoom.jsx
+  Used: {'Activity', 'PhoneOff', 'Video', 'Maximize2', 'Folder', 'Target', 'Minimize2', 'FileText', 'Layers', 'MessageSquare', 'Users'}
+  Imported: {'FiUsers', 'FiFileText', 'FiVideo as FiVideoIcon', 'FiMinimize2', 'FiSettings', 'FiVideo', 'FiPhoneOff', 'FiTarget', 'FiSmartphone', 'FiCpu', 'FiMessageSquare', 'FiActivity', 'FiLayers', 'FiGrid', 'FiMaximize2', 'FiCheckSquare', 'FiFolder', 'FiMic'}
+  Missing: {'Activity', 'PhoneOff', 'Video', 'Maximize2', 'Folder', 'Target', 'Minimize2', 'FileText', 'Layers', 'MessageSquare', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\study-room\GroupStudy.jsx
+  Used: {'Edit2', 'Activity', 'Globe', 'MoreVertical', 'Award', 'Trash2', 'LogOut', 'Plus', 'BookOpen', 'AlertCircle', 'ArrowRight', 'Clock', 'Search', 'Cpu', 'Check', 'Lock', 'Users'}
+  Imported: {'FiMoreVertical', 'FiUsers', 'FiArrowRight', 'FiAlertCircle', 'FiPlus', 'FiLogOut', 'FiTrash2', 'FiLock', 'FiX', 'FiCheck', 'FiBookOpen', 'FiActivity', 'FiEdit2', 'FiSearch', 'FiAward', 'FiCpu', 'FiClock', 'FiGlobe'}
+  Missing: {'Edit2', 'Activity', 'MoreVertical', 'Globe', 'Award', 'Trash2', 'LogOut', 'Plus', 'BookOpen', 'AlertCircle', 'ArrowRight', 'Clock', 'Search', 'Cpu', 'Check', 'Lock', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\study-room\PeerTutoring.jsx
+  Used: {'UserPlus', 'Video', 'Search', 'Calendar', 'Check'}
+  Imported: {'FiStar', 'FiUserPlus', 'FiVideo', 'FiX', 'FiCheck', 'FiCalendar', 'FiClock', 'FiSearch'}
+  Missing: {'UserPlus', 'Video', 'Search', 'Calendar', 'Check'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\study-room\StudyGroupDetail.jsx
+  Used: {'Activity', 'PhoneOff', 'MoreVertical', 'Shield', 'Video', 'Maximize2', 'Paperclip', 'Folder', 'Send', 'Minimize2', 'MessageSquare', 'Layers', 'Edit3', 'Users'}
+  Imported: {'FiShield', 'FiMinimize2', 'FiPhoneOff', 'FiActivity', 'FiMaximize2', 'FiUsers', 'FiArrowRight', 'FiVideo', 'FiShare2', 'FiEdit3', 'FiPaperclip', 'FiMoreVertical', 'FiFileText', 'FiLayers', 'FiSend', 'FiBookOpen', 'FiMessageSquare', 'FiPenTool', 'FiMonitor', 'FiFolder'}
+  Missing: {'Edit3', 'Activity', 'PhoneOff', 'MoreVertical', 'Shield', 'Video', 'Maximize2', 'Paperclip', 'Folder', 'Send', 'Minimize2', 'Layers', 'MessageSquare', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\study-room\StudyRoomLive.jsx
+  Used: {'Edit2', 'AlertTriangle', 'Clock', 'FileText', 'Grid', 'ArrowLeft'}
+  Imported: {'FiArrowLeft', 'FiAlertTriangle', 'FiArrowRight', 'FiFileText', 'FiEdit2', 'FiGrid', 'FiClock'}
+  Missing: {'Edit2', 'AlertTriangle', 'Clock', 'FileText', 'Grid', 'ArrowLeft'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\study-room\TopicDiscussions.jsx
+  Used: {'Hash'}
+  Imported: {'FiHash', 'FiMessageCircle'}
+  Missing: {'Hash'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\study-room\assignment-group-components\AssignmentAssets.jsx
+  Used: {'Trash2', 'Video', 'Music', 'File', 'Download', 'Upload', 'Cpu', 'Image', 'HardDrive'}
+  Imported: {'FiDownload', 'FiImage', 'FiHardDrive', 'FiTrash2', 'FiVideo', 'FiMusic', 'FiActivity', 'FiFile', 'FiCpu', 'FiUpload'}
+  Missing: {'Trash2', 'Video', 'Music', 'File', 'Cpu', 'Upload', 'Download', 'Image', 'HardDrive'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\study-room\assignment-group-components\AssignmentChat.jsx
+  Used: {'Shield', 'Paperclip', 'Smile', 'Send', 'Users'}
+  Imported: {'FiSmile', 'FiShield', 'FiUsers', 'FiSend', 'FiPaperclip'}
+  Missing: {'Shield', 'Paperclip', 'Smile', 'Send', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\study-room\assignment-group-components\AssignmentDocs.jsx
+  Used: {'Plus', 'Folder', 'Clock', 'FileText', 'Cpu', 'Archive'}
+  Imported: {'FiFileText', 'FiFolder', 'FiPlus', 'FiArchive', 'FiCpu', 'FiClock'}
+  Missing: {'Plus', 'Folder', 'Clock', 'FileText', 'Cpu', 'Archive'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\study-room\assignment-group-components\AssignmentGroupSelectionModal.jsx
+  Used: {'Activity', 'Shield', 'CheckCircle', 'ArrowRight', 'Users'}
+  Imported: {'FiUsers', 'FiArrowRight', 'FiShield', 'FiLock', 'FiX', 'FiCheckCircle', 'FiActivity', 'FiInfo'}
+  Missing: {'Activity', 'Shield', 'CheckCircle', 'ArrowRight', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\study-room\assignment-group-components\AssignmentMembers.jsx
+  Used: {'Search', 'UserPlus', 'UserMinus'}
+  Imported: {'FiMoreVertical', 'FiUserPlus', 'FiUserMinus', 'FiUser', 'FiSearch'}
+  Missing: {'Search', 'UserPlus', 'UserMinus'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\study-room\assignment-group-components\AssignmentOverview.jsx
+  Used: {'Activity', 'Zap', 'Shield', 'TrendingUp', 'Target', 'ArrowRight', 'MessageSquare', 'Cpu', 'Users'}
+  Imported: {'FiUsers', 'FiArrowRight', 'FiShield', 'FiCheckCircle', 'FiTarget', 'FiTrendingUp', 'FiActivity', 'FiMessageSquare', 'FiCpu', 'FiClock', 'FiZap'}
+  Missing: {'Activity', 'Zap', 'Shield', 'TrendingUp', 'Target', 'ArrowRight', 'MessageSquare', 'Cpu', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\study-room\assignment-group-components\AssignmentTasks.jsx
+  Used: {'Activity', 'Trash2', 'MoreVertical', 'Plus', 'ChevronRight', 'User', 'Layers', 'Flag'}
+  Imported: {'FiChevronRight', 'FiMoreVertical', 'FiPlus', 'FiFlag', 'FiTrash2', 'FiCheckCircle', 'FiUser', 'FiEdit3', 'FiLayers', 'FiAlertCircle', 'FiActivity', 'FiCpu', 'FiClock'}
+  Missing: {'Activity', 'Trash2', 'MoreVertical', 'Plus', 'ChevronRight', 'User', 'Layers', 'Flag'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\video-buddy\VideoBuddyHome.jsx
+  Used: {'Video', 'TrendingUp', 'ArrowRight', 'Clock', 'CheckCircle', 'Calendar', 'PlusSquare', 'Users'}
+  Imported: {'FiUsers', 'FiArrowRight', 'FiPlusSquare', 'FiVideo', 'FiCheckCircle', 'FiTrendingUp', 'FiCalendar', 'FiClock'}
+  Missing: {'Video', 'TrendingUp', 'CheckCircle', 'ArrowRight', 'Clock', 'Calendar', 'PlusSquare', 'Users'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\video-buddy\Whiteboard.jsx
+  Used: {'Save'}
+  Imported: {'FiSave'}
+  Missing: {'Save'}
+--------------------
+File: c:\Users\PC\Desktop\dd\frontend\src\pages\video-buddy\Whiteboard_tldraw.jsx
+  Used: {'Save'}
+  Imported: {'FiSave'}
+  Missing: {'Save'}
+--------------------
