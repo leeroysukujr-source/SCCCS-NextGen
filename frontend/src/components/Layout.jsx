@@ -1,271 +1,147 @@
-import axios from '../api/client'
-import { useEffect, useState, Suspense } from 'react'
-import { Outlet, Link, useNavigate, useLocation, NavLink } from 'react-router-dom'
-import { useAuthStore } from '../store/authStore'
-import { getApiBaseUrl, getFullImageUrl } from '../utils/api'
-import {
-  FiHome, FiVideo, FiMessageSquare, FiMessageCircle, FiBook, FiUser, FiLogOut, FiArrowRight, FiChevronLeft,
-  FiUsers, FiSettings, FiSearch, FiTrendingUp, FiAlertCircle, FiMonitor, FiLayers, FiMail,
-  FiShield, FiBarChart2, FiDatabase, FiSun, FiMoon, FiGrid, FiBookOpen, FiActivity, FiCpu, FiBriefcase
-} from 'react-icons/fi'
-import SearchBar from './SearchBar'
-import './Layout.css'
-import useTheme from '../hooks/useTheme'
-import PresenceManager from './PresenceManager'
-import { useSettingsStore } from '../store/settingsStore'
-import { useFeatureStore } from '../store/featureStore'
+import React, { useState, useEffect, Suspense } from 'react';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+import { getFullImageUrl, getApiBaseUrl } from '../utils/api';
+import { useFeatureStore } from '../store/featureStore';
+import { useSettingsStore } from '../store/settingsStore';
+import ThemeToggle from './ThemeToggle';
+import PresenceManager from './PresenceManager';
+import { 
+    FiHardDrive, FiMonitor, FiUsers, FiClock, FiTrash2, FiStar, FiDatabase,
+    FiMenu, FiSearch, FiBell, FiHelpCircle, FiSettings, FiPlus
+} from 'react-icons/fi';
+import './Layout.css';
 
 export default function Layout() {
-  const { user, logout, refreshUser } = useAuthStore()
-  const { getSettingValue } = useSettingsStore()
-  const { fetchFeatures, isFeatureEnabled } = useFeatureStore()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const [showSearch, setShowSearch] = useState(false)
-  const [theme, setTheme] = useTheme()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const { user, logout } = useAuthStore();
+    const { fetchFeatures } = useFeatureStore();
+    const { getSettingValue } = useSettingsStore();
+    const navigate = useNavigate();
+    const location = useLocation();
+    
+    const [mobileOpen, setMobileOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
+    useEffect(() => {
+        fetchFeatures(user?.workspace_id);
+    }, [user?.workspace_id, fetchFeatures]);
 
-  const handleSwitchWorkspace = async () => {
-    try {
-      await axios.post('/workspace/exit')
-      await refreshUser()
-      navigate('/workspace-entry')
-    } catch (err) {
-      console.error('Failed to exit workspace', err)
-      navigate('/workspace-entry')
-    }
-  }
+    // Mimic the left sidebar links exactly as shown in the Drive-clone image
+    const navLinks = [
+        { path: '/dashboard', icon: <FiHardDrive />, text: 'My Drive' },
+        { path: '/classes', icon: <FiMonitor />, text: 'Computers' },
+        { path: '/chat', icon: <FiUsers />, text: 'Shared With Me' },
+        { path: '/notifications', icon: <FiClock />, text: 'Recents' },
+        { path: '/trash', icon: <FiTrash2 />, text: 'Trash' },
+        { path: '/starred', icon: <FiStar />, text: 'Starred' },
+        { path: '/backups', icon: <FiDatabase />, text: 'Backups' }
+    ];
 
-  const handleBack = () => {
-    navigate(-1)
-  }
+    const appName = getSettingValue('APP_NAME', 'Goodle Drive').replace(/^['"]|['"]$/g, '');
 
-
-  // Use system logo for sidebar (workspace logo shown in dashboard header)
-  const systemLogo = getSettingValue('INSTITUTION_LOGO') || getSettingValue('SYSTEM_LOGO_URL')
-  const displayLogo = systemLogo
-
-  useEffect(() => {
-    if (user?.role) {
-      document.body.setAttribute('data-role', user.role)
-    }
-    fetchFeatures(user?.workspace_id)
-  }, [user?.role, user?.workspace_id, fetchFeatures])
-
-  const isSuperAdmin = () => user?.platform_role === 'SUPER_ADMIN' || user?.role === 'super_admin'
-  const isAtLeastAdmin = () => ['admin', 'super_admin'].includes(user?.role)
-
-  const navGroups = [
-    {
-      title: 'Main',
-      items: [
-        { path: '/dashboard', icon: <FiGrid />, text: 'Overview' },
-        { path: '/search', icon: <FiSearch />, text: 'Search', action: () => setShowSearch(true), feature: 'search' },
-      ].filter(item => !item.feature || isFeatureEnabled(item.feature))
-    },
-    {
-      title: 'Academic',
-      items: [
-        { path: '/creation-hub', icon: <FiGrid />, text: 'Creation Hub', feature: 'creation_hub' },
-        { path: '/classes', icon: <FiBookOpen />, text: 'My Classes', feature: 'classes' },
-      ].filter(item => !item.feature || isFeatureEnabled(item.feature))
-    },
-    {
-      title: 'Communication',
-      items: [
-        { path: '/chat', icon: <FiMessageSquare />, text: 'Channels', feature: 'channels' },
-        { path: '/direct-messages', icon: <FiMessageCircle />, text: 'Messages', feature: 'messages' },
-        { path: '/video-room', icon: <FiVideo />, text: 'Video Room', feature: 'video_room' },
-      ].filter(item => !item.feature || isFeatureEnabled(item.feature))
-    }
-  ]
-
-  if (isAtLeastAdmin()) {
-    const adminGroup = {
-      title: isSuperAdmin() ? 'Global Control' : 'Administration',
-      items: []
-    }
-
-    if (isSuperAdmin()) {
-      adminGroup.items.push({ path: '/superadmin/control-center', icon: <FiShield />, text: 'Control Plane' })
-    }
-
-    adminGroup.items.push({ path: '/admin/users', icon: <FiUsers />, text: 'Users' })
-    adminGroup.items.push({ path: '/admin/creation-hub-audit', icon: <FiActivity />, text: 'Creation Hub Audit' })
-    adminGroup.items.push({ path: '/admin/creation-policy', icon: <FiShield />, text: 'Creation Policy' })
-    adminGroup.items.push({ path: '/admin/security', icon: <FiShield />, text: 'Security & Audit' })
-    adminGroup.items.push({ path: '/admin/settings', icon: <FiSettings />, text: 'Institutional Settings' })
-
-    navGroups.push(adminGroup)
-  }
-
-  navGroups.push({
-    title: 'Account',
-    items: [
-      { path: '/profile', icon: <FiUser />, text: 'Profile' },
-      { path: '/settings', icon: <FiSettings />, text: 'Preferences' },
-    ]
-  })
-
-  // Filter out empty groups
-  const filteredNavGroups = navGroups.filter(group => group.items && group.items.length > 0)
-
-  // Image error state
-  const [imgError, setImgError] = useState(false)
-
-  // Reset error when user changes
-  useEffect(() => {
-    setImgError(false)
-  }, [user?.avatar_url])
-
-  return (
-    <div className="layout">
-      {/* Mobile Header */}
-      <div className="mobile-header">
-        <button className="mobile-menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-          <FiGrid />
-        </button>
-        <div className="mobile-logo">
-           {getSettingValue('APP_NAME', 'SCCCS')}
-        </div>
-        <div className="mobile-user" onClick={() => navigate('/profile')}>
-           <FiUser />
-        </div>
-      </div>
-
-      <nav className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''} expanded`}>
-        {/* Close button for mobile */}
-        <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}>
-          <FiLogOut style={{transform: 'rotate(180deg)'}} />
-        </button>
-        <div className="sidebar-header">
-          <Link to="/dashboard" className="logo-link">
-            <div className="branding-container">
-              {displayLogo ? (
-                <div className="flex items-center gap-3">
-                  <img
-                    src={getFullImageUrl(displayLogo)}
-                    alt="Logo"
-                    className="h-12 w-auto object-contain max-w-[120px]"
-                  />
-                  <div className="logo-text-wrapper overflow-hidden">
-                    <h1 className="logo text-lg leading-tight truncate">
-                      {getSettingValue('APP_NAME', 'SCCCS')}
-                    </h1>
-                    <p className="logo-subtitle text-[10px] tracking-[0.2em] font-bold">Educational OS</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col">
-                  <h1 className="logo text-2xl">{getSettingValue('APP_NAME', 'SCCCS')}</h1>
-                  <p className="logo-subtitle">Educational OS</p>
-                </div>
-              )}
-            </div>
-          </Link>
-
-        </div>
-
-        <div className="sidebar-nav">
-          {filteredNavGroups.map((group, gIdx) => (
-            <div key={gIdx} className="nav-group">
-              <div className="nav-group-title">{group.title}</div>
-              <div className="nav-group-items">
-                {group.items.map((item, iIdx) => (
-                  item.action ? (
-                    <button key={iIdx} onClick={item.action} className="nav-item">
-                      <span className="nav-icon">{item.icon}</span>
-                      <span className="nav-text">{item.text}</span>
+    return (
+        <div className="app-container">
+            <PresenceManager />
+            {/* Top White Header */}
+            <header className="top-header">
+                <div className="brand-logo-area">
+                    <button className="mobile-toggle" onClick={() => setMobileOpen(!mobileOpen)}>
+                        <FiMenu />
                     </button>
-                  ) : (
-                    <NavLink
-                      key={iIdx}
-                      to={item.path}
-                      className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                    >
-                      <span className="nav-icon">{item.icon}</span>
-                      <span className="nav-text">{item.text}</span>
-                    </NavLink>
-                  )
-                ))}
-              </div>
+                    <div className="brand-icon">
+                        <FiHardDrive size={18} />
+                    </div>
+                    <span className="brand-title">{appName}</span>
+                </div>
+
+                <div className="header-search-bar">
+                    <div className="search-input-wrapper">
+                        <FiSearch className="search-icon" />
+                        <input type="text" placeholder="Search Drive..." />
+                    </div>
+                </div>
+
+                <div className="header-actions">
+                    <button className="btn-icon"><FiBell /></button>
+                    <button className="btn-icon"><FiHelpCircle /></button>
+                    <button className="btn-icon"><FiSettings /></button>
+                    <ThemeToggle />
+                    <div className="profile-chip" onClick={() => navigate('/profile')}>
+                        <span className="profile-chip-text hidden sm:block">
+                            {user?.first_name || user?.username || 'User'}
+                        </span>
+                        {user?.avatar_url ? (
+                            <img src={getFullImageUrl(user.avatar_url)} alt="Profile" className="profile-avatar object-cover" />
+                        ) : (
+                            <div className="profile-avatar">
+                                {user?.username?.[0]?.toUpperCase() || 'U'}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </header>
+
+            {/* Layout Body */}
+            <div className="body-layout">
+                {/* Vibrant Blue Sidebar */}
+                <aside className={`vibrant-sidebar ${mobileOpen ? 'open' : ''}`}>
+                    {/* The prominent "Upload" button from the image */}
+                    <button className="upload-btn" onClick={() => navigate('/creation-hub')}>
+                       <FiPlus /> Upload New Files
+                    </button>
+
+                    <nav className="sidebar-nav">
+                        {navLinks.map((link) => (
+                            <NavLink
+                                key={link.path}
+                                to={link.path}
+                                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                                onClick={() => setMobileOpen(false)}
+                            >
+                                <span className="nav-link-icon">{link.icon}</span>
+                                {link.text}
+                            </NavLink>
+                        ))}
+                    </nav>
+
+                    <div className="sidebar-footer">
+                        <h4 className="storage-title">Storage Details</h4>
+                        
+                        <div className="storage-item">
+                            <div className="storage-item-header">
+                                <FiDatabase /> Storage
+                            </div>
+                            <div className="storage-bar-bg">
+                                <div className="storage-bar-fill" style={{ width: '60%' }}></div>
+                            </div>
+                            <div className="storage-text">60.70 GB of 1 TB used</div>
+                        </div>
+
+                        <div className="storage-item">
+                            <div className="storage-item-header">
+                                <FiStar /> Photos
+                            </div>
+                            <div className="storage-bar-bg">
+                                <div className="storage-bar-fill" style={{ width: '10%' }}></div>
+                            </div>
+                            <div className="storage-text">10.70 GB of 1 TB used</div>
+                        </div>
+                        
+                        <button onClick={logout} className="mt-4 text-xs font-bold uppercase tracking-wide opacity-80 hover:opacity-100 transition-opacity text-left bg-transparent border-none text-white cursor-pointer w-full">
+                            Sign Out ↗
+                        </button>
+                    </div>
+                </aside>
+
+                {/* Main Dashboard Content */}
+                <main className="main-area">
+                    <Suspense fallback={<div className="flex items-center justify-center h-full animate-pulse text-[var(--text-tertiary)]">Booting up...</div>}>
+                        <Outlet />
+                    </Suspense>
+                </main>
             </div>
-          ))}
-
-          <div className="nav-footer">
-            <div className="sidebar-user-container" onClick={() => navigate('/profile')}>
-              <div className="sidebar-user-avatar">
-                {user?.avatar_url && !imgError ? (
-                  <img
-                    src={getFullImageUrl(user.avatar_url)}
-                    alt="User"
-                    className="avatar-img"
-                    onError={(e) => {
-                      console.warn("Avatar load failed:", user.avatar_url);
-                      setImgError(true);
-                    }}
-                  />
-                ) : (
-                  <div className="avatar-initial">
-                    {user?.username?.[0]?.toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <div className="sidebar-user-info">
-                <span className="user-name">
-                  {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.username}
-                </span>
-                <span className="user-role">
-                  {user?.role?.replace('_', ' ')}
-                </span>
-              </div>
-            </div>
-
-            <button className="nav-item" onClick={handleSwitchWorkspace} title="Switch Workspace">
-              <span className="nav-icon"><FiBriefcase /></span>
-              <span className="nav-text">Switch Workspace</span>
-            </button>
-            <button className="nav-item theme-toggle" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-              <span className="nav-icon">{theme === 'dark' ? <FiMoon /> : <FiSun />}</span>
-              <span className="nav-text">{theme === 'dark' ? 'Dark' : 'Light'} Mode</span>
-            </button>
-            <button className="nav-item logout-button" onClick={handleLogout}>
-              <span className="nav-icon"><FiLogOut /></span>
-              <span className="nav-text">Sign Out</span>
-            </button>
-          </div>
+            
+            {/* Mobile overlay */}
+            {mobileOpen && <div className="fixed inset-0 bg-black/20 z-80 lg:hidden" onClick={() => setMobileOpen(false)}></div>}
         </div>
-      </nav >
-
-      {/* Overlay to close mobile menu */}
-      {mobileMenuOpen && <div className="mobile-overlay" onClick={() => setMobileMenuOpen(false)}></div>}
-
-      <main className="main-content">
-        <PresenceManager />
-        {location.pathname !== '/' && location.pathname !== '/dashboard' && (
-          <button className="premium-back-btn" onClick={handleBack} title="Go Back">
-            <FiChevronLeft />
-          </button>
-        )}
-        <div className="content-container">
-          <Suspense fallback={<div className="flex items-center justify-center h-64 text-slate-500 animate-pulse">Initializing Interface...</div>}>
-            <Outlet />
-          </Suspense>
-        </div>
-      </main>
-
-      {isFeatureEnabled('video_room') && (
-        <button className="floating-video-btn" onClick={() => navigate('/video-room')} title="Start Meeting">
-          <FiVideo />
-        </button>
-      )}
-
-      {showSearch && <SearchBar onClose={() => setShowSearch(false)} />}
-    </div >
-  )
+    );
 }
