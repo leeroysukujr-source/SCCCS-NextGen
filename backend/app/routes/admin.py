@@ -437,5 +437,134 @@ def get_lecturer_groups(lecturer_id):
         GroupMember.user_id == lecturer_id
     ).all()
     
+    
     return jsonify([group.to_dict() for group in member_groups]), 200
 
+@admin_bp.route('/users/bulk', methods=['POST'])
+@jwt_required()
+def bulk_create_users():
+    """Bulk create students or staff (workspace admin only)"""
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+    
+    if not current_user or not is_admin(current_user):
+        return jsonify({'error': 'Unauthorized. Admin access required'}), 403
+        
+    workspace_id = current_user.workspace_id or get_current_workspace_id()
+    if not workspace_id:
+        return jsonify({'error': 'No workspace context found'}), 400
+        
+    data = request.get_json()
+    users_data = data.get('users', [])
+    
+    if not users_data or not isinstance(users_data, list):
+        return jsonify({'error': 'Invalid payload. "users" list is required.'}), 400
+        
+    from app.models import StudentProfile, WorkspaceMembership
+    import secrets
+    import string
+    
+    created_users = []
+    errors = []
+    
+    for item in users_data:
+        email = item.get('email', '').strip()
+        role = item.get('role', 'student').strip()
+        first_name = item.get('first_name', '').strip()
+        last_name = item.get('last_name', '').strip()
+        reg_no = item.get('reg_no', '').strip()
+        
+        # Prevent assigning admin roles in bulk create
+        if role not in ['student', 'teacher', 'staff']:
+            role = 'student'
+            
+        if not email and role != 'student':
+            errors.append(f"Email required for staff: {first_name} {last_name}")
+            continue
+            
+        # Determine username and reg_no
+        username = item.get('username', '').strip()
+        
+        if role == 'student':
+            if not reg_no:
+                # Auto-generate reg_no if missing
+                random_chars = ''.join(secrets.choice(string.digits) for _ in range(6))
+                reg_no = f"REG-{random_chars}"
+                
+            # If student, reg_no becomes their primary login (set as username)
+            if not username:
+                username = reg_no
+        else:
+            if not username and email:
+                username = email.split('@')[0]
+                
+        # Ensure username uniqueness
+        base_username = username or f"user{secrets.randbelow(9999)}"
+        username = base_username
+        counter = 1
+        while User.query.filter_by(username=username).first():
+            username = f"{base_username}{counter}"
+            counter += 1
+            
+        # Ensure email uniqueness if provided
+        final_email = email
+        if email:
+            if User.query.filter_by(email=email).first():
+                errors.append(f"Email {email} already exists.")
+                continue
+        else:
+            # Generate a safely fake email since db requires unique email
+            final_email = f"{username}-fake@placeholder.invalid"
+                
+        # Create user
+        new_user = User(
+            username=username,
+            email=final_email,
+            first_name=first_name,
+            last_name=last_name,
+            role=role,
+            workspace_id=workspace_id,
+            status='active'
+        )
+        
+        password = item.get('password') or secrets.token_urlsafe(8)
+        new_user.set_password(password)
+        db.session.add(new_user)
+        db.session.flush() # get new_user.id
+        
+        if role == 'student':
+            profile = StudentProfile(
+                user_id=new_user.id,
+                workspace_id=workspace_id,
+                reg_no=reg_no,
+                verification_status='verified'
+            )
+            db.session.add(profile)
+            
+        membership = WorkspaceMembership(
+            user_id=new_user.id,
+            workspace_id=workspace_id,
+            role=role,
+            status='active'
+        )
+        db.session.add(membership)
+        
+        created_users.append({
+            'id': new_user.id,
+            'username': new_user.username,
+            'reg_no': reg_no if role == 'student' else None,
+            'email': email,
+            'role': new_user.role,
+            'password': password 
+        })
+        
+    try:
+        db.session.commit()
+        return jsonify({
+            'message': f"Successfully created {len(created_users)} users.",
+            'created': created_users,
+            'errors': errors
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500

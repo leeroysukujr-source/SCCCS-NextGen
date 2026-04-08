@@ -205,7 +205,7 @@ def register():
         role = sanitize_string(data.get('role', 'student'), max_length=20)
         reg_no = sanitize_string(data.get('reg_no', ''), max_length=100)
         
-        if role not in ['admin', 'teacher', 'student']:
+        if role == 'admin' or role not in ['teacher', 'student', 'staff']:
             role = 'student'
             
         # Workspace Resolution

@@ -96,6 +96,11 @@ def join_workspace():
         
         code = data.get('code')
         role = data.get('role', 'student') # student, teacher, etc.
+        
+        # Security: Prevent self-assigning Admin role
+        if role == 'admin':
+            role = 'student'
+            
         reg_no = data.get('reg_no')
         
         if not code:
