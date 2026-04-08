@@ -11,7 +11,15 @@ from app.models import GlobalFeatureFlag
 app = create_app()
 with app.app_context():
     print("--- Seeding GlobalFeatureFlag ---")
-    
+    try:
+        GlobalFeatureFlag.query.first()
+    except Exception:
+        print("Table missing, creating...")
+        try:
+            GlobalFeatureFlag.__table__.create(db.engine)
+        except Exception as e:
+            print(f"Creation warning: {e}")
+            db.session.rollback()
     # Define standard features
     standard_features = [
         ('channels', 'Channel communications system', True),

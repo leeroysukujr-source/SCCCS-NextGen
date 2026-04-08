@@ -17,21 +17,21 @@ def seed_settings():
                 print(f"Creation warning: {e}")
         
         defaults = [
-            # Identity
-            {'key': 'APP_NAME', 'value': 'SCCCS', 'category': 'identity', 'description': 'Application Name'},
-            {'key': 'SYSTEM_LOGO_URL', 'value': '', 'category': 'identity', 'description': 'URL of the system logo'},
+            # General (was Identity)
+            {'key': 'APP_NAME', 'value': 'SCCCS', 'category': 'general', 'description': 'Application Name'},
+            {'key': 'SYSTEM_LOGO_URL', 'value': '', 'category': 'ui_ux', 'description': 'URL of the system logo'},
             
             # Security
             {'key': 'ALLOW_PUBLIC_REGISTRATION', 'value': False, 'value_type': 'boolean', 'category': 'security', 'description': 'Allow users to sign up without invite'},
             {'key': 'REQUIRE_2FA_ADMIN', 'value': True, 'value_type': 'boolean', 'category': 'security', 'description': 'Force 2FA for all admins'},
             
-            # Modules
-            {'key': 'ENABLE_VIDEO_ROOM', 'value': True, 'value_type': 'boolean', 'category': 'modules', 'description': 'Enable Video Room feature'},
-            {'key': 'ENABLE_STUDY_ROOM', 'value': True, 'value_type': 'boolean', 'category': 'modules', 'description': 'Enable Study Room feature'},
+            # Modules (Move to communication)
+            {'key': 'ENABLE_VIDEO_ROOM', 'value': True, 'value_type': 'boolean', 'category': 'communication', 'description': 'Enable Video Room feature'},
+            {'key': 'ENABLE_STUDY_ROOM', 'value': True, 'value_type': 'boolean', 'category': 'communication', 'description': 'Enable Study Room feature'},
             
             # UX
-            {'key': 'DEFAULT_THEME', 'value': 'light', 'category': 'ux', 'description': 'Default system theme'},
-            {'key': 'SHOW_ONBOARDING', 'value': True, 'value_type': 'boolean', 'category': 'ux', 'description': 'Show onboarding for new users'}
+            {'key': 'DEFAULT_THEME', 'value': 'light', 'category': 'ui_ux', 'description': 'Default system theme'},
+            {'key': 'SHOW_ONBOARDING', 'value': True, 'value_type': 'boolean', 'category': 'ui_ux', 'description': 'Show onboarding for new users'}
         ]
         
         print("Seeding System Settings...")
