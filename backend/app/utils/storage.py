@@ -55,3 +55,26 @@ def generate_presigned_url(key, bucket=None, expires_in=3600):
     except Exception as e:
         logger.exception('Failed to generate presigned URL: %s', str(e))
         return None
+
+
+def get_public_url(key, bucket=None):
+    """
+    Generate a public URL for a given key.
+    If using Supabase S3, it transforms the S3 endpoint to a public URL.
+    """
+    bucket = bucket or current_app.config.get('S3_BUCKET')
+    endpoint = current_app.config.get('S3_ENDPOINT')
+    
+    if not endpoint:
+        return None
+        
+    # Handle Supabase S3 endpoint conversion
+    if 'supabase.co' in endpoint and '/storage/v1/s3' in endpoint:
+        # From: https://[id].supabase.co/storage/v1/s3
+        # To:   https://[id].supabase.co/storage/v1/object/public/[bucket]/[key]
+        base_url = endpoint.replace('/storage/v1/s3', '')
+        return f"{base_url}/storage/v1/object/public/{bucket}/{key}"
+        
+    # Default S3-style public URL (if public access is enabled on bucket)
+    return f"{endpoint}/{bucket}/{key}"
+

@@ -104,9 +104,30 @@ def upload_file():
                 # File encryption failed - continue without encryption
                 pass
     
-    # Save file
-    with open(file_path, 'wb') as f:
-        f.write(file_data)
+    # Cloud Storage Logic
+    storage_url = None
+    from app.utils.storage import upload_fileobj, get_public_url
+    from flask import current_app
+    
+    if current_app.config.get('S3_ENDPOINT') and current_app.config.get('S3_BUCKET'):
+        # Upload to S3
+        file_stream = BytesIO(file_data)
+        folder = 'files'
+        if lesson_id: folder = 'materials'
+        elif channel_id: folder = f'channels/{channel_id}'
+        
+        key = f"{folder}/{unique_filename}"
+        if upload_fileobj(file_stream, key):
+            storage_url = get_public_url(key)
+            # If uploaded to S3, we use the storage_url as the path or keep track of it
+            # Actually, the model expects 'file_path'. We'll store the URL there if it's cloud.
+            file_path = storage_url
+
+    # Fallback to Local Save if not uploaded to cloud (only works locally)
+    if not storage_url:
+        with open(file_path, 'wb') as f:
+            f.write(file_data)
+
     
     # Get current user
     user = User.query.get(current_user_id)
@@ -223,19 +244,35 @@ def get_file(file_id):
                 return jsonify({'error': 'Access denied'}), 403
     
     real_file_path = file_obj.file_path
+    file_data = None
     
-    # Handle relative paths (legacy) by making them absolute relative to backend root
-    if not os.path.isabs(real_file_path):
-        current_file_dir = os.path.dirname(os.path.abspath(__file__))
-        backend_dir = os.path.dirname(os.path.dirname(current_file_dir))
-        real_file_path = os.path.join(backend_dir, real_file_path)
-    
-    if not os.path.exists(real_file_path):
-        return jsonify({'error': 'File not found on server'}), 404
-    
-    # Read and decrypt file if encrypted
-    with open(real_file_path, 'rb') as f:
-        file_data = f.read()
+    # Handle Cloud Storage vs Local Storage
+    if real_file_path.startswith('http'):
+        import requests
+        try:
+            # If the file is NOT encrypted and no special processing is needed, we COULD redirect.
+            # However, for consistency with the rest of the logic (encryption, mime types),
+            # we fetch it to the server first.
+            response = requests.get(real_file_path)
+            if response.status_code == 200:
+                file_data = response.content
+            else:
+                return jsonify({'error': 'Failed to fetch file from cloud storage'}), 500
+        except Exception as e:
+            return jsonify({'error': f'Cloud storage access error: {str(e)}'}), 500
+    else:
+        # Handle relative paths (legacy) by making them absolute relative to backend root
+        if not os.path.isabs(real_file_path):
+            current_file_dir = os.path.dirname(os.path.abspath(__file__))
+            backend_dir = os.path.dirname(os.path.dirname(current_file_dir))
+            real_file_path = os.path.join(backend_dir, real_file_path)
+        
+        if not os.path.exists(real_file_path):
+            return jsonify({'error': 'File not found on server'}), 404
+        
+        # Read local file
+        with open(real_file_path, 'rb') as f:
+            file_data = f.read()
     
     # Check if file is encrypted (from channel)
     if file_obj.message_id:
@@ -249,6 +286,7 @@ def get_file(file_id):
                 except Exception:
                     # File decryption failed - continue
                     pass
+
     
     # Check if download is requested (for forced download)
     force_download = request.args.get('download', 'false').lower() == 'true'
