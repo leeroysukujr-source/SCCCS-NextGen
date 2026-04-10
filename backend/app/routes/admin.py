@@ -11,7 +11,7 @@ from email.mime.multipart import MIMEMultipart
 import os
 import secrets
 
-admin_bp = Blueprint('admin', __name__)
+admin_bp = Blueprint('admin_main', __name__)
 
 def is_admin(user):
     """Check if user is admin or super admin"""

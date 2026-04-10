@@ -55,13 +55,13 @@ def create_app(config_class=Config):
         else:
             cors_origins = cors_origins.split(',')
     
-    # Configure CORS using the official Flask-CORS extension
-    # Setting origins="*" or specific origins from config
+    # Maximum Robustness CORS
     CORS(app, 
          resources={r"/api/*": {"origins": "*"}}, 
          supports_credentials=True,
-         expose_headers=["Content-Type", "Authorization", "X-Workspace-ID"],
-         allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "bypass-tunnel-reminder", "X-Workspace-ID"])
+         allow_headers=["*"],
+         expose_headers=["*"],
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"])
 
     # Remove the manual handle_preflight and after_request CORS logic 
     # to avoid duplicate headers and conflicts with Flask-CORS.
@@ -153,7 +153,7 @@ def create_app(config_class=Config):
     from app.routes.ai import ai_bp
     from app.routes.ai_study import ai_study_bp
     from app.routes.courses import courses_bp
-    from app.routes.admin import admin_bp
+    from app.routes.admin import admin_bp as admin_main_bp
     from app.routes.direct_messages import direct_messages_bp
     from app.routes.feedback import feedback_bp
     from app.routes.message_actions import message_actions_bp
@@ -176,7 +176,7 @@ def create_app(config_class=Config):
     app.register_blueprint(ai_bp, url_prefix='/api/ai')
     app.register_blueprint(ai_study_bp, url_prefix='/api/ai-study')
     app.register_blueprint(courses_bp, url_prefix='/api/courses')
-    app.register_blueprint(admin_bp, url_prefix='/api/admin')
+    app.register_blueprint(admin_main_bp, url_prefix='/api/admin')
     app.register_blueprint(direct_messages_bp, url_prefix='/api/direct-messages')
     app.register_blueprint(feedback_bp, url_prefix='/api/feedback')
     app.register_blueprint(message_actions_bp, url_prefix='/api/messages')

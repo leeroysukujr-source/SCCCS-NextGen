@@ -124,9 +124,11 @@ if (typeof globalThis.__SCCCS_API_CLIENT__ === 'undefined') {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
       }
-      // Safely join baseURL and url to avoid double slashes
-      const cleanBase = config.baseURL?.endsWith('/') ? config.baseURL.slice(0, -1) : config.baseURL;
-      const cleanUrl = config.url?.startsWith('/') ? config.url : `/${config.url}`;
+      // Aggressively clean baseURL and url for safe joining
+      const base = config.baseURL || '';
+      const path = config.url || '';
+      const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+      const cleanUrl = path.startsWith('/') ? path : `/${path}`;
       const fullUrl = `${cleanBase}${cleanUrl}`;
       
       console.log(`[API Request] ${config.method?.toUpperCase()} ${fullUrl}`, {
