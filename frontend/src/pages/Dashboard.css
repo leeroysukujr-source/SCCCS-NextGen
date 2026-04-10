@@ -163,9 +163,10 @@
   }
   
   .dashboard-sidebar {
-    order: -1;
+    order: 1; /* Move to bottom */
   }
 }
+
 
 @media (max-width: 768px) {
   .dashboard-content-wrapper {
