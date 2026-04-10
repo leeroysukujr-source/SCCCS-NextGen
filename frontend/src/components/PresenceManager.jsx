@@ -11,10 +11,10 @@ export default function PresenceManager() {
         // Initial update
         presenceAPI.updatePresence({ status: 'online' }).catch(console.error)
 
-        // Heartbeat every 30 seconds
+        // Heartbeat every 2 minutes (reduced from 30s to prevent DB overload on free tier)
         const interval = setInterval(() => {
-            presenceAPI.updatePresence({ status: 'online' }).catch(console.error)
-        }, 30000)
+            presenceAPI.updatePresence({ status: 'online' }).catch(() => {})
+        }, 120000)
 
         // Update on visibility change (throttled)
         let lastVisibilityUpdate = 0;
