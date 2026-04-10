@@ -29,16 +29,16 @@ function getCurrentHostname() {
  * This ensures each browser/device connects to the backend correctly
  */
 export function getApiBaseUrl() {
+  // If explicitly set in env, use it as primary source
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL.replace('/api', '').replace(/\/$/, '')
+  }
+
   const hostname = getCurrentHostname()
   
   // If we are on localhost, always prefer localhost for the backend too
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:5000'
-  }
-
-  // If explicitly set in env, use it as fallback
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL.replace('/api', '')
   }
 
   return `http://${hostname}:5000`
