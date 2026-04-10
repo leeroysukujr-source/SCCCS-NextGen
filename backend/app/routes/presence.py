@@ -59,11 +59,18 @@ def update_presence():
             
             if needs_update:
                 presence.last_seen = now
+                try:
+                    db.session.add(presence)
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    log_error(f"Presence commit failed: {str(e)}")
+                    # Return success anyway to not break the heartbeat on the client
+                    return jsonify(presence.to_dict()), 200
             else:
                 # No update needed, return current state
                 return jsonify(presence.to_dict()), 200
 
-        db.session.commit()
         return jsonify(presence.to_dict()), 200
     except Exception as e:
         db.session.rollback()

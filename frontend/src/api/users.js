@@ -47,16 +47,15 @@ export const usersAPI = {
   },
 
   createUser: async (userData) => {
-    // We reuse the admin/users/bulk endpoint by sending a list with one item
-    const response = await client.post('admin/users/bulk', { users: [userData] })
+    // We reuse the admin/bulk-users-admin endpoint by sending a list with one item
+    const response = await client.post('admin/bulk-users-admin', { users: [userData] })
     return response.data
   },
 
-  bulkCreateUsers: async (users) => {
-    const response = await client.post('admin/users/bulk', { users })
+  bulkCreateUsers: async (users, workspaceId) => {
+    const response = await client.post('admin/bulk-users-admin', { users, workspace_id: workspaceId })
     return response.data
   },
 }
 
 export default usersAPI
-

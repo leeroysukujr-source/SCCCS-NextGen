@@ -440,7 +440,7 @@ def get_lecturer_groups(lecturer_id):
     
     return jsonify([group.to_dict() for group in member_groups]), 200
 
-@admin_bp.route('/users/bulk', methods=['POST'])
+@admin_bp.route('/bulk-users-admin', methods=['POST'])
 @jwt_required()
 def bulk_create_users():
     """Bulk create students or staff (workspace admin only)"""
