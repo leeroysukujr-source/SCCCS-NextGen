@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import SuperAdminSidebar from './SuperAdminSidebar';
 import { initializeTheme } from '../store/themeStore';
 import ThemeToggle from './ThemeToggle';
+import UserProfileDropdown from './UserProfileDropdown';
 import { FiMenu, FiGrid, FiArrowRight, FiChevronLeft } from 'react-icons/fi';
 import './SuperAdminLayout.css';
 
@@ -18,16 +19,25 @@ const SuperAdminLayout = () => {
             <SuperAdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
             
             <div className="flex-1 flex flex-col min-w-0">
-                {/* Mobile Top Bar */}
-                <header className="h-16 flex lg:hidden items-center justify-between px-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
-                    <button 
-                        onClick={() => setSidebarOpen(true)}
-                        className="p-2 text-slate-600 dark:text-slate-400"
-                    >
-                        <FiMenu size={24} />
-                    </button>
-                    <div className="font-bold text-slate-800 dark:text-indigo-400">Control Plane</div>
-                    <div className="w-10"></div> {/* Spacer for symmetry */}
+                {/* Top Bar */}
+                <header className="h-16 flex items-center justify-between px-4 lg:px-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+                    <div className="flex items-center gap-4">
+                        <button 
+                            onClick={() => setSidebarOpen(true)}
+                            className="p-2 text-slate-600 dark:text-slate-400 lg:hidden"
+                        >
+                            <FiMenu size={24} />
+                        </button>
+                        <div className="font-bold text-slate-800 dark:text-indigo-400 hidden sm:block">Control Plane</div>
+                    </div>
+                    
+                    <div className="flex items-center gap-4">
+                        <div className="hidden lg:block">
+                            <ThemeToggle />
+                        </div>
+                        <div className="w-px h-6 bg-slate-200 dark:bg-slate-800 hidden lg:block"></div>
+                        <UserProfileDropdown />
+                    </div>
                 </header>
 
                 <main className="sa-main flex-1 relative">
@@ -38,10 +48,7 @@ const SuperAdminLayout = () => {
                     >
                         <FiChevronLeft className="group-hover:-translate-x-1 transition-transform" />
                     </button>
-                    <div className="absolute top-4 right-8 z-50 hidden lg:block">
-                        <ThemeToggle />
-                    </div>
-                    <div className="sa-content p-4 md:p-6 lg:p-8 pt-16 lg:pt-8 text-slate-800 dark:text-slate-200">
+                    <div className="sa-content p-4 md:p-6 lg:p-8 pt-4 text-slate-800 dark:text-slate-200">
                         <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh] text-slate-500 animate-pulse">Initializing Interface...</div>}>
                             <Outlet />
                         </Suspense>

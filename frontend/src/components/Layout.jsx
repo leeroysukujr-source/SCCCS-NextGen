@@ -12,6 +12,7 @@ import SearchBar from './SearchBar'
 import './Layout.css'
 import useTheme from '../hooks/useTheme'
 import PresenceManager from './PresenceManager'
+import UserProfileDropdown from './UserProfileDropdown'
 import { useSettingsStore } from '../store/settingsStore'
 import { useFeatureStore } from '../store/featureStore'
 
@@ -115,28 +116,32 @@ export default function Layout() {
   // Filter out empty groups
   const filteredNavGroups = navGroups.filter(group => group.items && group.items.length > 0)
 
-  // Image error state
-  const [imgError, setImgError] = useState(false)
-
-  // Reset error when user changes
-  useEffect(() => {
-    setImgError(false)
-  }, [user?.avatar_url])
-
   return (
     <div className="layout">
-      {/* Mobile Header */}
-      <div className="mobile-header">
-        <button className="mobile-menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-          <FiGrid />
-        </button>
-        <div className="mobile-logo">
-           {getSettingValue('APP_NAME', 'SCCCS')}
+      {/* Top Navigation Bar */}
+      <header className="top-navbar">
+        <div className="top-navbar-left">
+          {location.pathname !== '/' && location.pathname !== '/dashboard' && (
+            <button className="nav-back-btn" onClick={handleBack} title="Go Back">
+              <FiChevronLeft />
+            </button>
+          )}
+          <div className="page-context">
+            <span className="context-label">Current View</span>
+            <h2 className="context-title">
+              {location.pathname.split('/').filter(Boolean).pop()?.replace(/-/g, ' ') || 'Dashboard'}
+            </h2>
+          </div>
         </div>
-        <div className="mobile-user" onClick={() => navigate('/profile')}>
-           <FiUser />
+
+        <div className="top-navbar-right">
+          <button className="navbar-action-btn" onClick={() => setShowSearch(true)} title="Search">
+            <FiSearch />
+          </button>
+          <div className="navbar-divider"></div>
+          <UserProfileDropdown />
         </div>
-      </div>
+      </header>
 
       <nav className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''} expanded`}>
         {/* Close button for mobile */}
@@ -198,45 +203,9 @@ export default function Layout() {
           ))}
 
           <div className="nav-footer">
-            <div className="sidebar-user-container" onClick={() => navigate('/profile')}>
-              <div className="sidebar-user-avatar">
-                {user?.avatar_url && !imgError ? (
-                  <img
-                    src={getFullImageUrl(user.avatar_url)}
-                    alt="User"
-                    className="avatar-img"
-                    onError={(e) => {
-                      console.warn("Avatar load failed:", user.avatar_url);
-                      setImgError(true);
-                    }}
-                  />
-                ) : (
-                  <div className="avatar-initial">
-                    {user?.username?.[0]?.toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <div className="sidebar-user-info">
-                <span className="user-name">
-                  {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.username}
-                </span>
-                <span className="user-role">
-                  {user?.role?.replace('_', ' ')}
-                </span>
-              </div>
-            </div>
-
             <button className="nav-item" onClick={handleSwitchWorkspace} title="Switch Workspace">
               <span className="nav-icon"><FiBriefcase /></span>
               <span className="nav-text">Switch Workspace</span>
-            </button>
-            <button className="nav-item theme-toggle" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-              <span className="nav-icon">{theme === 'dark' ? <FiMoon /> : <FiSun />}</span>
-              <span className="nav-text">{theme === 'dark' ? 'Dark' : 'Light'} Mode</span>
-            </button>
-            <button className="nav-item logout-button" onClick={handleLogout}>
-              <span className="nav-icon"><FiLogOut /></span>
-              <span className="nav-text">Sign Out</span>
             </button>
           </div>
         </div>
@@ -247,11 +216,6 @@ export default function Layout() {
 
       <main className="main-content">
         <PresenceManager />
-        {location.pathname !== '/' && location.pathname !== '/dashboard' && (
-          <button className="premium-back-btn" onClick={handleBack} title="Go Back">
-            <FiChevronLeft />
-          </button>
-        )}
         <div className="content-container">
           <Suspense fallback={<div className="flex items-center justify-center h-64 text-slate-500 animate-pulse">Initializing Interface...</div>}>
             <Outlet />
