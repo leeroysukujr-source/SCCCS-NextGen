@@ -154,6 +154,7 @@ def upload_avatar():
 @users_bp.route('/bulk', methods=['POST'])
 @jwt_required()
 def bulk_create_users_fallback():
+    print(f"[API] Bulk create fallback reached for user {get_jwt_identity()}")
     return bulk_create_users()
 
 @users_bp.route('/search', methods=['GET'])
