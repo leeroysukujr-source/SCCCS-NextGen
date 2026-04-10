@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models import User, Class, ClassMember, Group, GroupMember
-from app.utils.roles import is_at_least_admin
+from app.utils.roles import is_at_least_admin, is_super_admin
 from app.utils.scoping import scope_query, get_current_workspace_id
 from datetime import datetime
 import smtplib

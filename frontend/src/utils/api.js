@@ -48,7 +48,7 @@ export function getApiBaseUrl() {
  * Get the full API URL (with /api suffix)
  */
 export function getApiUrl() {
-  return `${getApiBaseUrl()}/api`
+  return `${getApiBaseUrl()}/api/`
 }
 
 /**
