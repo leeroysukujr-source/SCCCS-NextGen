@@ -143,6 +143,7 @@ def create_app(config_class=Config):
     # Register blueprints
     from app.routes.auth import auth_bp
     from app.routes.users import users_bp
+    from app.routes.user_create import user_create_bp
     from app.routes.rooms import rooms_bp
     from app.routes.channels import channels_bp
     from app.routes.messages import messages_bp
@@ -166,6 +167,7 @@ def create_app(config_class=Config):
     
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(users_bp, url_prefix='/api/users')
+    app.register_blueprint(user_create_bp, url_prefix='/api/users')
     app.register_blueprint(rooms_bp, url_prefix='/api/rooms')
     app.register_blueprint(channels_bp, url_prefix='/api/channels')
     app.register_blueprint(messages_bp, url_prefix='/api/messages')
