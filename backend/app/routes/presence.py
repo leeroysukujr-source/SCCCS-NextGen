@@ -15,41 +15,53 @@ from app.utils.logger import log_error
 
 from app import socketio
 
+import threading
+from flask import current_app
+
 @presence_bp.route('/update', methods=['POST'])
 @jwt_required()
 def update_presence():
-    """Update user presence - Highly optimized"""
-    try:
-        current_user_id = get_jwt_identity()
-        data = request.get_json() or {}
-        now = datetime.utcnow()
-        
-        # Use a more efficient update pattern if record exists
-        # This avoid the overhead of fully loading the model object
-        rows_updated = Presence.query.filter_by(user_id=current_user_id).update({
-            'last_seen': now,
-            'status': data.get('status', 'online'),
-            'current_resource_type': data.get('current_resource_type'),
-            'current_resource_id': data.get('current_resource_id')
-        })
-        
-        if rows_updated == 0:
-            # First time - create the record
-            presence = Presence(
-                user_id=current_user_id, 
-                status=data.get('status', 'online'), 
-                last_seen=now,
-                current_resource_type=data.get('current_resource_type'),
-                current_resource_id=data.get('current_resource_id')
-            )
-            db.session.add(presence)
-        
-        db.session.commit()
-        return jsonify({'status': 'online', 'last_seen': now.isoformat()}), 200
-    except Exception as e:
-        db.session.rollback()
-        # Fallback to success to keep the client happy
-        return jsonify({'status': 'online', 'error': str(e)}), 200
+    """Update user presence - Asynchronous and strictly non-blocking"""
+    current_user_id = get_jwt_identity()
+    data = request.get_json() or {}
+    
+    # Grab app object to pass to background thread
+    app = current_app._get_current_object()
+    
+    def async_db_update(app_context, user_id, payload):
+        with app_context:
+            try:
+                from app import db
+                from app.models.collaboration import Presence
+                now = datetime.utcnow()
+                
+                rows_updated = Presence.query.filter_by(user_id=user_id).update({
+                    'last_seen': now,
+                    'status': payload.get('status', 'online'),
+                    'current_resource_type': payload.get('current_resource_type'),
+                    'current_resource_id': payload.get('current_resource_id')
+                })
+                
+                if rows_updated == 0:
+                    presence = Presence(
+                        user_id=user_id, 
+                        status=payload.get('status', 'online'), 
+                        last_seen=now,
+                        current_resource_type=payload.get('current_resource_type'),
+                        current_resource_id=payload.get('current_resource_id')
+                    )
+                    db.session.add(presence)
+                
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                # We fail silently here because this is a background heartbeat thread
+                pass
+
+    # Fire and forget
+    threading.Thread(target=async_db_update, args=(app.app_context(), current_user_id, data)).start()
+    
+    return jsonify({'status': 'online', 'message': 'queued'}), 200
 
 @presence_bp.route('/online', methods=['GET'])
 @jwt_required()
