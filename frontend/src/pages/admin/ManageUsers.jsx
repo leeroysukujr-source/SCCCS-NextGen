@@ -3,7 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { usersAPI } from '../../api/users'
 import { presenceAPI } from '../../api/presence'
 import { useAuthStore } from '../../store/authStore'
-import { FiUsers, FiSearch, FiEdit, FiTrash2, FiShield, FiDownload, FiSettings, FiX, FiCheck } from 'react-icons/fi'
+import { FiUsers, FiSearch, FiEdit, FiTrash2, FiShield, FiDownload, FiSettings, FiX, FiCheck, FiPlus, FiFilePlus, FiUpload } from 'react-icons/fi'
+import Papa from 'papaparse'
+import * as XLSX from 'xlsx'
 import { useConfirm, useNotify } from '../../components/NotificationProvider'
 import './AdminPages.css'
 
@@ -18,8 +20,19 @@ export default function ManageUsers() {
   const [selectedUser, setSelectedUser] = useState(null)
   const [showRoleModal, setShowRoleModal] = useState(false)
   const [showPrivilegeModal, setShowPrivilegeModal] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showBulkModal, setShowBulkModal] = useState(false)
   const [availablePrivileges, setAvailablePrivileges] = useState([])
   const [userPrivileges, setUserPrivileges] = useState({})
+  const [newUser, setNewUser] = useState({
+    email: '',
+    username: '',
+    first_name: '',
+    last_name: '',
+    role: 'student',
+    password: ''
+  })
+  const [bulkData, setBulkData] = useState([])
   const exportMenuRef = useRef(null)
 
   const { data: users = [], isLoading } = useQuery({
@@ -84,6 +97,32 @@ export default function ManageUsers() {
     },
     onError: (error) => {
       notify('error', error.response?.data?.error || 'Failed to delete user')
+    }
+  })
+
+  const createUserMutation = useMutation({
+    mutationFn: (userData) => usersAPI.createUser(userData),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['users'])
+      setShowCreateModal(false)
+      setNewUser({ email: '', username: '', first_name: '', last_name: '', role: 'student', password: '' })
+      notify('success', 'User created successfully')
+    },
+    onError: (error) => {
+      notify('error', error.response?.data?.error || 'Failed to create user')
+    }
+  })
+
+  const bulkCreateMutation = useMutation({
+    mutationFn: (users) => usersAPI.bulkCreateUsers(users),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(['users'])
+      setShowBulkModal(false)
+      setBulkData([])
+      notify('success', `Successfully created ${data.created?.length || 0} users`)
+    },
+    onError: (error) => {
+      notify('error', error.response?.data?.error || 'Failed to bulk create users')
     }
   })
 
@@ -170,6 +209,49 @@ export default function ManageUsers() {
         privileges: userPrivileges
       })
     }
+  }
+
+  const handleCreateUser = (e) => {
+    e.preventDefault()
+    createUserMutation.mutate(newUser)
+  }
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    const extension = file.name.split('.').pop().toLowerCase()
+
+    if (extension === 'csv') {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          setBulkData(results.data)
+        }
+      })
+    } else if (['xlsx', 'xls'].includes(extension)) {
+      reader.onload = (evt) => {
+        const bstr = evt.target.result
+        const wb = XLSX.read(bstr, { type: 'binary' })
+        const wsname = wb.SheetNames[0]
+        const ws = wb.Sheets[wsname]
+        const data = XLSX.utils.sheet_to_json(ws)
+        setBulkData(data)
+      }
+      reader.readAsBinaryString(file)
+    } else {
+      notify('error', 'Unsupported file format. Please use CSV or Excel.')
+    }
+  }
+
+  const handleBulkSubmit = () => {
+    if (bulkData.length === 0) {
+      notify('error', 'No data found in file')
+      return
+    }
+    bulkCreateMutation.mutate(bulkData)
   }
 
   const handleExport = async (role, format) => {
@@ -267,6 +349,12 @@ export default function ManageUsers() {
               </div>
             )}
           </div>
+          <button className="btn-secondary" onClick={() => setShowBulkModal(true)}>
+            <FiFilePlus /> Bulk Import
+          </button>
+          <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
+            <FiPlus /> Create User
+          </button>
         </div>
       </div>
 
@@ -495,6 +583,150 @@ export default function ManageUsers() {
           </div>
         </div>
       )}
+
+      {/* Create User Modal */}
+      {showCreateModal && (
+        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Create New User</h2>
+              <button className="modal-close" onClick={() => setShowCreateModal(false)}>
+                <FiX />
+              </button>
+            </div>
+            <form onSubmit={handleCreateUser} className="modal-body">
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>First Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={newUser.first_name}
+                    onChange={(e) => setNewUser({ ...newUser, first_name: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Last Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={newUser.last_name}
+                    onChange={(e) => setNewUser({ ...newUser, last_name: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  required
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Username (optional)</label>
+                <input
+                  type="text"
+                  value={newUser.username}
+                  onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                  placeholder="Auto-generated if blank"
+                />
+              </div>
+              <div className="form-group">
+                <label>Role</label>
+                <select
+                  value={newUser.role}
+                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                >
+                  <option value="student">Student</option>
+                  <option value="teacher">Teacher</option>
+                  <option value="staff">Staff</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Initial Password (optional)</label>
+                <input
+                  type="password"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                  placeholder="Randomized if blank"
+                />
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setShowCreateModal(false)}>Cancel</button>
+                <button type="submit" className="btn-primary" disabled={createUserMutation.isLoading}>
+                  {createUserMutation.isLoading ? 'Creating...' : 'Create User'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Import Modal */}
+      {showBulkModal && (
+        <div className="modal-overlay" onClick={() => setShowBulkModal(false)}>
+          <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Bulk User Import</h2>
+              <button className="modal-close" onClick={() => setShowBulkModal(false)}>
+                <FiX />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="bulk-upload-zone">
+                <input type="file" id="bulk-file-input" hidden accept=".csv,.xlsx,.xls" onChange={handleFileUpload} />
+                <label htmlFor="bulk-file-input" className="upload-label">
+                  <FiUpload className="upload-icon" />
+                  <span>Click to select CSV or Excel file</span>
+                  <small>Expected columns: first_name, last_name, email, role, (optional) password, reg_no</small>
+                </label>
+              </div>
+
+              {bulkData.length > 0 && (
+                <div className="preview-container">
+                  <h3>Preview ({bulkData.length} users)</h3>
+                  <div className="table-wrapper mini">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Role</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bulkData.slice(0, 5).map((d, i) => (
+                          <tr key={i}>
+                            <td>{d.first_name} {d.last_name}</td>
+                            <td>{d.email}</td>
+                            <td>{d.role}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {bulkData.length > 5 && <p className="more-count">... and {bulkData.length - 5} more</p>}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn-secondary" onClick={() => setShowBulkModal(false)}>Cancel</button>
+              <button 
+                type="button" 
+                className="btn-primary" 
+                disabled={bulkCreateMutation.isLoading || bulkData.length === 0}
+                onClick={handleBulkSubmit}
+              >
+                {bulkCreateMutation.isLoading ? 'Processing...' : `Create ${bulkData.length} Users`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }

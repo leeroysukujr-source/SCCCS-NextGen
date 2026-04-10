@@ -45,6 +45,17 @@ export const usersAPI = {
     const response = await client.delete(`/users/${userId}`)
     return response.data
   },
+
+  createUser: async (userData) => {
+    // We reuse the /users/bulk endpoint by sending a list with one item
+    const response = await client.post('/users/bulk', { users: [userData] })
+    return response.data
+  },
+
+  bulkCreateUsers: async (users) => {
+    const response = await client.post('/users/bulk', { users })
+    return response.data
+  },
 }
 
 export default usersAPI
