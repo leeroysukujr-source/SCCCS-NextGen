@@ -462,6 +462,59 @@
   gap: 1rem;
 }
 
+/* Desktop Navbar Links (Centered) */
+.top-navbar-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] .top-navbar-center {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+.navbar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.navbar-link svg {
+  font-size: 1.1rem;
+}
+
+.navbar-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--primary);
+}
+
+.navbar-link.active {
+  color: var(--primary);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+@media (max-width: 1024px) {
+  .top-navbar-center {
+    display: none;
+  }
+}
+
 .navbar-action-btn {
   width: 40px;
   height: 40px;
@@ -554,7 +607,7 @@
 
 /* Mobile Bottom Navigation */
 .mobile-bottom-nav {
-  display: none;
+  display: none; /* Hidden by default on desktop */
   position: fixed;
   bottom: 0;
   left: 0;
@@ -564,7 +617,6 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
   justify-content: space-around;
   align-items: center;
   z-index: 1000;

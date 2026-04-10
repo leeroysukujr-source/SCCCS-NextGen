@@ -17,6 +17,19 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
+  <script>
+    // Handle Vite preload errors (fixes "unable to preload css/js" errors after new deployments)
+    window.addEventListener('vite:preloadError', (event) => {
+      console.log('Vite preload error detected, reloading...', event.payload);
+      // Avoid infinite reload loop: check if we already reloaded in the last 10 seconds
+      const now = Date.now();
+      const lastReload = parseInt(localStorage.getItem('last_preload_reload') || '0');
+      if (now - lastReload > 10000) {
+        localStorage.setItem('last_preload_reload', now.toString());
+        window.location.reload();
+      }
+    });
+  </script>
 </head>
 
 <body>
