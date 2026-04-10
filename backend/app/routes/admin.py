@@ -450,11 +450,17 @@ def bulk_create_users():
     if not current_user or not is_admin(current_user):
         return jsonify({'error': 'Unauthorized. Admin access required'}), 403
         
-    workspace_id = current_user.workspace_id or get_current_workspace_id()
+    data = request.get_json()
+    req_workspace_id = data.get('workspace_id')
+    
+    # If super admin specifies a workspace, use it. Otherwise use current user's workspace
+    if is_super_admin(current_user) and req_workspace_id:
+        workspace_id = req_workspace_id
+    else:
+        workspace_id = current_user.workspace_id or get_current_workspace_id()
+    
     if not workspace_id:
         return jsonify({'error': 'No workspace context found'}), 400
-        
-    data = request.get_json()
     users_data = data.get('users', [])
     
     if not users_data or not isinstance(users_data, list):

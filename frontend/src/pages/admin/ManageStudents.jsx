@@ -302,60 +302,76 @@ export default function ManageStudents() {
           <div className="modal-overlay" onClick={() => { setShowAddModal(false); setEditingStudent(null); resetForm(); }}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
-                <h2>{editingStudent ? 'Edit Student' : 'Add Student'}</h2>
-                <button className="btn-icon" onClick={() => { setShowAddModal(false); setEditingStudent(null); resetForm(); }} title="Close" aria-label="Close">
+                <h2>{editingStudent ? 'Edit Student Details' : 'Register New Student'}</h2>
+                <button className="modal-close" onClick={() => { setShowAddModal(false); setEditingStudent(null); resetForm(); }} title="Close">
                   <FiX />
                 </button>
               </div>
               <form onSubmit={editingStudent ? handleUpdate : handleAdd}>
-                <div className="form-group">
-                  <label>Email *</label>
-                  <input
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
+                <div className="modal-body">
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label>First Name</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.first_name}
+                        onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                        placeholder="e.g. John"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Last Name</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.last_name}
+                        onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                        placeholder="e.g. Doe"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Email Address *</label>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="student@example.com"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Username</label>
+                    <input
+                      type="text"
+                      value={formData.username}
+                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                      placeholder="Leave blank to auto-generate"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>{editingStudent ? 'Update Password' : 'Initial Password *'}</label>
+                    <input
+                      type="password"
+                      required={!editingStudent}
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder={editingStudent ? "•••••••• (only to change)" : "••••••••"}
+                    />
+                    <p className="form-hint">
+                      {editingStudent 
+                        ? "Leave this field empty if you don't wish to change the student's password." 
+                        : "Ensure the student is provided with this password for their initial login."}
+                    </p>
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label>Username</label>
-                  <input
-                    type="text"
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>First Name</label>
-                  <input
-                    type="text"
-                    value={formData.first_name}
-                    onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Last Name</label>
-                  <input
-                    type="text"
-                    value={formData.last_name}
-                    onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>{editingStudent ? 'New Password (leave blank to keep current)' : 'Password'}</label>
-                  <input
-                    type="password"
-                    required={!editingStudent}
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  />
-                </div>
-                <div className="modal-actions">
+                <div className="modal-footer">
                   <button type="button" className="btn-secondary" onClick={() => { setShowAddModal(false); setEditingStudent(null); resetForm(); }}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn-primary">
-                    {editingStudent ? 'Update' : 'Add'} Student
+                  <button type="submit" className="btn-primary" disabled={addMutation.isLoading || updateMutation.isLoading}>
+                    {addMutation.isLoading || updateMutation.isLoading ? 'Processing...' : (editingStudent ? 'Update Student' : 'Register Student')}
                   </button>
                 </div>
               </form>

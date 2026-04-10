@@ -3,7 +3,7 @@ import uuid
 from werkzeug.utils import secure_filename
 from flask import current_app
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'svg'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'}
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -47,17 +47,19 @@ def save_logo(file, folder='logos'):
                 logger.error(f"S3 upload failed for {key}")
                 
         # Fallback: Local file system
-        # Absolute path to save
-        upload_path = os.path.join(current_app.root_path, 'static', 'uploads', folder)
+        # Absolute path to save: backend/uploads/logos/...
+        current_file_dir = os.path.dirname(os.path.abspath(__file__))
+        backend_dir = os.path.dirname(os.path.dirname(current_file_dir))
+        upload_path = os.path.join(backend_dir, 'uploads', folder)
         os.makedirs(upload_path, exist_ok=True)
         
         # Save locally
         file.seek(0)
         file.save(os.path.join(upload_path, unique_filename))
         
-        logger.info(f"Saved logo locally to {unique_filename} (fallback)")
-        # Return relative URL
-        return f"/static/uploads/{folder}/{unique_filename}"
+        logger.info(f"Saved logo locally to {unique_filename} in {upload_path}")
+        # Return relative URL that files.py can serve via the new /serve/ route
+        return f"/api/files/serve/{folder}/{unique_filename}"
     except Exception as e:
         logger.exception(f"Unexpected error in save_logo: {str(e)}")
         return None

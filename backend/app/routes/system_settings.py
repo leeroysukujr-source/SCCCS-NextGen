@@ -66,10 +66,6 @@ def update_system_settings():
 @super_admin_required
 def upload_system_logo():
     """Upload or update system logo (super admin only)"""
-    import os
-    from werkzeug.utils import secure_filename
-    from flask import current_app
-    
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
         
@@ -77,30 +73,13 @@ def upload_system_logo():
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
         
-    # Validation
-    ALLOWED = {'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico'}
-    if not ('.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in ALLOWED):
-        return jsonify({'error': 'File type not allowed'}), 400
+    from app.utils.uploads import save_logo
+    # Use save_logo which handles S3 storage if configured
+    logo_url = save_logo(file, folder='system')
+    
+    if not logo_url:
+        return jsonify({'error': 'Failed to save logo'}), 500
         
-    # Save path: backend/uploads/system
-    filename = secure_filename('system_logo_' + file.filename)
-    
-    # Path resolution relative to this file
-    current_file_dir = os.path.dirname(os.path.abspath(__file__))
-    backend_dir = os.path.dirname(os.path.dirname(current_file_dir))
-    upload_folder = os.path.join(backend_dir, 'uploads', 'system')
-    os.makedirs(upload_folder, exist_ok=True)
-    
-    file_path = os.path.join(upload_folder, filename)
-    file.save(file_path)
-    
-    # URL construction: Assuming we serve uploads via /static or similar
-    # For now, we can use the existing /files/avatar logic or a new public route.
-    # Let's simple define the URL as /uploads/system/<filename> and ensure we have a route for it
-    # or better: reuse the /api/files/avatar logic but extended for system assets potentially.
-    # Actually, simplest is to store the full API path.
-    logo_url = f'/api/files/system/{filename}'
-    
     # Update System Setting
     settings_service.set_system_setting('SYSTEM_LOGO_URL', logo_url, category='ui_ux', is_public=True)
     

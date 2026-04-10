@@ -354,17 +354,105 @@
 }
 
 .sidebar-header {
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   background: rgba(255, 255, 255, 0.02);
   position: sticky;
   top: 0;
   z-index: 100;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+}
+
+.sidebar-tabs {
+  display: flex;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-tab:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sidebar-tab.active {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.discover-channels-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.5rem;
+}
+
+.discover-item {
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(15, 23, 42, 0.4) !important;
+}
+
+.join-channel-mini-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px;
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.join-channel-mini-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.loading-spinner-mini {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .sidebar-header h2 {

@@ -100,6 +100,9 @@ export default function Chat() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false) // Phase 2: Emoji Picker
   const [showAssignmentModal, setShowAssignmentModal] = useState(false) // Phase 2: Assignment Builder
   const [isSidebarOpen, setIsSidebarOpen] = useState(true) // Mobile Responsive Sidebar State
+  const [activeSidebarTab, setActiveSidebarTab] = useState('joined') // 'joined' or 'discover'
+  const [availableChannels, setAvailableChannels] = useState([])
+  const [isDiscoverLoading, setIsDiscoverLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const [isRecordingPaused, setIsRecordingPaused] = useState(false)
   const typingTimeoutRef = useRef(null)
@@ -142,31 +145,24 @@ export default function Chat() {
     saveUnsentQueue(next)
   }
 
-  const flushUnsentQueue = async () => {
+  const loadAvailableChannels = useCallback(async () => {
+    setIsDiscoverLoading(true)
     try {
-      const raw = localStorage.getItem('unsent_messages')
-      const queue = raw ? JSON.parse(raw) : []
-      if (!queue || queue.length === 0) return
-
-      // Attempt to resend items sequentially
-      const remaining = []
-      for (const it of queue) {
-        try {
-          // Use messagesAPI directly to avoid complication with mutation state
-          await messagesAPI.createMessage(it.channel_id, it.payload)
-          // On success, continue (temp message will be replaced by server emit)
-        } catch (err) {
-          // Increase attempts, keep for retry
-          it.attempts = (it.attempts || 0) + 1
-          // Give up after 5 attempts
-          if (it.attempts < 5) remaining.push(it)
-        }
-      }
-      saveUnsentQueue(remaining)
-    } catch (e) {
-      console.error('Error flushing unsent queue:', e)
+      const available = await channelsAPI.getAvailable()
+      setAvailableChannels(available)
+    } catch (error) {
+      console.error('Error loading available channels:', error)
+      notify('error', 'Failed to load discoverable channels')
+    } finally {
+      setIsDiscoverLoading(false)
     }
-  }
+  }, [notify])
+
+  useEffect(() => {
+    if (activeSidebarTab === 'discover') {
+      loadAvailableChannels()
+    }
+  }, [activeSidebarTab, loadAvailableChannels])
 
   const { data: channels = [], refetch: refetchChannels } = useQuery({
     queryKey: ['channels'],
@@ -1482,18 +1478,36 @@ export default function Chat() {
       {/* Channels Sidebar */}
       <div className={`chat-sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div className="header-title-row" style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+          <div className="sidebar-tabs">
+            <button 
+              className={`sidebar-tab ${activeSidebarTab === 'joined' ? 'active' : ''}`}
+              onClick={() => setActiveSidebarTab('joined')}
+            >
+              Joined
+            </button>
+            <button 
+              className={`sidebar-tab ${activeSidebarTab === 'discover' ? 'active' : ''}`}
+              onClick={() => setActiveSidebarTab('discover')}
+            >
+              Discover
+            </button>
+          </div>
+          <div className="header-title-row" style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between', marginTop: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h2>Chatrooms</h2>
-              <span className="channel-count">{channels.length}</span>
-              <button
-                className="create-channel-btn"
-                onClick={() => setShowCreateModal(true)}
-                title="Create new chatroom"
-                style={{ marginLeft: '4px' }}
-              >
-                <FiPlus />
-              </button>
+              <h2 style={{ fontSize: '1rem' }}>{activeSidebarTab === 'joined' ? 'My Chatrooms' : 'Public Channels'}</h2>
+              {activeSidebarTab === 'joined' && (
+                <>
+                  <span className="channel-count">{channels.length}</span>
+                  <button
+                    className="create-channel-btn"
+                    onClick={() => setShowCreateModal(true)}
+                    title="Create new chatroom"
+                    style={{ marginLeft: '4px' }}
+                  >
+                    <FiPlus />
+                  </button>
+                </>
+              )}
             </div>
             <button
               className="header-action-btn"
@@ -1523,71 +1537,121 @@ export default function Chat() {
         </div>
 
         <div className="channels-list">
-          {filteredChannels.length > 0 ? (
-            filteredChannels.map((channel) => {
-              const isActive = selectedChannel?.id === channel.id
-              return (
-                <div
-                  key={channel.id}
-                  className={`channel-item ${isActive ? 'active' : ''}`}
-                  onClick={() => {
-                    setSelectedChannel(channel)
-                    setUnreadCounts(prev => ({ ...prev, [channel.id]: 0 }))
-                    if (isMobile) setIsSidebarOpen(false)
-                    navigate(`/chat/${channel.id}`)
-                  }}
-                >
-                  <div className="channel-avatar group-hover:scale-110 transition-transform duration-300">
-                    <div className="avatar-glass"></div>
-                    {channel.is_encrypted ? (
-                      <FiLock className="channel-icon text-emerald-400" />
-                    ) : (
-                      <FiHash className="channel-icon text-indigo-400" />
-                    )}
-                    {(unreadCounts[channel.id] || 0) > 0 && (
-                      <div className="unread-badge animate-bounce">
-                        {unreadCounts[channel.id]}
+          {activeSidebarTab === 'joined' ? (
+            filteredChannels.length > 0 ? (
+              filteredChannels.map((channel) => {
+                const isActive = selectedChannel?.id === channel.id
+                return (
+                  <div
+                    key={channel.id}
+                    className={`channel-item ${isActive ? 'active' : ''}`}
+                    onClick={() => {
+                      setSelectedChannel(channel)
+                      setUnreadCounts(prev => ({ ...prev, [channel.id]: 0 }))
+                      if (isMobile) setIsSidebarOpen(false)
+                      navigate(`/chat/${channel.id}`)
+                    }}
+                  >
+                    <div className="channel-avatar group-hover:scale-110 transition-transform duration-300">
+                      <div className="avatar-glass"></div>
+                      {channel.is_encrypted ? (
+                        <FiLock className="channel-icon text-emerald-400" />
+                      ) : (
+                        <FiHash className="channel-icon text-indigo-400" />
+                      )}
+                      {(unreadCounts[channel.id] || 0) > 0 && (
+                        <div className="unread-badge animate-bounce">
+                          {unreadCounts[channel.id]}
+                        </div>
+                      )}
+                    </div>
+                    <div className="channel-details">
+                      <div className="channel-name-row">
+                        <span className="channel-name font-bold tracking-tight">{channel.name}</span>
+                        {channel.is_encrypted && (
+                          <FiLock className="lock-icon text-emerald-400" size={12} />
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <div className="channel-details">
-                    <div className="channel-name-row">
-                      <span className="channel-name font-bold tracking-tight">{channel.name}</span>
-                      {channel.is_encrypted && (
-                        <FiLock className="lock-icon text-emerald-400" size={12} />
-                      )}
-                    </div>
-                    <div className="channel-meta">
-                      <span className="member-count flex items-center gap-1 opacity-60">
-                        <FiUsers size={10} /> {channel.member_count || 0}
-                      </span>
-                      {channel.description && (
-                        <span className="channel-desc truncate text-xs opacity-40 italic">{channel.description}</span>
-                      )}
+                      <div className="channel-meta">
+                        <span className="member-count flex items-center gap-1 opacity-60">
+                          <FiUsers size={10} /> {channel.member_count || 0}
+                        </span>
+                        {channel.description && (
+                          <span className="channel-desc truncate text-xs opacity-40 italic">{channel.description}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })
+                )
+              })
+            ) : (
+              <div className="empty-channels">
+                <div className="empty-icon">💬</div>
+                <p className="empty-text">No chatrooms found</p>
+                {searchQuery && (
+                  <button
+                    className="clear-search-btn"
+                    onClick={() => setSearchQuery('')}
+                  >
+                    Clear search
+                  </button>
+                )}
+                {!searchQuery && (
+                  <button
+                    className="create-first-btn"
+                    onClick={() => setShowCreateModal(true)}
+                  >
+                    <FiPlus /> Create Your First Chatroom
+                  </button>
+                )}
+              </div>
+            )
           ) : (
-            <div className="empty-channels">
-              <div className="empty-icon">💬</div>
-              <p className="empty-text">No chatrooms found</p>
-              {searchQuery && (
-                <button
-                  className="clear-search-btn"
-                  onClick={() => setSearchQuery('')}
-                >
-                  Clear search
-                </button>
-              )}
-              {!searchQuery && (
-                <button
-                  className="create-first-btn"
-                  onClick={() => setShowCreateModal(true)}
-                >
-                  <FiPlus /> Create Your First Chatroom
-                </button>
+            /* DISCOVER TAB */
+            <div className="discover-channels-container">
+              {isDiscoverLoading ? (
+                <div className="loading-state">
+                  <div className="loading-spinner-mini"></div>
+                  <p>Searching for public spaces...</p>
+                </div>
+              ) : availableChannels.length > 0 ? (
+                availableChannels
+                  .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(channel => (
+                    <div key={channel.id} className="channel-item discover-item">
+                      <div className="channel-avatar">
+                        <FiHash className="channel-icon" />
+                      </div>
+                      <div className="channel-details">
+                        <div className="channel-name-row">
+                          <span className="channel-name">{channel.name}</span>
+                        </div>
+                        <div className="channel-meta">
+                          <span className="member-count"><FiUsers size={10} /> {channel.member_count} members</span>
+                        </div>
+                        <button 
+                          className="join-channel-mini-btn"
+                          onClick={() => {
+                            channelsAPI.joinChannel(channel.id)
+                              .then(() => {
+                                notify('success', `Joined ${channel.name}`)
+                                refetchChannels()
+                                setActiveSidebarTab('joined')
+                                navigate(`/chat/${channel.id}`)
+                              })
+                              .catch(err => notify('error', err.response?.data?.error || 'Failed to join'))
+                          }}
+                        >
+                          Join
+                        </button>
+                      </div>
+                    </div>
+                  ))
+              ) : (
+                <div className="empty-channels">
+                  <FiSearch size={40} opacity={0.3} />
+                  <p>No new public channels found in your workspace.</p>
+                </div>
               )}
             </div>
           )}

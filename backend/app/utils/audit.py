@@ -46,7 +46,7 @@ def log_security_event(user_id, event_type, severity='medium', details=None):
             severity=severity,
             ip_address=request.remote_addr if request else None,
             user_agent=request.headers.get('User-Agent') if request else None,
-            details=json.dumps(details) if details else None
+            details_data=json.dumps(details) if details else None
         )
         db.session.add(event)
         db.session.commit()

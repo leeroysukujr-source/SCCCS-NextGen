@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models import User
 from app.utils.scoping import scope_query, get_current_workspace_id
+from app.routes.admin import bulk_create_users
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import secrets
@@ -150,6 +151,11 @@ def upload_avatar():
         'user': user.to_dict()
     }), 200
 
+@users_bp.route('/bulk', methods=['POST'])
+@jwt_required()
+def bulk_create_users_fallback():
+    return bulk_create_users()
+
 @users_bp.route('/search', methods=['GET'])
 @jwt_required()
 def search_users():
@@ -179,115 +185,31 @@ def search_users():
     workspace_users = workspace_query.limit(20).all()
     
     # 2. If global search enabled or fewer than 5 users found, search across other workspaces
-    # (Only allow cross-workspace search for emails or exact username matches to prevent privacy leaks)
+    # (Allow cross-workspace search for common identity fields)
     other_users = []
-    if (global_search or len(workspace_users) < 5) and len(query) >= 3:
-        # Cross-workspace: more strict filters for privacy
+    if (global_search or len(workspace_users) < 3) and len(query) >= 3:
+        # Cross-workspace: allow partial name/email matches but limit results for privacy
         other_query = User.query.filter(
             User.workspace_id != current_user.workspace_id,
             (
-                (User.email.ilike(f'{query}%')) | # Email start
-                (User.username.ilike(query))      # Exact username
+                (User.email.ilike(f'%{query}%')) | 
+                (User.username.ilike(f'%{query}%')) |
+                (User.first_name.ilike(f'%{query}%')) |
+                (User.last_name.ilike(f'%{query}%'))
             )
         )
-        # Exclude super admins from cross-workspace search
+        # Exclude super admins from general cross-workspace discovery
         other_query = other_query.filter(User.role != 'super_admin')
         other_users = other_query.limit(10).all()
     
-    # Combine results, workspace users first
-    combined_users = workspace_users + [u for u in other_users if u.id not in [wu.id for wu in workspace_users]]
+    # Combined results, workspace users first
+    seen_ids = set(u.id for u in workspace_users)
+    combined_users = workspace_users + [u for u in other_users if u.id not in seen_ids]
     
     return jsonify([user.to_dict() for user in combined_users]), 200
 
-@users_bp.route('/bulk', methods=['POST'])
-@jwt_required()
-def bulk_create_users():
-    """Bulk create users (Admin/Super Admin only)"""
-    current_user_id = get_jwt_identity()
-    current_user = User.query.get(current_user_id)
-    
-    if not current_user or not is_admin(current_user):
-        return jsonify({'error': 'Unauthorized. Admin access required'}), 403
-    
-    data = request.get_json()
-    users_data = data.get('users', [])
-    
-    if not users_data or not isinstance(users_data, list):
-        return jsonify({'error': 'A list of users is required'}), 400
-    
-    if len(users_data) > 100:
-        return jsonify({'error': 'Maximum 100 users per bulk request'}), 400
-    
-    results = {
-        'created': [],
-        'failed': []
-    }
-    
-    for user_info in users_data:
-        email = user_info.get('email')
-        if not email:
-            results['failed'].append({'email': 'MISSING', 'error': 'Email is required'})
-            continue
-            
-        # Check if user already exists
-        if User.query.filter_by(email=email).first():
-            results['failed'].append({'email': email, 'error': 'User already exists'})
-            continue
-            
-        username = user_info.get('username') or email.split('@')[0]
-        # Ensure username uniqueness
-        base_username = username
-        counter = 1
-        while User.query.filter_by(username=username).first():
-            username = f"{base_username}{counter}"
-            counter += 1
-            
-        try:
-            role = user_info.get('role', 'student')
-            if role not in ['admin', 'teacher', 'student']:
-                role = 'student'
-            
-            # Super Admin can specify workspace, regular admin is locked to their own
-            workspace_id = current_user.workspace_id
-            if current_user.role == 'super_admin' and user_info.get('workspace_id'):
-                workspace_id = user_info.get('workspace_id')
-            
-            new_user = User(
-                username=username,
-                email=email,
-                first_name=user_info.get('first_name', ''),
-                last_name=user_info.get('last_name', ''),
-                role=role,
-                workspace_id=workspace_id,
-                admin_id=current_user_id
-            )
-            
-            password = user_info.get('password') or secrets.token_urlsafe(10)
-            new_user.set_password(password)
-            
-            db.session.add(new_user)
-            results['created'].append({
-                'email': email,
-                'username': username,
-                'password': password if not user_info.get('password') else '********'
-            })
-        except Exception as e:
-            results['failed'].append({'email': email, 'error': str(e)})
-            
-    db.session.commit()
-    
-    # Log audit event
-    log_audit_event(
-        user_id=current_user_id,
-        action='bulk_create_users',
-        resource_type='user',
-        details={
-            'count': len(results['created']),
-            'failed_count': len(results['failed'])
-        }
-    )
-    
-    return jsonify(results), 201
+    return jsonify([user.to_dict() for user in combined_users]), 200
+
 
 @users_bp.route('/list-teachers', methods=['GET'])
 @jwt_required()

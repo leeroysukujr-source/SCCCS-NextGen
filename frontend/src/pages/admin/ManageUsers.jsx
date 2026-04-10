@@ -478,30 +478,39 @@ export default function ManageUsers() {
                 <FiX />
               </button>
             </div>
-            <form onSubmit={handleRoleUpdate} className="modal-body">
-              <div className="form-group">
-                <label>User</label>
-                <p><strong>{selectedUser.first_name} {selectedUser.last_name}</strong> ({selectedUser.email})</p>
-              </div>
-              <div className="form-group">
-                <label>Current Role</label>
-                <p>{selectedUser.role}</p>
-              </div>
-              <div className="form-group">
-                <label>New Role *</label>
-                <select
-                  required
-                  value={selectedUser.role}
-                  onChange={(e) => setSelectedUser({ ...selectedUser, role: e.target.value })}
-                  className="role-select"
-                >
-                  <option value="admin">Admin - Full system access</option>
-                  <option value="teacher">Teacher - Can manage classes and students</option>
-                  <option value="student">Student - Basic access</option>
-                </select>
-                <p className="form-hint">
-                  The user's dashboard will automatically update to reflect the new role.
-                </p>
+            <form onSubmit={handleRoleUpdate}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>Selected User</label>
+                  <p className="form-info-text"><strong>{selectedUser.first_name} {selectedUser.last_name}</strong> ({selectedUser.email})</p>
+                </div>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Current Role</label>
+                    <div className={`role-badge role-${selectedUser.role}`}>{selectedUser.role}</div>
+                  </div>
+                  <div className="form-group">
+                    <label>Assigned To</label>
+                    <p className="form-info-text">Production / Main Office</p>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>New Role *</label>
+                  <select
+                    required
+                    value={selectedUser.role}
+                    onChange={(e) => setSelectedUser({ ...selectedUser, role: e.target.value })}
+                    className="role-select"
+                  >
+                    <option value="admin">Admin - Full system access</option>
+                    <option value="teacher">Teacher - Can manage classes and students</option>
+                    <option value="student">Student - Basic access</option>
+                    <option value="staff">Staff - Support and operations</option>
+                  </select>
+                  <p className="form-hint">
+                    Role changes take effect upon the user's next navigation or refresh.
+                  </p>
+                </div>
               </div>
               <div className="modal-footer">
                 <button
@@ -595,65 +604,73 @@ export default function ManageUsers() {
                 <FiX />
               </button>
             </div>
-            <form onSubmit={handleCreateUser} className="modal-body">
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>First Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={newUser.first_name}
-                    onChange={(e) => setNewUser({ ...newUser, first_name: e.target.value })}
-                  />
+            <form onSubmit={handleCreateUser}>
+              <div className="modal-body">
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>First Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={newUser.first_name}
+                      onChange={(e) => setNewUser({ ...newUser, first_name: e.target.value })}
+                      placeholder="e.g. John"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Last Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={newUser.last_name}
+                      onChange={(e) => setNewUser({ ...newUser, last_name: e.target.value })}
+                      placeholder="e.g. Doe"
+                    />
+                  </div>
                 </div>
                 <div className="form-group">
-                  <label>Last Name</label>
+                  <label>Email Address</label>
                   <input
-                    type="text"
+                    type="email"
                     required
-                    value={newUser.last_name}
-                    onChange={(e) => setNewUser({ ...newUser, last_name: e.target.value })}
+                    value={newUser.email}
+                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                    placeholder="user@example.com"
                   />
                 </div>
-              </div>
-              <div className="form-group">
-                <label>Email Address</label>
-                <input
-                  type="email"
-                  required
-                  value={newUser.email}
-                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Username (optional)</label>
-                <input
-                  type="text"
-                  value={newUser.username}
-                  onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-                  placeholder="Auto-generated if blank"
-                />
-              </div>
-              <div className="form-group">
-                <label>Role</label>
-                <select
-                  value={newUser.role}
-                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                >
-                  <option value="student">Student</option>
-                  <option value="teacher">Teacher</option>
-                  <option value="staff">Staff</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Initial Password (optional)</label>
-                <input
-                  type="password"
-                  value={newUser.password}
-                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                  placeholder="Randomized if blank"
-                />
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Username</label>
+                    <input
+                      type="text"
+                      value={newUser.username}
+                      onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                      placeholder="Leave blank for auto"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Assigned Role</label>
+                    <select
+                      value={newUser.role}
+                      onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                    >
+                      <option value="student">Student</option>
+                      <option value="teacher">Teacher</option>
+                      <option value="staff">Staff</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Initial Password</label>
+                  <input
+                    type="password"
+                    value={newUser.password}
+                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                    placeholder="•••••••• (optional)"
+                  />
+                  <p className="form-hint">If left blank, a randomized password will be generated.</p>
+                </div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={() => setShowCreateModal(false)}>Cancel</button>

@@ -16,15 +16,15 @@ export default function PresenceManager() {
             presenceAPI.updatePresence({ status: 'online' }).catch(console.error)
         }, 30000)
 
-        // Update on visibility change
+        // Update on visibility change (throttled)
+        let lastVisibilityUpdate = 0;
         const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                presenceAPI.updatePresence({ status: 'online' }).catch(console.error)
-            } else {
-                // Optional: set away?
-                // presenceAPI.updatePresence({ status: 'away' })
+            const now = Date.now();
+            if (document.visibilityState === 'visible' && now - lastVisibilityUpdate > 5000) {
+                lastVisibilityUpdate = now;
+                presenceAPI.updatePresence({ status: 'online' }).catch(console.error);
             }
-        }
+        };
 
         document.addEventListener('visibilitychange', handleVisibilityChange)
 

@@ -209,6 +209,20 @@ def get_system_file(filename):
         
     return send_from_directory(system_folder, filename)
 
+@files_bp.route('/serve/<path:filepath>', methods=['GET'])
+@cross_origin()
+def get_uploaded_file(filepath):
+    """Generic route to serve any file from uploads directory - PUBLIC ACCESS"""
+    from flask import send_from_directory
+    
+    current_file_dir = os.path.dirname(os.path.abspath(__file__))
+    backend_dir = os.path.dirname(os.path.dirname(current_file_dir))
+    uploads_folder = os.path.join(backend_dir, 'uploads')
+    
+    # Secure the filepath to prevent path traversal
+    # Note: flask's send_from_directory handles some of this
+    return send_from_directory(uploads_folder, filepath)
+
 @files_bp.route('/<int:file_id>', methods=['GET'])
 def get_file(file_id):
     # Support token in query params for media elements (audio/video/img)

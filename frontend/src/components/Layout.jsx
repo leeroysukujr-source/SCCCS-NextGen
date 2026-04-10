@@ -25,6 +25,19 @@ export default function Layout() {
   const [showSearch, setShowSearch] = useState(false)
   const [theme, setTheme] = useTheme()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(window.innerWidth < 1200)
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1200 && !isSidebarCollapsed) {
+        setIsSidebarCollapsed(true)
+      } else if (window.innerWidth >= 1200 && isSidebarCollapsed) {
+        setIsSidebarCollapsed(false)
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [isSidebarCollapsed])
 
   const handleLogout = () => {
     logout()
@@ -167,7 +180,15 @@ export default function Layout() {
         </div>
       </header>
 
-      <nav className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''} expanded`}>
+      <nav className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''} ${isSidebarCollapsed ? '' : 'expanded'}`}>
+        {/* Toggle Button for Desktop */}
+        <button 
+          className="sidebar-collapse-toggle" 
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+        >
+          {isSidebarCollapsed ? <FiArrowRight /> : <FiChevronLeft />}
+        </button>
         {/* Close button for mobile */}
         <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}>
           <FiLogOut style={{transform: 'rotate(180deg)'}} />

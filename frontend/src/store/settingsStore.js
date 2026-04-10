@@ -99,7 +99,7 @@ export const useSettingsStore = create((set, get) => ({
 
     updateWorkspaceDetails: async (workspaceId, data) => {
         try {
-            await apiClient.patch(`/workspaces/${workspaceId}`, data)
+            await apiClient.patch(`/workspace/${workspaceId}`, data)
             return { success: true }
         } catch (err) {
             console.error('Failed to update workspace details:', err)

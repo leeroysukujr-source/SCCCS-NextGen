@@ -107,6 +107,32 @@ export default function DirectMessages() {
     enabled: false
   })
 
+  // Synchronize selectedUser with userId URL parameter
+  useEffect(() => {
+    if (userId && !selectedUser) {
+      // 1. Try finding in current conversations
+      const existingConv = sortedConversations.find(c => String(c.user_id) === String(userId))
+      if (existingConv) {
+        setSelectedUser(existingConv)
+      } else {
+        // 2. If not found, fetch the user info to start a new conversation
+        usersAPI.getUser(userId).then(userData => {
+          setSelectedUser({
+            user_id: userData.id,
+            user: userData,
+            last_message: null,
+            unread_count: 0
+          })
+        }).catch(err => {
+          console.error('Failed to resolve user for DM:', err)
+          notify('error', 'User not found or unavailable')
+        })
+      }
+    } else if (!userId && selectedUser) {
+      setSelectedUser(null)
+    }
+  }, [userId, sortedConversations, selectedUser, notify])
+
   // Attach handlers to shared socket from SocketProvider
   useEffect(() => {
     if (!sharedSocket) return
@@ -816,163 +842,125 @@ export default function DirectMessages() {
         </div>
 
         <div className="dm-search-box">
-          <button
-            className="attach-btn"
-            onClick={() => fileInputRef.current?.click()}
-            title="Attach file"
-            aria-label="Attach file"
-          >
-            <FiPaperclip />
-          </button>
-          <input
-            ref={searchInputRef}
-            type="text"
-            placeholder={showUserSearch ? "Type to find users..." : "Search conversations..."}
-            value={searchQuery}
-            className={showUserSearch ? "search-input-active" : ""}
-            onChange={(e) => {
-              setSearchQuery(e.target.value)
-              if (showUserSearch && e.target.value.trim()) {
-                handleSearchUsers(e.target.value)
-              } else if (showUserSearch) {
-                setSearchResults([])
-              }
-            }}
-            onFocus={() => {
-              if (showUserSearch && searchQuery.trim()) {
-                handleSearchUsers(searchQuery)
-              }
-            }}
-          />
+          <div className="search-input-wrapper">
+            <FiSearch className="search-icon" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search people or messages..."
+              value={searchQuery}
+              onChange={(e) => {
+                const val = e.target.value
+                setSearchQuery(val)
+                if (val.trim().length >= 2) {
+                  handleSearchUsers(val)
+                } else {
+                  setSearchResults([])
+                }
+              }}
+            />
+            {searchQuery && (
+              <button 
+                className="clear-search" 
+                onClick={() => {
+                  setSearchQuery('')
+                  setSearchResults([])
+                }}
+              >
+                <FiX />
+              </button>
+            )}
+          </div>
         </div>
 
 
         <div className="conversations-list">
-          {/* USER SEARCH MODE */}
-          {showUserSearch ? (
+          {/* SEARCH RESULTS VIEW */}
+          {searchQuery.trim().length >= 2 ? (
             <div className="search-mode-container">
-              <div className="search-section-header">
-                <h3>New Message</h3>
-                <button
-                  className="close-search-btn"
-                  onClick={() => {
-                    setShowUserSearch(false)
-                    setSearchQuery('')
-                    setSearchResults([])
-                  }}
-                  title="Close Search"
-                >
-                  <FiX />
-                </button>
+              <div className="sidebar-section-label">
+                {searchResults.length > 0 ? 'Search Results' : 'No users found'}
               </div>
 
-              {searchQuery.trim() ? (
-                /* Search Results or No Results Found */
-                <div className="search-results-list">
-                  {searchResults.length > 0 ? (
-                    searchResults.map(result => {
-                      const existingConv = conversations.find(c => c.user_id === result.id)
-                      return (
-                        <div
-                          key={result.id}
-                          className="conversation-item search-result-item"
-                          onClick={() => {
-                            if (existingConv) {
-                              setSelectedUser(existingConv)
-                              navigate(`/direct-messages/${result.id}`)
-                            } else {
-                              setSelectedUser({
-                                user_id: result.id,
-                                user: result,
-                                last_message: null,
-                                unread_count: 0
-                              })
-                              navigate(`/direct-messages/${result.id}`)
-                            }
-                            setShowUserSearch(false)
-                            setSearchQuery('')
-                            setSearchResults([])
-                          }}
-                        >
-                          <div className="conversation-avatar">
-                            {result.avatar_url ? (
-                              <img src={result.avatar_url} alt={result.username} />
-                            ) : (
-                              <FiUser />
-                            )}
-                            {existingConv && existingConv.unread_count > 0 && (
-                              <span className="unread-badge">{existingConv.unread_count}</span>
-                            )}
+              <div className="search-results-list">
+                {searchResults.length > 0 ? (
+                  searchResults.map(result => {
+                    const existingConv = conversations.find(c => c.user_id === result.id)
+                    return (
+                      <div
+                        key={result.id}
+                        className="conversation-item search-result-item"
+                        onClick={() => {
+                          const existingConv = sortedConversations.find(c => String(c.user_id) === String(result.id))
+                          if (existingConv) {
+                            setSelectedUser(existingConv)
+                          } else {
+                            setSelectedUser({
+                              user_id: result.id,
+                              user: result,
+                              last_message: null,
+                              unread_count: 0
+                            })
+                          }
+                          navigate(`/direct-messages/${result.id}`)
+                          setSearchQuery('')
+                          setSearchResults([])
+                        }}
+                      >
+                        <div className="conversation-avatar">
+                          {result.avatar_url ? (
+                            <img src={result.avatar_url} alt={result.username} />
+                          ) : (
+                            <div className="avatar-placeholder-small">
+                              {result.first_name?.[0]?.toUpperCase() || result.username?.[0]?.toUpperCase() || 'U'}
+                            </div>
+                          )}
+                        </div>
+                        <div className="conversation-info">
+                          <div className="conversation-name">
+                            {result.first_name && result.last_name
+                              ? `${result.first_name} ${result.last_name}`
+                              : result.username}
                           </div>
-                          <div className="conversation-info">
-                            <div className="conversation-name">
-                              {result.first_name && result.last_name
-                                ? `${result.first_name} ${result.last_name}`
-                                : result.username}
-                            </div>
-                            <div className="conversation-preview">
-                              <span className="user-role">{result.role}</span>
-                              {existingConv && (
-                                <span className="has-conversation">Existing chat</span>
-                              )}
-                            </div>
+                          <div className="conversation-preview">
+                            <span className="user-role">{result.role}</span>
+                            {existingConv && (
+                              <span className="has-conversation">Active Chat</span>
+                            )}
                           </div>
                         </div>
-                      )
-                    })
-                  ) : (
-                    <div className="no-conversations">
-                      <p>No users found matching "{searchQuery}"</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                /* Empty State for Search Mode */
-                <div className="new-message-prompt">
-                  <div className="prompt-icon">
-                    <FiUserPlus />
+                      </div>
+                    )
+                  })
+                ) : (
+                  <div className="no-conversations">
+                    <p>No system-wide users match "{searchQuery}"</p>
                   </div>
-                  <p>Type a name to find people</p>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           ) : (
             /* REGULAR CONVERSATIONS LIST */
             <>
+              <div className="sidebar-section-label">Recent Messages</div>
               {conversationsLoading ? (
                 <div className="no-conversations">
                   <FiMessageCircle />
-                  <p>Loading conversations...</p>
+                  <p>Loading inbox...</p>
                 </div>
               ) : conversationsError ? (
                 <div className="no-conversations">
                   <FiMessageCircle />
-                  <p>Error loading conversations</p>
+                  <p>Check connection</p>
                   <button onClick={() => refetchConversations()}>Retry</button>
                 </div>
-              ) : filteredConversations.length === 0 && !searchQuery ? (
+              ) : filteredConversations.length === 0 ? (
                 <div className="no-conversations">
                   <div className="empty-state-icon">
                     <FiMessageCircle />
                   </div>
-                  <h3>Your inbox is empty</h3>
-                  <p>Start a new conversation to connect with others</p>
-                  <button
-                    className="start-conversation-btn"
-                    onClick={() => {
-                      setShowUserSearch(true)
-                      setSearchQuery('')
-                    }}
-                  >
-                    <FiMessageCircle />
-                    Start a Conversation
-                  </button>
-                </div>
-              ) : filteredConversations.length === 0 && searchQuery ? (
-                <div className="no-conversations">
-                  <FiMessageCircle />
-                  <p>No conversations found</p>
-                  <p className="search-hint">Try searching for users instead</p>
+                  <h3>No chats yet</h3>
+                  <p>Search for anyone to start messaging</p>
                 </div>
               ) : (
                 filteredConversations.map(conv => (
@@ -989,7 +977,9 @@ export default function DirectMessages() {
                       {conv.user?.avatar_url ? (
                         <img src={conv.user.avatar_url} alt={conv.user.username} />
                       ) : (
-                        <FiUser />
+                        <div className="avatar-placeholder-small">
+                          {conv.user?.first_name?.[0]?.toUpperCase() || conv.user?.username?.[0]?.toUpperCase() || 'U'}
+                        </div>
                       )}
                       {conv.unread_count > 0 && (
                         <span className="unread-badge">{conv.unread_count}</span>
