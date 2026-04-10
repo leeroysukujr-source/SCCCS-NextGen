@@ -124,7 +124,11 @@ if (typeof globalThis.__SCCCS_API_CLIENT__ === 'undefined') {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
       }
-      const fullUrl = `${config.baseURL}${config.url}`
+      // Safely join baseURL and url to avoid double slashes
+      const cleanBase = config.baseURL?.endsWith('/') ? config.baseURL.slice(0, -1) : config.baseURL;
+      const cleanUrl = config.url?.startsWith('/') ? config.url : `/${config.url}`;
+      const fullUrl = `${cleanBase}${cleanUrl}`;
+      
       console.log(`[API Request] ${config.method?.toUpperCase()} ${fullUrl}`, {
         baseURL: config.baseURL,
         url: config.url,

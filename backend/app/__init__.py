@@ -47,46 +47,25 @@ def create_app(config_class=Config):
     from app.utils.firebase_auth import init_firebase
     init_firebase()
     
-    # CORS configuration - allow all origins in development
+    # CORS configuration
     cors_origins = app.config.get('CORS_ORIGINS', ['*'])
     if isinstance(cors_origins, str):
         if cors_origins == '*':
-            cors_origins = '*' # Flask-CORS will handle this
+            cors_origins = '*'
         else:
             cors_origins = cors_origins.split(',')
     
-    # Configure CORS - Use a flexible but secure check
-    CORS(app, supports_credentials=True, resources={r"/api/.*": {"origins": []}})
+    # Configure CORS using the official Flask-CORS extension
+    # Setting origins="*" or specific origins from config
+    CORS(app, 
+         resources={r"/api/*": {"origins": "*"}}, 
+         supports_credentials=True,
+         expose_headers=["Content-Type", "Authorization", "X-Workspace-ID"],
+         allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "bypass-tunnel-reminder", "X-Workspace-ID"])
 
-    @app.before_request
-    def handle_preflight():
-        if request.method == "OPTIONS":
-            response = app.make_default_options_response()
-            origin = request.headers.get('Origin')
-            if origin:
-                response.headers.add('Access-Control-Allow-Origin', origin)
-                response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin,bypass-tunnel-reminder')
-                response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH')
-                response.headers.add('Access-Control-Allow-Credentials', 'true')
-                response.headers.add('Access-Control-Max-Age', '3600')
-            return response
-
-    @app.after_request
-    def after_request(response):
-        origin = request.headers.get('Origin')
-        if origin:
-            # Dynamically allow our specific app and any tunnel services
-            # Allow all origins (IPs and Domains) per user request
-            is_allowed = True
-            
-            if is_allowed:
-                # Ensure header isn't added twice if before_request already handled it
-                if 'Access-Control-Allow-Origin' not in response.headers:
-                    response.headers.add('Access-Control-Allow-Origin', origin)
-                    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin,bypass-tunnel-reminder')
-                    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH')
-                    response.headers.add('Access-Control-Allow-Credentials', 'true')
-        return response
+    # Remove the manual handle_preflight and after_request CORS logic 
+    # to avoid duplicate headers and conflicts with Flask-CORS.
+    
     
     # Initialize SocketIO with its own CORS for WebSocket connections
     # This only affects /socket.io/* routes, not /api/* routes
