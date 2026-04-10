@@ -24,7 +24,7 @@ import LessonDetail from './pages/LessonDetail'
 import LessonMaterials from './pages/LessonMaterials'
 import Profile from './pages/Profile'
 const ManageStudents = lazy(() => import('./pages/admin/ManageStudents'))
-const ManageUsers = lazy(() => import('./pages/admin/ManageUsers'))
+import ManageUsers from './pages/admin/ManageUsers'
 const ManageRooms = lazy(() => import('./pages/admin/ManageRooms'))
 const ManageClasses = lazy(() => import('./pages/admin/ManageClasses'))
 const ManageGroups = lazy(() => import('./pages/admin/ManageGroups'))

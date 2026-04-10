@@ -39,6 +39,10 @@ export default defineConfig({
       'Cross-Origin-Opener-Policy': 'unsafe-none',
       'Cross-Origin-Embedder-Policy': 'unsafe-none'
     }
+  },
+  build: {
+    emptyOutDir: true,
+    chunkSizeWarningLimit: 1000
   }
 })
 
