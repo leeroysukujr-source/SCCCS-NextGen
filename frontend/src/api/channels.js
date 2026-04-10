@@ -101,8 +101,9 @@ export const channelsAPI = {
     return response.data
   },
 
-  getAvailable: async () => {
-    const response = await client.get('/channels/available')
+  getAvailable: async (query = '') => {
+    const qs = query ? `?q=${encodeURIComponent(query)}` : ''
+    const response = await client.get(`/channels/available${qs}`)
     return response.data
   },
 }

@@ -55,3 +55,4 @@ backend/firebase-service-account.json
 instance/
 __pycache__/
 *.pyc
+.tmp.driveupload/

@@ -8,6 +8,9 @@ logger = logging.getLogger(__name__)
 
 def get_s3_client():
     endpoint = current_app.config.get('S3_ENDPOINT')
+    if endpoint:
+        endpoint = endpoint.rstrip('/')
+        
     access_key = current_app.config.get('S3_ACCESS_KEY')
     secret_key = current_app.config.get('S3_SECRET_KEY')
     # Use unsigned or specific config if needed

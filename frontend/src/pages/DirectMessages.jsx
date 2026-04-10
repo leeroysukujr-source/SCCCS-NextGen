@@ -212,8 +212,17 @@ export default function DirectMessages() {
     }
 
     try {
-      const results = await usersAPI.searchUsers(query)
-      // Admins can message anyone, others follow role restrictions
+      // Try local search first
+      let results = await usersAPI.searchUsers(query)
+      
+      // If no local results or few results, try global search if query is long enough
+      if (results.length < 3 && query.length >= 3) {
+        const globalResults = await usersAPI.searchUsers(query, true)
+        // Merge results, removing duplicates
+        const existingIds = new Set(results.map(r => r.id))
+        results = [...results, ...globalResults.filter(r => !existingIds.has(r.id))]
+      }
+
       const filtered = results.filter(u => u.id !== user?.id)
       setSearchResults(filtered)
     } catch (error) {
@@ -1018,8 +1027,15 @@ export default function DirectMessages() {
             <div className="dm-header">
               <div className="dm-header-info">
                 {isMobile && (
-                  <button className="mobile-back-btn" onClick={() => setIsSidebarOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', marginRight: '10px', display: 'flex', alignItems: 'center' }}>
-                    <FiArrowRight size={20} />
+                  <button 
+                    className="mobile-back-btn" 
+                    onClick={() => {
+                      setSelectedUser(null);
+                      setIsSidebarOpen(true);
+                    }}
+                    title="Back to Conversations"
+                  >
+                    <FiArrowRight style={{ transform: 'rotate(180deg)' }} />
                   </button>
                 )}
                 <div

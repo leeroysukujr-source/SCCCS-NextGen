@@ -42,8 +42,12 @@ const UserProfileDropdown = () => {
 
     return (
         <div className="user-profile-dropdown" ref={dropdownRef}>
-            <button className={`profile-trigger ${isOpen ? 'active' : ''}`} onClick={toggleDropdown}>
-                <div className="avatar-wrapper">
+            <button 
+                className={`profile-trigger ${isOpen ? 'active' : ''}`} 
+                onClick={toggleDropdown}
+                title="Account Settings"
+            >
+                <div className="avatar-circle">
                     {user.avatar_url ? (
                         <img 
                             src={getFullImageUrl(user.avatar_url)} 
@@ -52,54 +56,70 @@ const UserProfileDropdown = () => {
                             onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.style.display = 'none';
-                                e.target.nextSibling.style.display = 'flex';
                             }}
                         />
-                    ) : null}
-                    <div className="avatar-initials" style={{ display: user.avatar_url ? 'none' : 'flex' }}>
-                        {getInitials()}
-                    </div>
+                    ) : (
+                        <div className="avatar-initials-circle">
+                           {getInitials()}
+                        </div>
+                    )}
                 </div>
-                <div className="user-info-brief">
-                    <span className="user-name-text">{user.first_name || user.username}</span>
+                <div className="user-label-desktop">
+                    <span className="user-display-name">{user.first_name || user.username}</span>
                     <FiChevronDown className={`chevron-icon ${isOpen ? 'rotate' : ''}`} />
                 </div>
             </button>
 
             {isOpen && (
-                <div className="dropdown-menu">
-                    <div className="dropdown-header">
-                        <p className="full-name">{user.first_name} {user.last_name}</p>
-                        <p className="user-email">{user.email || user.username}</p>
-                        <div className="user-role-badge">
-                            <FiShield size={12} />
-                            <span>{user.role?.replace('_', ' ')}</span>
+                <div className="dropdown-menu premium-menu">
+                    <div className="dropdown-profile-header">
+                        <div className="header-avatar">
+                             {user.avatar_url ? (
+                                <img src={getFullImageUrl(user.avatar_url)} alt="Avatar" />
+                             ) : (
+                                <div className="avatar-initials-large">{getInitials()}</div>
+                             )}
+                        </div>
+                        <div className="header-info">
+                            <h3 className="full-name">{user.first_name} {user.last_name}</h3>
+                            <p className="user-email">{user.email || user.username}</p>
+                            <span className={`role-tag role-${user.role}`}>
+                                <FiShield size={10} />
+                                {user.role?.replace('_', ' ')}
+                            </span>
                         </div>
                     </div>
                     
                     <div className="dropdown-divider"></div>
                     
                     <div className="dropdown-items">
-                        <button onClick={() => { navigate('/profile'); setIsOpen(false); }}>
-                            <FiUser />
-                            <span>My Profile</span>
+                        <button className="menu-item" onClick={() => { navigate('/profile'); setIsOpen(false); }}>
+                            <div className="item-icon-bg"><FiUser /></div>
+                            <div className="item-text">
+                                <strong>My Profile</strong>
+                                <span>Personal information & security</span>
+                            </div>
                         </button>
-                        <button onClick={() => { navigate('/settings'); setIsOpen(false); }}>
-                            <FiSettings />
-                            <span>Settings</span>
+                        <button className="menu-item" onClick={() => { navigate('/settings'); setIsOpen(false); }}>
+                            <div className="item-icon-bg"><FiSettings /></div>
+                            <div className="item-text">
+                                <strong>Preferences</strong>
+                                <span>System behavior & UI</span>
+                            </div>
                         </button>
-                        <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-                            {theme === 'dark' ? <FiSun /> : <FiMoon />}
-                            <span>{theme === 'dark' ? 'Light' : 'Dark'} Mode</span>
+                        <button className="menu-item theme-switch" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                            <div className="item-icon-bg">{theme === 'dark' ? <FiSun /> : <FiMoon />}</div>
+                            <div className="item-text">
+                                <strong>{theme === 'dark' ? 'Light' : 'Dark'} Mode</strong>
+                                <span>Switch visual theme</span>
+                            </div>
                         </button>
                     </div>
 
-                    <div className="dropdown-divider"></div>
-                    
                     <div className="dropdown-footer">
-                        <button className="logout-btn" onClick={handleLogout}>
+                        <button className="professional-logout-btn" onClick={handleLogout}>
                             <FiLogOut />
-                            <span>Sign Out</span>
+                            <span>Sign Out of Session</span>
                         </button>
                     </div>
                 </div>

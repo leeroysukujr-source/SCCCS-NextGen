@@ -984,16 +984,18 @@
 @media (max-width: 768px) {
     .direct-messages {
         flex-direction: column;
+        height: calc(100vh - 75px - 70px); /* Fill remaining space exactly */
+        position: relative;
     }
 
     .dm-sidebar {
-        position: fixed;
+        position: absolute;
         top: 0;
         left: 0;
         width: 100% !important;
         height: 100%;
-        z-index: 2000;
-        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 2100; /* Higher than global sidebar (2000) */
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
         background: var(--dm-bg-secondary);
         border-right: none;
         max-width: none !important;
@@ -1001,25 +1003,34 @@
 
     .direct-messages.sidebar-closed .dm-sidebar {
         transform: translateX(-100%);
+        opacity: 0;
+        pointer-events: none;
     }
 
     .direct-messages.sidebar-open .dm-sidebar {
         transform: translateX(0);
+        opacity: 1;
+        pointer-events: auto;
     }
 
     .dm-main {
         width: 100%;
-        height: 100vh;
+        height: 100%;
         display: flex;
         flex-direction: column;
+        position: relative;
+        z-index: 50;
     }
 
     /* Header Mobile Adjustments */
     .dm-header {
-        padding: 0 16px;
-        height: 64px;
+        padding: 0 12px;
+        height: 60px;
         background: var(--dm-bg-header) !important;
         backdrop-filter: blur(20px) !important;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
     .mobile-back-btn {

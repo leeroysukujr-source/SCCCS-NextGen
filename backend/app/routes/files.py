@@ -93,6 +93,8 @@ def upload_file():
     # Check if encryption is needed (from channel if message_id provided)
     is_encrypted = False
     channel_id = request.form.get('channel_id', type=int)
+    lesson_id = request.form.get('lesson_id', type=int)
+    
     if channel_id:
         channel = Channel.query.get(channel_id)
         if channel and channel.is_encrypted and channel.encryption_key:
@@ -134,8 +136,6 @@ def upload_file():
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
-    # Check if this is a lesson material upload
-    lesson_id = request.form.get('lesson_id', type=int)
     if lesson_id:
         # Verify user has permission to upload to this lesson
         from app.models import Lesson, Class, ClassMember

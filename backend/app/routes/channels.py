@@ -725,23 +725,35 @@ def publish_channel(channel_id):
 
 @channels_bp.route('/available', methods=['GET'])
 @jwt_required()
-def get_available_courses():
+def get_available_channels():
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
+    search_query = request.args.get('q', '').strip()
     
-    # Courses: type='course', status='published', workspace_id=user.workspace_id
-    query = Channel.query.filter_by(
-        type='course', 
-        status='published', 
-        workspace_id=user.workspace_id
+    # Discovery query: 
+    # 1. Published courses in user's workspace
+    # 2. Public channels in user's workspace
+    query = Channel.query.filter(
+        Channel.workspace_id == user.workspace_id,
+        (
+            (Channel.type == 'course') & (Channel.status == 'published') |
+            (Channel.type == 'public')
+        )
     )
     
-    courses = query.order_by(Channel.created_at.desc()).all()
+    if search_query:
+        query = query.filter(
+            (Channel.name.ilike(f'%{search_query}%')) |
+            (Channel.description.ilike(f'%{search_query}%')) |
+            (Channel.course_code.ilike(f'%{search_query}%'))
+        )
+    
+    channels = query.order_by(Channel.created_at.desc()).all()
     
     # Attach is_member
     member_channel_ids = [m.channel_id for m in ChannelMember.query.filter_by(user_id=current_user_id).all()]
     results = []
-    for c in courses:
+    for c in channels:
         d = c.to_dict()
         d['is_member'] = c.id in member_channel_ids
         results.append(d)

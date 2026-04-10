@@ -11,8 +11,8 @@ export const usersAPI = {
     return response.data
   },
 
-  searchUsers: async (query) => {
-    const response = await client.get(`/users/search?q=${encodeURIComponent(query)}`)
+  searchUsers: async (query, isGlobal = false) => {
+    const response = await client.get(`/users/search?q=${encodeURIComponent(query)}${isGlobal ? '&global=true' : ''}`)
     return response.data
   },
 

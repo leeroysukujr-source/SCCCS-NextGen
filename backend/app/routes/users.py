@@ -109,24 +109,36 @@ def upload_avatar():
     if ext not in allowed_extensions:
         return jsonify({'error': 'Only image files are allowed (png, jpg, jpeg, gif, webp, svg)'}), 400
     
-    # Create avatars directory if it doesn't exist
-    current_file_dir = os.path.dirname(os.path.abspath(__file__))
-    backend_dir = os.path.dirname(os.path.dirname(current_file_dir))
-    avatars_folder = os.path.join(backend_dir, 'uploads', 'avatars')
-    os.makedirs(avatars_folder, exist_ok=True)
-    
     # Generate unique filename
     filename = secure_filename(file.filename)
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
     unique_filename = f"{timestamp}{current_user_id}_{filename}"
-    file_path = os.path.join(avatars_folder, unique_filename)
     
-    # Save file
-    file.save(file_path)
+    # Storage Logic
+    file_url = None
+    from app.utils.storage import upload_fileobj, get_public_url
+    from flask import current_app
     
-    # Get file URL - construct relative URL that frontend can use
-    # In production, you'd want to use a proper file serving solution
-    file_url = f"/api/files/avatar/{unique_filename}"
+    # Cloud Storage Path
+    if current_app.config.get('S3_ENDPOINT') and current_app.config.get('S3_BUCKET'):
+        # Upload to S3
+        file.seek(0)
+        key = f"avatars/{unique_filename}"
+        if upload_fileobj(file, key):
+            file_url = get_public_url(key)
+            
+    # Fallback to local
+    if not file_url:
+        # Create avatars directory if it doesn't exist
+        current_file_dir = os.path.dirname(os.path.abspath(__file__))
+        backend_dir = os.path.dirname(os.path.dirname(current_file_dir))
+        avatars_folder = os.path.join(backend_dir, 'uploads', 'avatars')
+        os.makedirs(avatars_folder, exist_ok=True)
+        
+        file_path = os.path.join(avatars_folder, unique_filename)
+        file.seek(0)
+        file.save(file_path)
+        file_url = f"/api/files/avatar/{unique_filename}"
     
     # Update user's avatar URL
     user.avatar_url = file_url
@@ -142,28 +154,140 @@ def upload_avatar():
 @jwt_required()
 def search_users():
     query = request.args.get('q', '')
+    global_search = request.args.get('global', 'false').lower() == 'true'
     
     if not query or len(query) < 2:
         return jsonify({'error': 'Query too short'}), 400
     
-    base_query = User.query.filter(
-        (User.username.contains(query)) |
-        (User.email.contains(query)) |
-        (User.first_name.contains(query)) |
-        (User.last_name.contains(query))
-    )
-    
     current_user_id = get_jwt_identity()
     current_user = User.query.get(current_user_id)
     
-    # Apply scoping via utility
-    base_query = scope_query(base_query, User)
-    if current_user and current_user.role != 'super_admin':
-        base_query = base_query.filter(User.role != 'super_admin')
-        
-    users = base_query.limit(20).all()
+    # 1. First, search within the current workspace (priority)
+    workspace_query = User.query.filter(
+        User.workspace_id == current_user.workspace_id,
+        (
+            (User.username.ilike(f'%{query}%')) |
+            (User.email.ilike(f'%{query}%')) |
+            (User.first_name.ilike(f'%{query}%')) |
+            (User.last_name.ilike(f'%{query}%'))
+        )
+    )
     
-    return jsonify([user.to_dict() for user in users]), 200
+    if current_user.role != 'super_admin':
+        workspace_query = workspace_query.filter(User.role != 'super_admin')
+        
+    workspace_users = workspace_query.limit(20).all()
+    
+    # 2. If global search enabled or fewer than 5 users found, search across other workspaces
+    # (Only allow cross-workspace search for emails or exact username matches to prevent privacy leaks)
+    other_users = []
+    if (global_search or len(workspace_users) < 5) and len(query) >= 3:
+        # Cross-workspace: more strict filters for privacy
+        other_query = User.query.filter(
+            User.workspace_id != current_user.workspace_id,
+            (
+                (User.email.ilike(f'{query}%')) | # Email start
+                (User.username.ilike(query))      # Exact username
+            )
+        )
+        # Exclude super admins from cross-workspace search
+        other_query = other_query.filter(User.role != 'super_admin')
+        other_users = other_query.limit(10).all()
+    
+    # Combine results, workspace users first
+    combined_users = workspace_users + [u for u in other_users if u.id not in [wu.id for wu in workspace_users]]
+    
+    return jsonify([user.to_dict() for user in combined_users]), 200
+
+@users_bp.route('/bulk', methods=['POST'])
+@jwt_required()
+def bulk_create_users():
+    """Bulk create users (Admin/Super Admin only)"""
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+    
+    if not current_user or not is_admin(current_user):
+        return jsonify({'error': 'Unauthorized. Admin access required'}), 403
+    
+    data = request.get_json()
+    users_data = data.get('users', [])
+    
+    if not users_data or not isinstance(users_data, list):
+        return jsonify({'error': 'A list of users is required'}), 400
+    
+    if len(users_data) > 100:
+        return jsonify({'error': 'Maximum 100 users per bulk request'}), 400
+    
+    results = {
+        'created': [],
+        'failed': []
+    }
+    
+    for user_info in users_data:
+        email = user_info.get('email')
+        if not email:
+            results['failed'].append({'email': 'MISSING', 'error': 'Email is required'})
+            continue
+            
+        # Check if user already exists
+        if User.query.filter_by(email=email).first():
+            results['failed'].append({'email': email, 'error': 'User already exists'})
+            continue
+            
+        username = user_info.get('username') or email.split('@')[0]
+        # Ensure username uniqueness
+        base_username = username
+        counter = 1
+        while User.query.filter_by(username=username).first():
+            username = f"{base_username}{counter}"
+            counter += 1
+            
+        try:
+            role = user_info.get('role', 'student')
+            if role not in ['admin', 'teacher', 'student']:
+                role = 'student'
+            
+            # Super Admin can specify workspace, regular admin is locked to their own
+            workspace_id = current_user.workspace_id
+            if current_user.role == 'super_admin' and user_info.get('workspace_id'):
+                workspace_id = user_info.get('workspace_id')
+            
+            new_user = User(
+                username=username,
+                email=email,
+                first_name=user_info.get('first_name', ''),
+                last_name=user_info.get('last_name', ''),
+                role=role,
+                workspace_id=workspace_id,
+                admin_id=current_user_id
+            )
+            
+            password = user_info.get('password') or secrets.token_urlsafe(10)
+            new_user.set_password(password)
+            
+            db.session.add(new_user)
+            results['created'].append({
+                'email': email,
+                'username': username,
+                'password': password if not user_info.get('password') else '********'
+            })
+        except Exception as e:
+            results['failed'].append({'email': email, 'error': str(e)})
+            
+    db.session.commit()
+    
+    # Log audit event
+    log_audit_event(
+        user_id=current_user_id,
+        action='bulk_create_users',
+        resource_type='user',
+        details={
+            'count': len(results['created']),
+            'failed_count': len(results['failed'])
+        }
+    )
+    
+    return jsonify(results), 201
 
 @users_bp.route('/list-teachers', methods=['GET'])
 @jwt_required()

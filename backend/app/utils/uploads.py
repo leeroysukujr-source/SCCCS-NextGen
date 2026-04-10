@@ -14,37 +14,51 @@ def save_logo(file, folder='logos'):
     Saves an uploaded logo file and returns the URL.
     Uses S3 cloud storage if configured, otherwise falls back to local storage.
     """
+    import logging
+    logger = logging.getLogger(__name__)
+
     if not file or file.filename == '':
+        logger.warning("save_logo called with empty file")
         return None
     
     if not allowed_file(file.filename):
+        logger.warning(f"File type not allowed for {file.filename}")
         return None
 
-    filename = secure_filename(file.filename)
-    ext = filename.rsplit('.', 1)[1].lower()
-    unique_filename = f"{uuid.uuid4().hex}.{ext}"
-    key = f"{folder}/{unique_filename}" if folder else unique_filename
-    
-    # Check if S3 is configured
-    from app.utils.storage import upload_fileobj, get_public_url
-    
-    # S3 Storage Path
-    if current_app.config.get('S3_ENDPOINT') and current_app.config.get('S3_BUCKET'):
-        # Reset file pointer to beginning before uploading
+    try:
+        filename = secure_filename(file.filename)
+        ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'png'
+        unique_filename = f"{uuid.uuid4().hex}.{ext}"
+        key = f"{folder}/{unique_filename}" if folder else unique_filename
+        
+        # Check if S3 is configured
+        from app.utils.storage import upload_fileobj, get_public_url
+        
+        # S3 Storage Path
+        if current_app.config.get('S3_ENDPOINT') and current_app.config.get('S3_BUCKET') and 'localhost' not in current_app.config.get('S3_ENDPOINT'):
+            # Reset file pointer to beginning before uploading
+            file.seek(0)
+            success = upload_fileobj(file, key)
+            if success:
+                url = get_public_url(key)
+                logger.info(f"Successfully uploaded logo to S3: {url}")
+                return url
+            else:
+                logger.error(f"S3 upload failed for {key}")
+                
+        # Fallback: Local file system
+        # Absolute path to save
+        upload_path = os.path.join(current_app.root_path, 'static', 'uploads', folder)
+        os.makedirs(upload_path, exist_ok=True)
+        
+        # Save locally
         file.seek(0)
-        success = upload_fileobj(file, key)
-        if success:
-            return get_public_url(key)
-            
-    # Fallback: Local file system
-    # Absolute path to save
-    upload_path = os.path.join(current_app.root_path, 'static', 'uploads', folder)
-    os.makedirs(upload_path, exist_ok=True)
-    
-    # Save locally
-    file.seek(0)
-    file.save(os.path.join(upload_path, unique_filename))
-    
-    # Return relative URL
-    return f"/static/uploads/{folder}/{unique_filename}"
+        file.save(os.path.join(upload_path, unique_filename))
+        
+        logger.info(f"Saved logo locally to {unique_filename} (fallback)")
+        # Return relative URL
+        return f"/static/uploads/{folder}/{unique_filename}"
+    except Exception as e:
+        logger.exception(f"Unexpected error in save_logo: {str(e)}")
+        return None
 
