@@ -108,17 +108,18 @@ export default function CreateChatroomModal({ isOpen, onClose, onCreate }) {
           </button>
         </div>
 
-        <div className="modal-body">
+        <div className="modal-body" style={{ padding: '2rem 3rem' }}>
           <div className="form-group">
             <label>Chatroom Name</label>
-            <div className="input-with-icon">
-              <FiMessageCircle className="input-icon" />
+            <div className="input-with-icon" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <FiMessageCircle className="input-icon" style={{ position: 'absolute', left: '1.25rem', fontSize: '1.25rem', color: 'var(--primary-purple)', zIndex: 2 }} />
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter chatroom name"
                 className="form-input"
+                style={{ paddingLeft: '3.5rem' }}
                 maxLength={100}
               />
             </div>
