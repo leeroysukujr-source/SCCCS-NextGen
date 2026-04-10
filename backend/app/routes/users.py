@@ -26,6 +26,14 @@ def is_admin(user):
     """Check if user is admin"""
     return user and user.role in ['admin', 'super_admin']
 
+@users_bp.route('/batch-create', methods=['POST'])
+@jwt_required()
+def bulk_create_users_api():
+    """Batch create users - Relocated for maximum reliability"""
+    print(f"[DEBUG] Batch create hit in users_bp by {get_jwt_identity()}")
+    from app.routes.admin import bulk_create_users
+    return bulk_create_users()
+
 @users_bp.route('', methods=['GET'])
 @jwt_required()
 def get_users():
@@ -151,11 +159,7 @@ def upload_avatar():
         'user': user.to_dict()
     }), 200
 
-@users_bp.route('/bulk', methods=['POST'])
-@jwt_required()
-def bulk_create_users_fallback():
-    print(f"[API] Bulk create fallback reached for user {get_jwt_identity()}")
-    return bulk_create_users()
+# Route removed and moved to top for reliability
 
 @users_bp.route('/search', methods=['GET'])
 @jwt_required()
