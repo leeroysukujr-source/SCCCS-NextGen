@@ -15,9 +15,9 @@ Write-Host ""
 Write-Host "[1/4] Checking Docker..." -ForegroundColor Yellow
 $dockerVersion = docker --version 2>&1
 if ($?) {
-    Write-Host "✓ Docker is available: $dockerVersion" -ForegroundColor Green
+    Write-Host "[OK] Docker is available: $dockerVersion" -ForegroundColor Green
 } else {
-    Write-Host "✗ Docker is not installed or not in PATH" -ForegroundColor Red
+    Write-Host "[ERROR] Docker is not installed or not in PATH" -ForegroundColor Red
     Write-Host "Please install Docker Desktop and try again." -ForegroundColor Red
     exit 1
 }
@@ -27,7 +27,7 @@ Write-Host ""
 Write-Host "[2/4] Starting Docker Compose stack..." -ForegroundColor Yellow
 Set-Location $scriptDir
 docker compose -f docker-compose.prod.yml up -d
-Write-Host "✓ Services started" -ForegroundColor Green
+Write-Host "[OK] Services started" -ForegroundColor Green
 
 # Wait for services to be ready
 if (-not $NoWait) {

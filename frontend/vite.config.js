@@ -11,7 +11,8 @@ export default defineConfig({
     strictPort: true,
     host: true,
     headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
+      'Cross-Origin-Opener-Policy': 'unsafe-none',
+      'Cross-Origin-Embedder-Policy': 'unsafe-none'
     },
     proxy: {
       '/api/ai': {
@@ -28,6 +29,15 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       }
+    }
+  },
+  preview: {
+    port: 5174,
+    strictPort: true,
+    host: true,
+    headers: {
+      'Cross-Origin-Opener-Policy': 'unsafe-none',
+      'Cross-Origin-Embedder-Policy': 'unsafe-none'
     }
   }
 })
