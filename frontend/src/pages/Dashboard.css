@@ -1585,6 +1585,20 @@
 }
 
 @media (max-width: 768px) {
+  .dashboard-topbar {
+    padding: 1rem 1.5rem 1rem 5rem;
+    flex-wrap: wrap;
+  }
+  
+  .agenda-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-content-wrapper {
+    padding: 1.5rem 1rem;
+    gap: 1.5rem;
+  }
+  
   .welcome-title {
     font-size: 2rem;
   }
@@ -1609,6 +1623,7 @@
     width: 100%;
   }
 }
+
 
 @media (max-width: 480px) {
   .stats-grid {

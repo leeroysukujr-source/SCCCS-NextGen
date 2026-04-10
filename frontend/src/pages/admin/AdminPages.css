@@ -295,6 +295,90 @@
   line-height: 1.6;
 }
 
+@media (max-width: 768px) {
+  .header-actions {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  
+  .header-actions button, .header-actions .export-dropdown {
+    flex: 1;
+    min-width: 140px;
+  }
+
+  /* Transform tables into cards for mobile */
+  .admin-table thead {
+    display: none;
+  }
+
+  .admin-table tbody tr {
+    display: block;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 2px solid var(--border-light);
+    border-radius: 16px;
+    background: var(--bg-secondary);
+  }
+
+  .admin-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-light);
+    text-align: right;
+  }
+
+  .admin-table td:last-child {
+    border-bottom: none;
+    margin-top: 0.5rem;
+  }
+
+  .admin-table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    text-align: left;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+  }
+
+  .admin-filters {
+    flex-direction: column;
+  }
+
+  .admin-search {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .role-filter {
+    width: 100%;
+  }
+}
+
+/* Animations */
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;

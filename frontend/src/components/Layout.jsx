@@ -121,11 +121,16 @@ export default function Layout() {
       {/* Top Navigation Bar */}
       <header className="top-navbar">
         <div className="top-navbar-left">
+          <button className="mobile-menu-toggle-navbar" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <FiGrid />
+          </button>
+          
           {location.pathname !== '/' && location.pathname !== '/dashboard' && (
             <button className="nav-back-btn" onClick={handleBack} title="Go Back">
               <FiChevronLeft />
             </button>
           )}
+
           <div className="page-context">
             <span className="context-label">Current View</span>
             <h2 className="context-title">
@@ -230,6 +235,26 @@ export default function Layout() {
       )}
 
       {showSearch && <SearchBar onClose={() => setShowSearch(false)} />}
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="mobile-bottom-nav">
+        <NavLink to="/dashboard" className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <FiGrid />
+          <span>Home</span>
+        </NavLink>
+        <NavLink to="/chat" className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <FiMessageSquare />
+          <span>Chat</span>
+        </NavLink>
+        <NavLink to="/classes" className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <FiBookOpen />
+          <span>Classes</span>
+        </NavLink>
+        <NavLink to="/profile" className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <FiUser />
+          <span>Profile</span>
+        </NavLink>
+      </nav>
     </div >
   )
 }

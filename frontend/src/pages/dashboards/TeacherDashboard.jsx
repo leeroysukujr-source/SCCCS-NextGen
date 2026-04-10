@@ -164,29 +164,8 @@ export default function TeacherDashboard() {
 
   return (
     <div className="dashboard-modern teacher-dashboard">
-      {/* Top Header Bar */}
-      <div className="dashboard-topbar">
-        <div className="topbar-left">
-          <div className="search-container">
-            <FiSearch className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search classes, students, lessons..."
-              className="search-input"
-            />
-          </div>
-        </div>
-        <div className="topbar-right">
-          <div className="topbar-nav">
-            <button className="nav-tab active">Home</button>
-            <button className="nav-tab" onClick={() => navigate('/chat')}>Team Chat</button>
-            <button className="nav-tab" onClick={() => navigate('/classes')}>My Classes</button>
-            <button className="nav-tab" onClick={() => navigate('/profile')}>Profile</button>
-          </div>
-        </div>
-      </div>
-
       <div className="dashboard-content-wrapper">
+
         {/* Main Content Area */}
         <div className="dashboard-main">
           {/* Workspace Identity Section */}

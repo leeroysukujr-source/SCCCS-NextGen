@@ -404,12 +404,12 @@ export default function ManageUsers() {
               ) : (
                 filteredUsers.map(u => (
                   <tr key={u.id}>
-                    <td>
+                    <td data-label="Name">
                       <div className="user-name-cell">
                         {u.first_name} {u.last_name}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Status">
                       {onlineUserIds.has(u.id) ? (
                         <span className="status-badge active" style={{ backgroundColor: '#10b981', color: 'white' }}>
                           Online
@@ -420,19 +420,19 @@ export default function ManageUsers() {
                         </span>
                       )}
                     </td>
-                    <td>{u.email}</td>
-                    <td>{u.username}</td>
-                    <td>
+                    <td data-label="Email">{u.email}</td>
+                    <td data-label="Username">{u.username}</td>
+                    <td data-label="Role">
                       <span className={`role-badge role-${u.role}`}>
                         <FiShield /> {u.role}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Account">
                       <span className={`status-badge ${u.is_active ? 'active' : 'inactive'}`}>
                         {u.is_active ? 'Enabled' : 'Disabled'}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Actions">
                       <div className="action-buttons">
                         <button
                           className="action-btn view"
@@ -460,6 +460,7 @@ export default function ManageUsers() {
                       </div>
                     </td>
                   </tr>
+
                 ))
               )}
             </tbody>
