@@ -162,27 +162,28 @@ export default function Login() {
     setLoading(true)
 
     try {
-      let idToken = selectionIdToken
-      if (!idToken) {
-        // In Firebase, we log in with Email, so we use the 'username' field assuming it is an email
-        const result = await signInWithEmailAndPassword(auth, username, password)
-        idToken = await result.user.getIdToken()
-        setSelectionIdToken(idToken)
-      }
-      
+      // Call the backend /api/auth/login directly — no Firebase needed for email/password
       const finalWorkspaceCode = workspaceCode || branding?.code || slug || new URLSearchParams(location.search).get('w')
-      
-      const data = await authAPI.firebaseLogin(idToken, finalWorkspaceCode)
 
-      if (data.require_selection) {
-        setAvailableWorkspaces(data.workspaces)
-        setRequireSelection(true)
-        setLoading(false)
-        return
+      const payload = {
+        username: username,   // backend accepts username or email in the 'username' field
+        password: password,
       }
+      if (finalWorkspaceCode) {
+        if (String(finalWorkspaceCode).match(/^\d+$/)) {
+          payload.workspace_id = parseInt(finalWorkspaceCode)
+        } else {
+          payload.workspace_code = finalWorkspaceCode
+        }
+      }
+      if (otpRequired && otpCode) {
+        payload.otp = otpCode
+      }
+
+      const data = await authAPI.login(payload)
 
       setAuth(data.user, data.access_token)
-      
+
       if (data.redirect_url) {
         navigate(data.redirect_url)
       } else if (data.user?.platform_role === 'SUPER_ADMIN' || data.user?.role === 'super_admin') {
@@ -200,12 +201,12 @@ export default function Login() {
 
       let errorMessage = 'Invalid email or password'
 
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-         errorMessage = 'Invalid email or password'
-      } else if (err.code === 'ECONNREFUSED' || err.code === 'ERR_NETWORK') {
-        errorMessage = `Cannot connect to backend server. Please ensure backend is running.`
+      if (err.code === 'ECONNREFUSED' || err.code === 'ERR_NETWORK') {
+        errorMessage = 'Cannot connect to server. Please try again.'
       } else if (err.response?.data?.error) {
         errorMessage = err.response.data.error
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message
       } else if (err.message) {
         errorMessage = err.message
       }
