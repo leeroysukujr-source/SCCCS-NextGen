@@ -1,6 +1,6 @@
 """
-ensure_tables.py — The Iron Version
-Smart, incremental creation that skips existing objects without crashing.
+ensure_tables.py — The Titan Version
+A guaranteed, forced reset and rebuild.
 """
 import sys
 import os
@@ -9,37 +9,55 @@ sys.path.insert(0, os.path.dirname(__file__))
 from app import create_app, db
 from sqlalchemy import text
 
-def iron_sync():
+def titan_sync():
     app = create_app()
     with app.app_context():
-        print("=== 🛡️ Starting Iron Schema Sync ===")
+        print("=== 🏗️ Starting Titan Database Sync ===")
         
-        # Lock the database so only ONE process can do this at a time
+        # 1. THE TITAN WIPE: Forced ordered cleanup.
+        # We drop TABLES first (with CASCADE), which naturally kills all indexes/constraints.
+        print("🧨 Executing Titan Wipe (Forced Order)...")
+        cleanup_sql = """
+        DO $$
+        DECLARE
+            r RECORD;
+        BEGIN
+            -- 1. Drop all tables with CASCADE (this kills almost everything)
+            FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+                EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
+            END LOOP;
+            
+            -- 2. Clean up any remaining loose indexes (like orphan search indexes)
+            FOR r IN (SELECT indexname FROM pg_indexes WHERE schemaname = 'public') LOOP
+                EXECUTE 'DROP INDEX IF EXISTS ' || quote_ident(r.indexname) || ' CASCADE';
+            END LOOP;
+            
+            -- 3. Clean up any custom types (if any exist)
+            FOR r IN (SELECT typname FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typtype = 'e') LOOP
+                EXECUTE 'DROP TYPE IF EXISTS ' || quote_ident(r.typname) || ' CASCADE';
+            END LOOP;
+        END $$;
+        """
         try:
-            db.session.execute(text("SELECT pg_advisory_xact_lock(123456);"))
-            print("   🔒 Database lock acquired.")
-        except Exception:
-            print("   ⚠️  Could not acquire lock, proceeding with caution...")
-
-        # Create tables one by one. If one exists, skip it.
-        # This is the most stable way to handle a "messy" database.
-        for table in db.metadata.sorted_tables:
-            try:
-                # checkfirst=True is the key—it only creates if missing
-                table.create(db.engine, checkfirst=True)
-                print(f"   ✅ Table '{table.name}' ensured.")
-            except Exception as e:
-                # If it already exists or has a conflict, we just skip it
-                # because it means the table is already there for the app to use.
-                db.session.rollback()
-                print(f"   ℹ️  Table '{table.name}' already stable (skipped).")
-        
-        try:
+            db.session.execute(text(cleanup_sql))
             db.session.commit()
-        except:
+            print("   ✅ Database wiped to absolute zero.")
+        except Exception as e:
             db.session.rollback()
+            print(f"   ⚠️  Wipe had issues: {e}")
 
-        print("=== 🏁 Iron Sync Finished: DB is Stable ===")
+        # 2. THE TITAN REBUILD: Pure, original SQLAlchemy build.
+        print("🏗️  Rebuilding Titan Schema...")
+        try:
+            # We use db.create_all() directly here. 
+            # It is the only way to solve the User/Workspace cycle correctly.
+            db.create_all()
+            db.session.commit()
+            print("   ✨ 100% of tables and relations created successfully.")
+        except Exception as e:
+            print(f"   ❌ Titan build failed: {e}")
+            
+        print("=== 🏁 Titan Sync Finished ===")
 
 if __name__ == '__main__':
-    iron_sync()
+    titan_sync()
