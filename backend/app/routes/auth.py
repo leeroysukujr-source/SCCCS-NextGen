@@ -643,6 +643,41 @@ def reset_password():
     log_info(f"Password reset successful for user_id={user.id}")
     return success_response(message='Your password has been reset successfully. You can now log in.')
 
+@auth_bp.route('/password/change', methods=['POST'])
+@jwt_required()
+def change_password():
+    """Allows a logged-in user to change their own password"""
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    
+    if not user:
+        return error_response('User not found', status_code=404)
+        
+    data = request.get_json() or {}
+    current_password = data.get('current_password')
+    new_password = data.get('new_password')
+    confirm_password = data.get('confirm_password')
+    
+    if not current_password or not new_password or not confirm_password:
+        return validation_error_response(['All password fields are required'])
+        
+    if new_password != confirm_password:
+        return validation_error_response(['New passwords do not match'])
+        
+    if not user.check_password(current_password):
+        return error_response('Invalid current password', status_code=400)
+        
+    from app.utils.validation import validate_password_strength
+    password_validation = validate_password_strength(new_password)
+    if not password_validation['valid']:
+        return validation_error_response(password_validation['errors'])
+        
+    user.set_password(new_password)
+    db.session.commit()
+    
+    log_info(f"User {user.id} changed their password successfully.")
+    return success_response(message='Password updated successfully.')
+
 @auth_bp.route('/password/verify-token', methods=['POST'])
 def verify_reset_token():
     """Verify if a password reset token is valid without performing a reset"""

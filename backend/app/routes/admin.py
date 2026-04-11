@@ -574,3 +574,35 @@ def bulk_create_users():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/users/<int:user_id>/reset-password', methods=['POST'])
+@jwt_required()
+def reset_user_password(user_id):
+    """Reset any user's password (admin only, workspace-scoped)"""
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+    
+    if not current_user or not is_admin(current_user):
+        return jsonify({'error': 'Unauthorized. Admin access required'}), 403
+        
+    # Find the target user
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+        
+    # Check authorization - Admin can only reset users in THEIR workspace
+    if not is_super_admin(current_user):
+        if user.workspace_id != current_user.workspace_id:
+            return jsonify({'error': 'Unauthorized. You can only reset passwords for users in your own workspace.'}), 403
+            
+    data = request.get_json() or {}
+    new_password = data.get('password')
+    
+    if not new_password:
+        return jsonify({'error': 'New password is required'}), 400
+        
+    # Apply change
+    user.set_password(new_password)
+    db.session.commit()
+    
+    return jsonify({'message': f'Password for user {user.username} has been reset successfully.'}), 200
