@@ -40,6 +40,15 @@ def create_app(config_class=Config):
     
     # Initialize extensions
     db.init_app(app)
+    
+    # Configure Search Path for Blueprint Method (Neon/PgBouncer compatible)
+    from sqlalchemy import event
+    @event.listens_for(db.engine, "connect")
+    def set_search_path(dbapi_conn, connection_record):
+        cursor = dbapi_conn.cursor()
+        cursor.execute("SET search_path TO scccs_prod, public")
+        cursor.close()
+        
     jwt.init_app(app)
     mail.init_app(app)
     

@@ -40,8 +40,6 @@ class Config:
                 params.append("sslmode=require")
             if 'connect_timeout=' not in db_url:
                 params.append("connect_timeout=10")
-            if 'options=' not in db_url:
-                params.append("options=-csearch_path%3Dscccs_prod,public")
             
             if params:
                 separator = '&' if '?' in db_url else '?'
