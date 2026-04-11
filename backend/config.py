@@ -34,9 +34,18 @@ class Config:
     else:
         db_url = os.getenv('DATABASE_URL', 'sqlite:///instance/scccs.db')
         if db_url.startswith('postgres'):
-            separator = '&' if '?' in db_url else '?'
+            # Add parameters only if they aren't already in the URL
+            params = []
+            if 'sslmode=' not in db_url:
+                params.append("sslmode=require")
+            if 'connect_timeout=' not in db_url:
+                params.append("connect_timeout=10")
             if 'options=' not in db_url:
-                db_url += f"{separator}sslmode=require&connect_timeout=10&options=-csearch_path%3Dscccs_prod,public"
+                params.append("options=-csearch_path%3Dscccs_prod,public")
+            
+            if params:
+                separator = '&' if '?' in db_url else '?'
+                db_url += separator + "&".join(params)
         SQLALCHEMY_DATABASE_URI = db_url
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
