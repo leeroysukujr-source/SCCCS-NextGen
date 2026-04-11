@@ -1,7 +1,6 @@
 """
-ensure_tables.py — The Golden Version
-1. Performs a 'soft wipe' of orphan indexes/constraints.
-2. Uses the native SQLAlchemy create_all() to solve cycles correctly.
+ensure_tables.py — The Diamond Version
+Full schema purge via CASCADE to resolve all orphan dependencies.
 """
 import sys
 import os
@@ -10,48 +9,48 @@ sys.path.insert(0, os.path.dirname(__file__))
 from app import create_app, db
 from sqlalchemy import text
 
-def golden_sync():
+def diamond_sync():
     app = create_app()
     with app.app_context():
-        print("=== 🌟 Starting Golden Schema Sync ===")
+        print("=== 💎 Starting Diamond Schema Sync ===")
         
-        # 1. Clean up ALL indexes and constraints that are blocking us
-        print("🧹 Clearing all blocking relations...")
+        # 1. TOTAL PURGE: This drops every table and index in the public schema
+        # to guarantee a 100% clean environment for create_all().
+        print("🧨 Purging entire public schema...")
         cleanup_sql = """
         DO $$
         DECLARE
             r RECORD;
         BEGIN
-            -- Drop all indexes in public schema
-            FOR r IN (SELECT indexname FROM pg_indexes WHERE schemaname = 'public') LOOP
-                EXECUTE 'DROP INDEX IF EXISTS ' || quote_ident(r.indexname) || ' CASCADE';
-            END LOOP;
-            
-            -- Drop all tables in public schema to ensure a clean create_all
-            -- This is safe because your tables currently fail to even load
+            -- Drop every table in the public schema (CASCADE takes everything else with it)
             FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
                 EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
+            END LOOP;
+            
+            -- Just in case any loose indexes remain
+            FOR r IN (SELECT indexname FROM pg_indexes WHERE schemaname = 'public') LOOP
+                EXECUTE 'DROP INDEX IF EXISTS ' || quote_ident(r.indexname) || ' CASCADE';
             END LOOP;
         END $$;
         """
         try:
             db.session.execute(text(cleanup_sql))
             db.session.commit()
-            print("   ✅ Database slate wiped clean.")
+            print("   ✅ Database is now 100% empty and clean.")
         except Exception as e:
             db.session.rollback()
-            print(f"   ⚠️  Cleanup failed (non-critical): {e}")
+            print(f"   ⚠️  Purge failed (non-critical): {e}")
 
-        # 2. Use the official create_all() which handles the User/Workspace cycle
+        # 2. Rebuild from scratch using cycle-aware logic
         print("🏗️  Building official schema...")
         try:
             db.create_all()
             db.session.commit()
-            print("   ✨ All 80+ tables created successfully via SQLAlchemy native Sync.")
+            print("   ✨ All tables created perfectly.")
         except Exception as e:
             print(f"   ❌ Schema build failed: {e}")
             
-        print("=== 🏁 Golden Sync Finished ===")
+        print("=== 🏁 Diamond Sync Finished ===")
 
 if __name__ == '__main__':
-    golden_sync()
+    diamond_sync()
