@@ -19,30 +19,33 @@ def nuclear_bootstrap():
         try:
             with engine.connect() as conn:
                 conn.execute(text("COMMIT"))
-                print("1️⃣  Clearing old environment...")
+                print("1. Annihilating old environment (Public & Prod)...")
+                conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE"))
+                conn.execute(text("CREATE SCHEMA public"))
                 conn.execute(text("DROP SCHEMA IF EXISTS scccs_prod CASCADE"))
                 conn.execute(text("CREATE SCHEMA scccs_prod"))
+                conn.execute(text("GRANT ALL ON SCHEMA public TO public"))
                 conn.execute(text("GRANT ALL ON SCHEMA scccs_prod TO public"))
                 conn.execute(text("COMMIT"))
-                print("   ✅ Fresh schema 'scccs_prod' is ready.")
+                print("   [OK] Environment is now pristine.")
 
             # IMPORTANT: Re-map SQLAlchemy to the new schema
             # Since we added search_path to the URI in config.py, 
             # create_all will now default to scccs_prod.
             
-            print("2️⃣  Injecting Application Architecture...")
+            print("2. Injecting Application Architecture...")
             # Trigger model imports to ensure they are in metadata
             from app import models
             import app.models
             
             db.metadata.create_all(bind=engine)
-            print("   ✅ Architecture successfully pushed to 'scccs_prod'.")
+            print("   [OK] Architecture successfully pushed to 'scccs_prod'.")
 
             # Verify 'users' table specifically
             with engine.connect() as conn:
                 res = conn.execute(text("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'scccs_prod'"))
                 tables = [row[0] for row in res]
-                print(f"   📊 PHYSICAL VERIFICATION: {', '.join(tables)}")
+                print(f"   [AUDIT] PHYSICAL VERIFICATION: {', '.join(tables)}")
                 if 'users' not in tables:
                      raise Exception("Critical: 'users' table failed to build even in fresh schema.")
                 conn.execute(text("COMMIT"))
@@ -52,9 +55,7 @@ def nuclear_bootstrap():
             print("="*70 + "\n")
             return True
         except Exception as e:
-            print(f"\n❌ Bootstrap Failed: {e}")
-            import traceback
-            traceback.print_exc()
+            print(f"\n[ERROR] Bootstrap Failed: {e}")
             return False
 
 if __name__ == "__main__":

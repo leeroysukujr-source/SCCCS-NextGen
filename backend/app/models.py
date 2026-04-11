@@ -1298,51 +1298,6 @@ class TutorSession(db.Model):
             'created_at': self.created_at.isoformat()
         }
 
-class SystemSetting(db.Model):
-    __tablename__ = 'system_settings'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    key = db.Column(db.String(100), unique=True, nullable=False, index=True)
-    value = db.Column(db.Text)  # JSON serialized
-    category = db.Column(db.String(50), index=True, default='general')
-    value_type = db.Column(db.String(20), default='string')  # string, int, bool, json, float
-    description = db.Column(db.String(255))
-    is_public = db.Column(db.Boolean, default=False)
-    admin_only = db.Column(db.Boolean, default=True)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    def get_value(self):
-        if self.value is None:
-            return None
-        try:
-            val = json.loads(self.value)
-            if self.value_type == 'int':
-                return int(val)
-            if self.value_type == 'float':
-                return float(val)
-            if self.value_type == 'bool':
-                if isinstance(val, str):
-                    return val.lower() == 'true'
-                return bool(val)
-            return val
-        except:
-            return self.value
-
-    def set_value(self, val):
-        self.value = json.dumps(val)
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'key': self.key,
-            'value': self.get_value(),
-            'category': self.category,
-            'value_type': self.value_type,
-            'description': self.description,
-            'is_public': self.is_public,
-            'admin_only': self.admin_only,
-            'updated_at': self.updated_at.isoformat()
-        }
 
 # Announcement Model (Workspace Scoped)
 class Announcement(db.Model):
