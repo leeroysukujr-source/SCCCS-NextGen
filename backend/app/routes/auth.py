@@ -671,25 +671,35 @@ def verify_reset_token():
 @auth_bp.route('/firebase-login', methods=['POST'])
 def firebase_login():
     """Verify Firebase ID token and login/register the user in the backend."""
+    try:
+        return _firebase_login_handler()
+    except Exception as e:
+        import traceback
+        log_error(f"firebase_login unhandled exception: {str(e)}\n{traceback.format_exc()}")
+        db.session.rollback()
+        return server_error_response(message=f'Login failed: {str(e)}')
+
+def _firebase_login_handler():
+    """Internal handler for Firebase login."""
     data = request.get_json() or {}
     id_token = data.get('id_token')
     workspace_code = data.get('workspace_code')
-    
+
     if not id_token:
         return validation_error_response(['Firebase ID token is required'])
-        
+
     from app.utils.firebase_auth import verify_token
     decoded_token = verify_token(id_token)
-    
+
     if not decoded_token:
         return error_response('Invalid Firebase token', status_code=401)
-        
+
     email = decoded_token.get('email', '')
     firebase_uid = decoded_token.get('uid')
-    
+
     if not email:
         return error_response('Email not found in Firebase token', status_code=400)
-        
+
     # Find all accounts associated with this email across all workspaces
     # Ensure case-insensitive match for email
     users = User.query.filter((func.lower(User.email) == email.lower()) | (User.oauth_id == firebase_uid)).all()

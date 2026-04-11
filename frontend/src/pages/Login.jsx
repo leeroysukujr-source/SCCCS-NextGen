@@ -164,23 +164,10 @@ export default function Login() {
     try {
       // Call the backend /api/auth/login directly — no Firebase needed for email/password
       const finalWorkspaceCode = workspaceCode || branding?.code || slug || new URLSearchParams(location.search).get('w')
+      const otp = otpRequired ? otpCode : null
 
-      const payload = {
-        username: username,   // backend accepts username or email in the 'username' field
-        password: password,
-      }
-      if (finalWorkspaceCode) {
-        if (String(finalWorkspaceCode).match(/^\d+$/)) {
-          payload.workspace_id = parseInt(finalWorkspaceCode)
-        } else {
-          payload.workspace_code = finalWorkspaceCode
-        }
-      }
-      if (otpRequired && otpCode) {
-        payload.otp = otpCode
-      }
-
-      const data = await authAPI.login(payload)
+      // authAPI.login(username, password, workspaceCode, otp)
+      const data = await authAPI.login(username, password, finalWorkspaceCode, otp)
 
       setAuth(data.user, data.access_token)
 
@@ -192,7 +179,7 @@ export default function Login() {
         navigate('/workspace-entry')
       }
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.otp_required) {
+      if (err.response?.data?.otp_required) {
         setOtpRequired(true)
         setError(err.response.data.message || 'Two-factor code required')
         setLoading(false)
@@ -200,9 +187,10 @@ export default function Login() {
       }
 
       let errorMessage = 'Invalid email or password'
-
       if (err.code === 'ECONNREFUSED' || err.code === 'ERR_NETWORK') {
         errorMessage = 'Cannot connect to server. Please try again.'
+      } else if (err.response?.data?.errors?.length) {
+        errorMessage = err.response.data.errors.join(', ')
       } else if (err.response?.data?.error) {
         errorMessage = err.response.data.error
       } else if (err.response?.data?.message) {
