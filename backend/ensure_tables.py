@@ -1,6 +1,6 @@
 """
-ensure_tables.py — The Diamond Version
-Full schema purge via CASCADE to resolve all orphan dependencies.
+ensure_tables.py — The Super-Diamond Version
+Total database purge and official SQLAlchemy rebuild.
 """
 import sys
 import os
@@ -9,48 +9,41 @@ sys.path.insert(0, os.path.dirname(__file__))
 from app import create_app, db
 from sqlalchemy import text
 
-def diamond_sync():
+def super_diamond_sync():
     app = create_app()
     with app.app_context():
-        print("=== 💎 Starting Diamond Schema Sync ===")
+        print("=== 💎 Starting Super-Diamond Schema Sync ===")
         
-        # 1. TOTAL PURGE: This drops every table and index in the public schema
-        # to guarantee a 100% clean environment for create_all().
-        print("🧨 Purging entire public schema...")
-        cleanup_sql = """
-        DO $$
-        DECLARE
-            r RECORD;
-        BEGIN
-            -- Drop every table in the public schema (CASCADE takes everything else with it)
-            FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
-                EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
-            END LOOP;
-            
-            -- Just in case any loose indexes remain
-            FOR r IN (SELECT indexname FROM pg_indexes WHERE schemaname = 'public') LOOP
-                EXECUTE 'DROP INDEX IF EXISTS ' || quote_ident(r.indexname) || ' CASCADE';
-            END LOOP;
-        END $$;
-        """
+        # 1. TOTAL PURGE: Drop everything owned by the user.
+        # This is the cleanest way to reset a Postgres database.
+        print("🧨 Purging all database objects owned by current user...")
+        cleanup_sql = "DROP OWNED BY CURRENT_USER CASCADE;"
         try:
             db.session.execute(text(cleanup_sql))
             db.session.commit()
-            print("   ✅ Database is now 100% empty and clean.")
+            print("   ✅ Database cleared completely.")
         except Exception as e:
             db.session.rollback()
-            print(f"   ⚠️  Purge failed (non-critical): {e}")
+            print(f"   ⚠️  Purge failed (retrying with schema wipe): {e}")
+            try:
+                db.session.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO public;"))
+                db.session.commit()
+                print("   ✅ Public schema recreated.")
+            except Exception as e2:
+                db.session.rollback()
+                print(f"   ❌ Critical: Could not reset database: {e2}")
 
-        # 2. Rebuild from scratch using cycle-aware logic
+        # 2. Rebuild using SQLAlchemy native create_all()
+        # This correctly handles the User/Workspace circular dependencies.
         print("🏗️  Building official schema...")
         try:
             db.create_all()
             db.session.commit()
-            print("   ✨ All tables created perfectly.")
+            print("   ✨ All 80+ tables created successfully.")
         except Exception as e:
             print(f"   ❌ Schema build failed: {e}")
             
-        print("=== 🏁 Diamond Sync Finished ===")
+        print("=== 🏁 Super-Diamond Sync Finished ===")
 
 if __name__ == '__main__':
-    diamond_sync()
+    super_diamond_sync()

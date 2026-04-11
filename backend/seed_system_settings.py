@@ -5,18 +5,9 @@ from app.models.system_settings import SystemSetting
 def seed_settings():
     app = create_app()
     with app.app_context():
-        # Ensure table exists — rollback any failed DDL transaction before querying
-        try:
-            SystemSetting.query.first()
-        except Exception:
-            db.session.rollback()  # Clear aborted transaction state
-            print("Table missing, creating...")
-            try:
-                SystemSetting.__table__.create(db.engine)
-            except Exception as e:
-                print(f"Creation warning: {e}")
-                db.session.rollback()  # Rollback duplicate index error too
-
+        # Clean transaction slate
+        db.session.rollback()
+        
         # Now safe to query
         try:
             defaults = [
