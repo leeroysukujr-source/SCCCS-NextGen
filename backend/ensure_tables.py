@@ -15,72 +15,55 @@ def ensure_all_tables():
     with app.app_context():
         print("=== 🛠️  Starting Ultra-Robust Schema Sync ===")
 
-        # Identify all tables in dependency order
-        tables = db.metadata.sorted_tables
+        # Identify all tables
+        tables = list(db.metadata.sorted_tables)
         
-        created = 0
-        skipped = 0
-        failed = []
-
-        for table in tables:
-            print(f"⌛ Processing {table.name}...")
+        # We loop up to 5 times to ensure dependencies are met in multiple passes
+        for pass_num in range(1, 6):
+            print(f"\n--- 🔄 Schema Sync Pass {pass_num}/5 ---")
+            created_in_pass = 0
+            remaining_tables = []
             
-            # Use a fresh connection and transaction for every attempt
-            attempt_count = 0
-            while attempt_count < 3: # Allow up to 2 retries for index issues
-                attempt_count += 1
+            for table in tables:
                 try:
                     with db.engine.connect() as conn:
-                        # Check if table exists
                         if db.engine.dialect.has_table(conn, table.name):
-                            print(f"   ✅ {table.name} already exists.")
-                            skipped += 1
-                            break
+                            continue # Already exists
                         
-                        # Try to create table
-                        with conn.begin():
-                            table.create(conn, checkfirst=False)
-                            print(f"   ✨ Created {table.name}.")
-                            created += 1
-                            break
-                            
-                except Exception as e:
-                    err_msg = str(e)
-                    
-                    # Check for "already exists" errors (Relation / Index / Constraint)
-                    if "already exists" in err_msg:
-                        # Parse out the name of the offending index/constraint
-                        # Example: 'relation "ix_users_username" already exists'
-                        match = re.search(r'relation "([^"]+)" already exists', err_msg)
-                        if not match:
-                             match = re.search(r'index "([^"]+)" already exists', err_msg)
-                        
-                        if match:
-                            offending_object = match.group(1)
-                            print(f"   ⚠️  Found orphan object: {offending_object}. Dropping and retrying...")
+                        # Use a retry loop for orphan indexes
+                        for attempt in range(2):
                             try:
-                                with db.engine.connect() as conn:
-                                    with conn.begin():
-                                        conn.execute(text(f'DROP INDEX IF EXISTS "{offending_object}" CASCADE'))
-                                        conn.execute(text(f'DROP CONSTRAINT IF EXISTS "{offending_object}" CASCADE'))
-                                continue # Retry table creation
-                            except Exception as drop_err:
-                                print(f"   ❌ Could not drop {offending_object}: {drop_err}")
-                                break
-                        else:
-                            print(f"   ⚠️  Object already exists but couldn't parse name. Skipping.")
-                            skipped += 1
-                            break
-                    else:
-                        print(f"   ❌ Failed to create {table.name}: {err_msg[:200]}")
-                        failed.append(table.name)
-                        break
+                                with conn.begin():
+                                    table.create(conn, checkfirst=False)
+                                    print(f"   ✨ Created {table.name}.")
+                                    created_in_pass += 1
+                                    break
+                            except Exception as te:
+                                err_msg = str(te)
+                                if "already exists" in err_msg and attempt == 0:
+                                    match = re.search(r'relation "([^"]+)" already exists', err_msg) or \
+                                            re.search(r'index "([^"]+)" already exists', err_msg)
+                                    if match:
+                                        offending = match.group(1)
+                                        print(f"   ⚠️  Dropping orphan index {offending} for {table.name}...")
+                                        with db.engine.connect() as drop_conn:
+                                            with drop_conn.begin():
+                                                drop_conn.execute(text(f'DROP INDEX IF EXISTS "{offending}" CASCADE'))
+                                        continue # Retry creation
+                                raise te # If not an index issue or second attempt, fail pass
+                except Exception as pass_e:
+                    remaining_tables.append(table)
+            
+            tables = remaining_tables
+            if not tables:
+                print("✅ All tables verified/created successfully.")
+                break
+            if created_in_pass == 0:
+                print(f"⚠️  No progress made in pass {pass_num}. {len(remaining_tables)} tables still missing.")
+                break
 
-        print("\n" + "="*40)
-        print(f"✅ Sync Complete: {created} Created, {skipped} Skipped, {len(failed)} Failed")
-        if failed:
-            print(f"⚠️  Missing: {', '.join(failed)}")
-        print("="*40)
+        if tables:
+            print(f"❌ Final missing tables: {[t.name for t in tables]}")
 
 if __name__ == '__main__':
     ensure_all_tables()
