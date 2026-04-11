@@ -10,7 +10,10 @@ settings_bp = Blueprint('settings', __name__)
 @settings_bp.route('/public', methods=['GET'])
 def get_public_settings():
     """Get all public (non-sensitive) system settings"""
-    return jsonify(settings_service.get_system_settings(public_only=True)), 200
+    try:
+        return jsonify(settings_service.get_system_settings(public_only=True)), 200
+    except Exception:
+        return jsonify([]), 200  # Return empty if table not yet seeded
 
 @settings_bp.route('/platform', methods=['GET'])
 @jwt_required()
