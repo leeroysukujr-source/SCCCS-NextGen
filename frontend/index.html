@@ -9,7 +9,11 @@
   <!-- Security Meta Tags -->
   <!-- Expanded CSP for Development: Allows http/ws for localhost APIs -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self' https: http: wss: ws: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:;">
+    content="default-src 'self' https: http: wss: ws: data: blob:; 
+             script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.firebaseapp.com blob:; 
+             style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+             font-src 'self' https://fonts.gstatic.com data:;
+             connect-src 'self' https: http: wss: ws:;">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <link rel="preconnect" href="https://fonts.googleapis.com">
