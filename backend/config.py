@@ -17,8 +17,23 @@ class Config:
 
     JWT_ACCESS_TOKEN_EXPIRES = False  # Set to timedelta(hours=24) for production
     
-    # Database
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///instance/scccs.db')
+    # Database - Build URL from components to avoid @ symbol encoding issues in Render
+    # If individual POSTGRES_* vars are set, use them (safer for special chars in passwords)
+    # Otherwise fall back to DATABASE_URL env var
+    _pg_host = os.getenv('POSTGRES_HOST')
+    _pg_user = os.getenv('POSTGRES_USER', 'postgres')
+    _pg_pass = os.getenv('POSTGRES_PASSWORD', '')
+    _pg_port = os.getenv('POSTGRES_PORT', '5432')
+    _pg_db   = os.getenv('POSTGRES_DB', 'postgres')
+
+    if _pg_host and _pg_pass:
+        from urllib.parse import quote_plus
+        SQLALCHEMY_DATABASE_URI = (
+            f"postgresql://{_pg_user}:{quote_plus(_pg_pass)}@{_pg_host}:{_pg_port}/{_pg_db}"
+        )
+    else:
+        SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///instance/scccs.db')
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_size': 5,
