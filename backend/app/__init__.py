@@ -108,17 +108,24 @@ def create_app(config_class=Config):
     else:
         init_kwargs["allow_upgrades"] = True
 
-    try:
-        socketio.init_app(app, **init_kwargs)
-    except (ValueError, ImportError):
-        app.logger.warning(f"Requested async_mode '{async_mode}' unavailable. Falling back to default.")
-        if "async_mode" in init_kwargs:
-            del init_kwargs["async_mode"]
-        init_kwargs["allow_upgrades"] = False
-        socketio.init_app(app, **init_kwargs)
+    # Check if we are running a migration or CLI command that doesn't need SocketIO
+    import sys
+    is_migration = any(cmd in sys.argv for cmd in ['db', 'migrate', 'upgrade', 'downgrade'])
+    
+    if is_migration:
+        app.logger.info("Skipping SocketIO initialization for migration task.")
+    else:
+        try:
+            socketio.init_app(app, **init_kwargs)
+        except (ValueError, ImportError):
+            app.logger.warning(f"Requested async_mode '{async_mode}' unavailable. Falling back to threading.")
+            # Explicitly force threading for safety
+            init_kwargs['async_mode'] = 'threading'
+            init_kwargs["allow_upgrades"] = False
+            socketio.init_app(app, **init_kwargs)
 
     app.logger.info(
-        f"Socket.IO async mode: {socketio.async_mode} "
+        f"Socket.IO async mode: {getattr(socketio, 'async_mode', 'disabled')} "
         f"(message_queue={'on' if message_queue else 'off'})"
     )
     migrate.init_app(app, db)
