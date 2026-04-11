@@ -108,7 +108,15 @@ def create_app(config_class=Config):
     else:
         init_kwargs["allow_upgrades"] = True
 
-    socketio.init_app(app, **init_kwargs)
+    try:
+        socketio.init_app(app, **init_kwargs)
+    except (ValueError, ImportError):
+        app.logger.warning(f"Requested async_mode '{async_mode}' unavailable. Falling back to default.")
+        if "async_mode" in init_kwargs:
+            del init_kwargs["async_mode"]
+        init_kwargs["allow_upgrades"] = False
+        socketio.init_app(app, **init_kwargs)
+
     app.logger.info(
         f"Socket.IO async mode: {socketio.async_mode} "
         f"(message_queue={'on' if message_queue else 'off'})"
