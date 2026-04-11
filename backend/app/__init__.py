@@ -290,26 +290,8 @@ def create_app(config_class=Config):
     from app.middleware.error_handler import register_error_handlers
     register_error_handlers(app)
     
-    # Create tables — use checkfirst to skip existing tables/indexes safely
-    with app.app_context():
-        try:
-            db.create_all()
-        except Exception as e:
-            # If create_all fails (e.g. duplicate index), rollback and retry
-            # each table individually so new tables still get created
-            print(f"create_all partial failure: {e} — retrying per-table")
-            try:
-                db.session.rollback()
-                for table in db.metadata.sorted_tables:
-                    try:
-                        table.create(db.engine, checkfirst=True)
-                    except Exception as te:
-                        print(f"  Skipping table {table.name}: {te}")
-            except Exception as e2:
-                print(f"Per-table creation also failed: {e2}")
-        # Ensure rooms table has correct breakout columns
-        from app.utils.db_fix import fix_room_schema
-        fix_room_schema()
+    # Database initialization is handled externally by ensure_tables.py
+    # during the pre-start sequence to avoid worker race conditions.
     
     # Start scheduled message worker (dev-friendly, polls DB periodically)
     try:
