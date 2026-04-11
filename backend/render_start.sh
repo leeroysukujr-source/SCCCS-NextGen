@@ -2,9 +2,9 @@
 export SOCKETIO_ASYNC_MODE=eventlet
 export LIVEKIT_AUTOSTART=false
 
-# STEP 1: Ensure all DB tables exist (handles fresh Neon DB & duplicate index edge cases)
-echo "=== Step 1: Ensuring DB schema ==="
-python ensure_tables.py || echo "ensure_tables had errors (non-fatal)"
+# STEP 1: Nuclear Blueprint Bootstrap (Fresh isolated schema)
+echo "=== Step 1: Running Blueprint Bootstrap ==="
+python bootstrap.py || echo "Bootstrap had errors (non-fatal)"
 
 # STEP 2: Seed reference data
 echo "=== Step 2: Running seeders ==="
