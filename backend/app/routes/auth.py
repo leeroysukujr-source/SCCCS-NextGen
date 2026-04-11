@@ -544,8 +544,9 @@ def login():
             message='Login successful'
         )
     except Exception as e:
-        log_error(f"Login exception: {str(e)}")
-        return server_error_response(message='Login failed. Please try again.')
+        import traceback
+        log_error(f"Login exception: {str(e)}\n{traceback.format_exc()}")
+        return server_error_response(message=f'Login failed: {str(e)}')
 
 @auth_bp.route('/password/forgot', methods=['POST'])
 def request_password_reset():
