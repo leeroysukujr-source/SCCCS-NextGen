@@ -112,8 +112,20 @@ export default function Login() {
       }
     } catch (err) {
       console.error('Firebase Google OAuth error:', err)
-      const errorMsg = err.response?.data?.error || err.message || 'Failed to initiate Google login'
+      let errorMsg = 'Failed to initiate Google login'
+      
+      if (err.code === 'auth/popup-closed-by-user') {
+        errorMsg = 'Login popup was closed before completion.'
+      } else if (err.code === 'auth/popup-blocked') {
+        errorMsg = 'Login popup was blocked by your browser.'
+      } else if (err.response?.data?.error) {
+        errorMsg = err.response.data.error
+      } else if (err.message) {
+        errorMsg = err.message
+      }
+      
       setError(errorMsg)
+    } finally {
       setLoading(false)
     }
   }
@@ -150,8 +162,18 @@ export default function Login() {
       }
     } catch (err) {
       console.error('Firebase GitHub OAuth error:', err)
-      const errorMsg = err.response?.data?.error || err.message || 'Failed to initiate GitHub login'
+      let errorMsg = 'Failed to initiate GitHub login'
+
+      if (err.code === 'auth/popup-closed-by-user') {
+        errorMsg = 'Login popup was closed before completion.'
+      } else if (err.response?.data?.error) {
+        errorMsg = err.response.data.error
+      } else if (err.message) {
+        errorMsg = err.message
+      }
+
       setError(errorMsg)
+    } finally {
       setLoading(false)
     }
   }
