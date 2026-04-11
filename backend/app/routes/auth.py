@@ -720,6 +720,12 @@ def firebase_login():
 
 def _firebase_login_handler():
     """Internal handler for Firebase login."""
+    # Start with a clean slate to prevent InFailedSqlTransaction/Deadlocks from previous requests
+    try:
+        db.session.rollback()
+    except Exception:
+        pass
+        
     data = request.get_json() or {}
     id_token = data.get('id_token')
     workspace_code = data.get('workspace_code')
