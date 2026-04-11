@@ -44,7 +44,8 @@ def check_workspace_status():
                         'message': 'Your institution account has been suspended. Please contact support.'
                     }), 403
     except Exception:
-        # If JWT invalid or other error, let the actual route handle it (or basic auth fail)
+        # Clear aborted transactions from failed lookups
+        db.session.rollback()
         pass
 
 @auth_bp.route('/resolve-workspace', methods=['POST'])
@@ -55,6 +56,7 @@ def resolve_workspace():
     Consumes: { email?, workspace_code?, invite_token? }
     Returns: { workspace_id, workspace_name, branding, resolution_method }
     """
+    db.session.rollback() # Ensure clean transaction
     try:
         data = request.get_json() or {}
         email = (data.get('email') or '').strip().lower()
@@ -371,6 +373,7 @@ def register():
 @auth_bp.route('/login', methods=['POST'])
 def login():
     """Login endpoint with proper validation and tenant scoping"""
+    db.session.rollback() # Fix "InFailedSqlTransaction" errors
     try:
         data = request.get_json()
         
