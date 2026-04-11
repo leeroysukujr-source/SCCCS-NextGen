@@ -1,64 +1,57 @@
-"""
-ensure_tables.py — The Omega Version
-Total schema annihilation and fresh rebuild. 
-This is the only 100% guarantee against 'ghost' indexes.
-"""
-import sys
 import os
-sys.path.insert(0, os.path.dirname(__file__))
-
-from app import create_app, db
+import sys
 from sqlalchemy import text
 
-def omega_sync():
+# Add the current directory to sys.path so we can import 'app'
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from app import create_app, db
+
+def infinity_sync():
+    """Infinity Sync: Total annihilation followed by a forced, cold-rebuild of the schema."""
     app = create_app()
     with app.app_context():
-        print("=== 🔱 Starting Omega Database Sync ===")
-        
-        # 1. THE OMEGA WIPE: Recreate the entire schema
-        # This kills every table, index, type, and constraint in one command.
-        print("🧨 Executing Omega Wipe (Schema Annihilation)...")
-        # We try to drop the schema itself. If the DB user doesn't have 
-        # permission, we fall back to a brute-force ordered drop.
-        cmds = [
-            "DROP SCHEMA public CASCADE;",
-            "CREATE SCHEMA public;",
-            "GRANT ALL ON SCHEMA public TO public;", 
-            "GRANT ALL ON SCHEMA public TO " + app.config['SQLALCHEMY_DATABASE_URI'].split(':')[1].replace('//','')
-        ]
+        engine = db.engine
+        print("\n" + "="*50)
+        print("=== INFINITY SYNC: COLD-REBUILDING DATABASE ===")
+        print("="*50)
         
         try:
-            for cmd in cmds:
-                try:
-                    db.session.execute(text(cmd))
-                    db.session.commit()
-                except Exception as e:
-                    db.session.rollback()
-                    print(f"   ⚠️  Note: Schema command '{cmd[:20]}...' failed (skipping): {e}")
-            print("   ✅ Public schema reset completed.")
-        except Exception as e:
-            print(f"   ❌ Final wipe attempt failed: {e}")
-
-        # 2. THE REBUILD: Official SQLAlchemy native create_all
-        print("🏗️  Rebuilding from absolute zero...")
-        try:
-            # checkfirst=False tells SQLAlchemy 'Don't even check, just do it.'
-            # because we KNOW it's empty.
-            db.metadata.create_all(db.engine)
-            db.session.commit()
-            print("   ✨ Database reconstructed successfully.")
-        except Exception as e:
-            # Final fallback: if create_all fails, we try individual table creation
-            print(f"   ⚠️  Rebuild error: {e}. Attempting recovery...")
-            db.session.rollback()
-            try:
-                db.create_all()
-                db.session.commit()
-                print("   ✨ Emergency rebuild successful.")
-            except Exception as e2:
-                print(f"   ❌ Critical build failure: {e2}")
+            with engine.connect() as conn:
+                # Force commit outside transaction block
+                conn.execute(text("COMMIT"))
+                
+                print("1. Annihilating existing schema 'public'...")
+                conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE"))
+                conn.execute(text("CREATE SCHEMA public"))
+                conn.execute(text("GRANT ALL ON SCHEMA public TO public"))
+                conn.execute(text("COMMENT ON SCHEMA public IS 'standard public schema'"))
+                conn.execute(text("COMMIT"))
+                print("   ✅ Schema wiped and recreated.")
+                
+            print("2. Clearing SQLAlchemy Metadata Cache...")
+            db.metadata.clear()
             
-        print("=== 🏁 Omega Sync Finished ===")
+            print("3. Building Schema from Models...")
+            # Use metadata.create_all directly on the engine for maximum reliability
+            db.metadata.create_all(bind=engine)
+            print("   ✅ All tables created successfully.")
+            
+            with engine.connect() as conn:
+                print("4. Finalizing Transaction...")
+                conn.execute(text("COMMIT"))
+                
+            print("="*50)
+            print("=== SUCCESS: Database is now in a pristine state ===")
+            print("="*50 + "\n")
+            return True
+        except Exception as e:
+            print(f"\n!!! CRITICAL SYNC FAILURE: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return False
 
-if __name__ == '__main__':
-    omega_sync()
+if __name__ == "__main__":
+    success = infinity_sync()
+    if not success:
+        sys.exit(1)
