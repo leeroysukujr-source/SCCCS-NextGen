@@ -166,27 +166,6 @@ export default function Chat() {
   const notify = useNotify()
   const queryClient = useQueryClient()
 
-  // Persist queue helper
-  const saveUnsentQueue = (queue) => {
-    try {
-      localStorage.setItem('unsent_messages', JSON.stringify(queue))
-    } catch (e) {
-      console.error('Failed to save unsent queue:', e)
-    }
-    setUnsentQueue(queue)
-  }
-
-  const enqueueUnsentMessage = (tempMessage, payload) => {
-    const item = {
-      id: tempMessage.id,
-      channel_id: tempMessage.channel_id,
-      payload,
-      attempts: 0,
-      created_at: new Date().toISOString()
-    }
-    const next = [...(JSON.parse(localStorage.getItem('unsent_messages') || '[]')), item]
-    saveUnsentQueue(next)
-  }
 
   const loadAvailableChannels = useCallback(async () => {
     setIsDiscoverLoading(true)
