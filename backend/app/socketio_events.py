@@ -250,7 +250,8 @@ def register_socketio_events(socketio):
                 return
             
             # Ensure real-time broadcast is decrypted for the Authorized Stream
-            if content and isinstance(content, str) and content.startswith('gAAAA'):
+            # Check for both base64 (gAAAA) and hex (\x6741) Fernet prefixes
+            if content and isinstance(content, str) and (content.startswith('gAAAA') or content.startswith('\\x6741')):
                 try:
                     from app.utils.encryption import decrypt_message
                     channel = Channel.query.get(channel_id)

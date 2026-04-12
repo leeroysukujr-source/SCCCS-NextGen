@@ -142,7 +142,9 @@ def create_message(channel_id):
         message_dict = message.to_dict()
 
         # Robust Decryption for the Authorized Stream
-        if message.is_encrypted and message.content:
+        # Check for both base64 (gAAAA) and hex (\x6741) Fernet prefixes
+        content_str = str(message.content or "")
+        if message.content and (content_str.startswith('gAAAA') or content_str.startswith('\\x6741')):
             try:
                 # 1. Try Channel Key
                 decrypted = None
@@ -152,12 +154,12 @@ def create_message(channel_id):
                         decrypted = decrypt_message(message.content, encryption_key)
                         
                         # Handle legacy double-encryption
-                        if decrypted and isinstance(decrypted, str) and decrypted.startswith('gAAAA'):
+                        if decrypted and isinstance(decrypted, str) and (decrypted.startswith('gAAAA') or decrypted.startswith('\\x6741')):
                             decrypted = decrypt_message(decrypted, encryption_key)
                     except:
                         decrypted = None
                 
-                # 2. Try Master Key Fallback (if channel key failed or missing)
+                # 2. Try Master Key Fallback
                 if not decrypted or decrypted == "[Decryption Error]":
                     try:
                         decrypted = decrypt_message(message.content) # Uses system ENCRYPTION_KEY
@@ -167,9 +169,9 @@ def create_message(channel_id):
                 if decrypted and decrypted != "[Decryption Error]":
                     message_dict['content'] = decrypted
                 else:
-                    # Final fallback for UI safety
-                    if not message_dict['content'] or message_dict['content'].startswith('gAAAA'):
-                        message_dict['content'] = '[Encrypted Message]'
+                    # If it's still encrypted hex, show the UI safety placeholder
+                    if content_str.startswith('\\x6741') or content_str.startswith('gAAAA'):
+                         message_dict['content'] = '[Encrypted Message]'
             except Exception:
                 message_dict['content'] = '[Encrypted Message]'
 
@@ -208,7 +210,8 @@ def get_messages(channel_id):
     
     # Decrypt messages for the Authorized Stream
     for message in messages:
-        if message.is_encrypted and message.content:
+        content_str = str(message.content or "")
+        if message.content and (content_str.startswith('gAAAA') or content_str.startswith('\\x6741')):
             try:
                 # 1. Try Channel Key
                 decrypted = None
@@ -217,7 +220,7 @@ def get_messages(channel_id):
                         encryption_key = channel.encryption_key.encode('utf-8')
                         decrypted = decrypt_message(message.content, encryption_key)
                         # Handle legacy double-encryption
-                        if decrypted and isinstance(decrypted, str) and decrypted.startswith('gAAAA'):
+                        if decrypted and isinstance(decrypted, str) and (decrypted.startswith('gAAAA') or decrypted.startswith('\\x6741')):
                             decrypted = decrypt_message(decrypted, encryption_key)
                     except:
                         decrypted = None
@@ -232,7 +235,8 @@ def get_messages(channel_id):
                 if decrypted and decrypted != "[Decryption Error]":
                     message.content = decrypted
                 else:
-                    message.content = '[Encrypted Message]'
+                    if content_str.startswith('\\x6741') or content_str.startswith('gAAAA'):
+                        message.content = '[Encrypted Message]'
             except Exception:
                 message.content = '[Encrypted Message]'
     

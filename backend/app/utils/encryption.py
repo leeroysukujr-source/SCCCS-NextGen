@@ -40,16 +40,28 @@ class EncryptionService:
             # Use provided key or fallback to system key
             enc_key = key if key else cls.get_key()
             
-            # Ensure encrypted_data is bytes for Fernet
+            # Handle string input
             if isinstance(encrypted_data, str):
-                encrypted_data = encrypted_data.encode()
+                # Handle hex-encoded data (e.g., \x6741...) often seen in Postgres
+                if encrypted_data.startswith('\\x'):
+                    try:
+                        # Extract hex part and convert to bytes
+                        hex_data = encrypted_data[2:]
+                        encrypted_data = bytes.fromhex(hex_data)
+                    except:
+                        # Fallback to standard encoding if hex conversion fails
+                        encrypted_data = encrypted_data.encode()
+                else:
+                    encrypted_data = encrypted_data.encode()
                 
             f = Fernet(enc_key)
             decrypted = f.decrypt(encrypted_data)
             
             # Try to return as string, fallback to bytes for binary files
             try:
-                return decrypted.decode()
+                if isinstance(decrypted, bytes):
+                    return decrypted.decode('utf-8')
+                return decrypted
             except UnicodeDecodeError:
                 return decrypted
         except Exception:
