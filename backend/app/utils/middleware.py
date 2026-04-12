@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from app.models import User
 from functools import wraps
 from app.services.feature_flags import is_feature_enabled
@@ -9,34 +9,56 @@ def jurisdiction_check():
     Middleware to verify cross-tenant isolation.
     Ensures that the request's workspace_id matches the user's authorized workspace.
     """
-    # Skip for public routes or pre-auth routes if needed
-    if request.endpoint in ['auth.login', 'auth.register', 'health.check']:
+    # 1. Skip check for CORS preflight (OPTIONS)
+    if request.method == "OPTIONS":
         return None
 
-    user_id = get_jwt_identity()
-    if not user_id:
-        return None
-
-    user = User.query.get(user_id)
-    if not user:
-        return jsonify({"error": "User context lost"}), 401
-
-    # Super admins are exempt from jurisdictional lockdown
-    if user.role == 'super_admin' or user.platform_role == 'SUPER_ADMIN':
-        return None
-
-    # Check incoming workspace context
-    req_workspace_id = request.headers.get('X-Workspace-ID') or request.args.get('workspace_id')
+    # 2. Define Public Routes that don't need a token
+    public_endpoints = [
+        'auth.login', 
+        'auth.register', 
+        'auth.firebase_login', 
+        'static', 
+        'health.check', 
+        'health_check'
+    ]
     
-    if req_workspace_id:
-        try:
-            if int(req_workspace_id) != user.workspace_id:
-                return jsonify({
-                    "error": "Jurisdiction Breach Detected",
-                    "details": "Workspace mismatch. Access denied to unauthorized tenant data."
-                }), 403
-        except (ValueError, TypeError):
-            return jsonify({"error": "Invalid workspace context"}), 400
+    if request.endpoint in public_endpoints or not request.endpoint:
+        return None
+
+    # 3. Attempt to verify JWT; if it fails, let @jwt_required handles it on the route
+    try:
+        # verify_jwt_in_request is already called if the route has @jwt_required
+        # but since this is a before_request, we check optionally
+        verify_jwt_in_request(optional=True)
+        user_id = get_jwt_identity()
+        if not user_id:
+            return None # Not logged in yet, let the route catch it
+            
+        user = User.query.get(user_id)
+        if not user:
+            return None # User context lost, let JWT session handling deal with it
+            
+        # Super admins are exempt from jurisdictional lockdown
+        if user.role == 'super_admin' or user.platform_role == 'SUPER_ADMIN':
+            return None
+
+        # 4. Check incoming workspace context
+        req_workspace_id = request.headers.get('X-Workspace-ID') or request.args.get('workspace_id')
+        
+        if req_workspace_id:
+            try:
+                if int(req_workspace_id) != user.workspace_id:
+                    return jsonify({
+                        "error": "Jurisdiction Breach Detected",
+                        "details": "Workspace mismatch. Access denied to unauthorized tenant data."
+                    }), 403
+            except (ValueError, TypeError):
+                return jsonify({"error": "Invalid workspace context"}), 400
+
+    except Exception:
+        # Verification failed or another error, skip jurisdiction check
+        return None
 
     return None
 
