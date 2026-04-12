@@ -89,6 +89,7 @@ class User(db.Model):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'role': effective_role,
+            'platform_role': self.platform_role,
             'is_active': self.is_active,
             'avatar_url': self.avatar_url,
             'oauth_provider': self.oauth_provider,
