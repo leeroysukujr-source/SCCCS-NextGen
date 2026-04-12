@@ -399,7 +399,8 @@ class Class(db.Model):
     # Relationships
     members = db.relationship('ClassMember', backref='class_obj', lazy='dynamic', cascade='all, delete-orphan')
     lessons = db.relationship('Lesson', backref='class_obj', lazy='dynamic', cascade='all, delete-orphan')
-    assignments = db.relationship('Assignment', backref='course', lazy='dynamic', cascade='all, delete-orphan')
+    assignments = db.relationship('Assignment', backref='associated_class', lazy=True, 
+                                 primaryjoin="Class.id == Assignment.class_id", cascade='all, delete-orphan')
     channels = db.relationship('Channel', backref='course_obj', lazy='dynamic')
     
     def to_dict(self):
@@ -1351,6 +1352,7 @@ class Assignment(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     workspace_id = db.Column(db.Integer, db.ForeignKey('workspaces.id'), nullable=False)
+    class_id = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=True)
     channel_id = db.Column(db.Integer, db.ForeignKey('channels.id'), nullable=True)
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     due_date = db.Column(db.DateTime)
