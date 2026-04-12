@@ -61,6 +61,33 @@ def feature_required(feature_name):
         return decorated_function
     return decorator
 
+def workspace_required(f):
+    """
+    Decorator to ensure the user has access to the workspace specified in the URL.
+    Used for institutional management and jurisdictional data access.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"error": "Authentication required"}), 401
+            
+        # Super admins have global access
+        if user.platform_role == 'SUPER_ADMIN':
+            return f(*args, **kwargs)
+            
+        # Check against workspace_id in URL/kwargs
+        workspace_id = kwargs.get('workspace_id')
+        if workspace_id and int(user.workspace_id) != int(workspace_id):
+            return jsonify({
+                "error": "Jurisdictional Access Denied",
+                "details": "You do not have permission to manage this workspace."
+            }), 403
+            
+        return f(*args, **kwargs)
+    return decorated_function
+
 def platform_super_admin_required(f):
     """
     Decorator to ensure user is a platform super admin.
