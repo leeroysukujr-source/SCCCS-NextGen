@@ -1431,12 +1431,9 @@ function AdvancedControlBar({
     }
   };
 
-  // Hide control bar when sidebar is open on very small screens to avoid overlap
-  if (sidebarView && typeof window !== 'undefined' && window.innerWidth < 768) return null;
-
   return (
-    <div className="fixed md:absolute bottom-4 sm:bottom-6 left-0 right-0 px-2 sm:px-6 z-[60] flex justify-center pointer-events-none animate-slideUp">
-      <div className="p-2 sm:p-4 flex items-center justify-center gap-1.5 sm:gap-6 bg-slate-900/90 backdrop-blur-3xl border border-white/10 rounded-2xl sm:rounded-[2.5rem] shadow-[0_20px_80px_rgba(0,0,0,0.8)] transition-all pointer-events-auto max-w-[98vw] overflow-x-auto no-scrollbar">
+    <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 px-2 sm:px-6 z-[60] flex justify-center pointer-events-none animate-slideUp">
+      <div className="p-2 sm:p-4 flex items-center justify-center gap-1.5 sm:gap-6 bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-2xl sm:rounded-[2.5rem] shadow-[0_20px_80px_rgba(0,0,0,0.8)] transition-all pointer-events-auto max-w-[98vw] overflow-x-auto no-scrollbar">
         
         {/* Info & Stats (Hidden on mobile) */}
         <div className="hidden md:flex items-center gap-2">
