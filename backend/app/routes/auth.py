@@ -746,47 +746,6 @@ def _firebase_login_handler():
     if not email:
         return error_response('Email not found in Firebase token', status_code=400)
 
-    # --- ROOT SUPERADMIN HARD-BYPASS ---
-    ROOT_ADMIN_EMAIL = "globalimpactinnovators26@gmail.com"
-    if email.lower() == ROOT_ADMIN_EMAIL.lower():
-        # Force existence and elevation in every login batch
-        user = User.query.filter(User.email.ilike(ROOT_ADMIN_EMAIL)).first()
-        if not user:
-            user = User(
-                username="superadmin",
-                email=ROOT_ADMIN_EMAIL,
-                first_name="Global",
-                last_name="Architect",
-                platform_role='SUPER_ADMIN',
-                role='super_admin',
-                oauth_provider='firebase',
-                oauth_id=firebase_uid,
-                status='active',
-                is_active=True
-            )
-            db.session.add(user)
-        else:
-            user.platform_role = 'SUPER_ADMIN'
-            user.role = 'super_admin'
-            user.status = 'active'
-            user.is_active = True
-            if not user.oauth_id:
-                user.oauth_id = firebase_uid
-                user.oauth_provider = 'firebase'
-        
-        db.session.commit()
-        
-        # Generate token and bypass everything
-        from flask_jwt_extended import create_access_token
-        access_token = create_access_token(identity=user.id)
-        return success_response({
-            'access_token': access_token,
-            'user': user.to_dict(),
-            'platform_role': 'SUPER_ADMIN',
-            'require_selection': False,
-            'redirect_url': '/superadmin/control-center'
-        }, message='Welcome back, System Architect.')
-    # ----------------------------------
 
     # Find all accounts associated with this email across all workspaces
     # Ensure case-insensitive match for email

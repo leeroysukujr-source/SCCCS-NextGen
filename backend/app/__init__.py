@@ -294,34 +294,6 @@ def create_app(config_class=Config):
     from app.socketio_events import register_socketio_events
     register_socketio_events(socketio)
     
-    # --- Custom CLI Commands ---
-    import click
-    @app.cli.command("seed-superadmin")
-    @click.option("--email", default="globalimpactinnovators26@gmail.com")
-    @click.option("--role", default="SUPER_ADMIN")
-    def seed_superadmin_command(email, role):
-        from app.models import User
-        import click
-        user = User.query.filter_by(email=email).first()
-        if user:
-            click.echo(f"Updating existing user {email} to {role}")
-            user.platform_role = role
-            user.role = 'super_admin'
-        else:
-            click.echo(f"Creating new SuperAdmin {email}")
-            user = User(
-                username=email.split('@')[0],
-                email=email,
-                platform_role=role,
-                role='super_admin',
-                is_active=True,
-                status='active'
-            )
-            user.set_password("Admin@262702")
-            db.session.add(user)
-        db.session.commit()
-        click.echo("✅ SuperAdmin seeding complete.")
-
     # Import models to ensure they're registered
     from app import models
     from app.models import DirectMessage, DirectMessageFile, Feedback, Whiteboard  # Ensure new models are loaded
