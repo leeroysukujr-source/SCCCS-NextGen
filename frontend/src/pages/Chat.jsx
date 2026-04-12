@@ -103,7 +103,28 @@ export default function Chat() {
   const [activeSidebarTab, setActiveSidebarTab] = useState('joined') // 'joined' or 'discover'
   const [availableChannels, setAvailableChannels] = useState([])
   const [isDiscoverLoading, setIsDiscoverLoading] = useState(false)
-  
+
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+  const [isRecordingPaused, setIsRecordingPaused] = useState(false)
+  const typingTimeoutRef = useRef(null)
+  const mentionSuggestionsRef = useRef(null)
+
+  const messagesEndRef = useRef(null)
+  const fileInputRef = useRef(null)
+  const mediaRecorderRef = useRef(null)
+  const videoRecorderRef = useRef(null)
+  const audioChunksRef = useRef([])
+  const videoChunksRef = useRef([])
+  const messageInputRef = useRef(null)
+  const accumulatedTimeRef = useRef(0)
+  const lastStartTimeRef = useRef(null)
+
+  const { user, token } = useAuthStore()
+  const confirm = useConfirm()
+  const notify = useNotify()
+  const queryClient = useQueryClient()
+
   // Implementation of missing offline message queue functions
   const enqueueUnsentMessage = useCallback((tempMsg, payload) => {
     try {
@@ -145,26 +166,6 @@ export default function Chat() {
       console.error('[Chat] Failed to flush unsent queue:', e)
     }
   }, [queryClient])
-
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
-  const [isRecordingPaused, setIsRecordingPaused] = useState(false)
-  const typingTimeoutRef = useRef(null)
-  const mentionSuggestionsRef = useRef(null)
-
-  const messagesEndRef = useRef(null)
-  const fileInputRef = useRef(null)
-  const mediaRecorderRef = useRef(null)
-  const videoRecorderRef = useRef(null)
-  const audioChunksRef = useRef([])
-  const videoChunksRef = useRef([])
-  const messageInputRef = useRef(null)
-  const accumulatedTimeRef = useRef(0)
-  const lastStartTimeRef = useRef(null)
-
-  const { user, token } = useAuthStore()
-  const confirm = useConfirm()
-  const notify = useNotify()
-  const queryClient = useQueryClient()
 
 
   const loadAvailableChannels = useCallback(async () => {
