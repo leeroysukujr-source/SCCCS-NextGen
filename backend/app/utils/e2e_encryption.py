@@ -1,5 +1,5 @@
 """
-Enhanced End-to-End Encryption Utilities for Direct Messages
+Enhanced End-toEnd Encryption Utilities for Direct Messages
 Includes message integrity verification, forward secrecy support, and key rotation
 """
 from cryptography.fernet import Fernet
@@ -11,24 +11,27 @@ import os
 import hashlib
 import hmac as hmac_lib
 from datetime import datetime
+import functools
 
-def generate_key():
-    """Generate a new encryption key"""
-    return Fernet.generate_key()
+@functools.lru_cache(maxsize=1024)
+def _get_cached_key(password: str, salt_bytes: bytes) -> bytes:
+    """Helper for LRU cache - takes hashable types"""
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt_bytes,
+        iterations=100000,
+        backend=default_backend()
+    )
+    return base64.urlsafe_b64encode(kdf.derive(password.encode()))
 
 def derive_key_from_password(password: str, salt: bytes = None) -> tuple:
     """Derive an encryption key from a password using PBKDF2 with 100,000 iterations"""
     if salt is None:
         salt = os.urandom(16)
     
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=salt,
-        iterations=100000,  # High iteration count for security
-        backend=default_backend()
-    )
-    key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+    # Use cached version to speed up repeated lookups
+    key = _get_cached_key(password, salt)
     return key, salt
 
 def get_dm_encryption_key(user_id1: int, user_id2: int, salt: bytes = None) -> tuple:
