@@ -202,6 +202,9 @@ export default function DirectMessages() {
       e.target.nextSibling.style.display = 'flex';
     }
   };
+
+  // Attach handlers to shared socket from SocketProvider
+  useEffect(() => {
     if (!sharedSocket) return
 
     const newSocket = sharedSocket
