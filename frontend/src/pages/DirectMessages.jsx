@@ -196,8 +196,12 @@ export default function DirectMessages() {
     }
   }, [userId, sortedConversations, selectedUser, notify])
 
-  // Attach handlers to shared socket from SocketProvider
-  useEffect(() => {
+  const handleImageError = (e) => {
+    e.target.style.display = 'none';
+    if (e.target.nextSibling) {
+      e.target.nextSibling.style.display = 'flex';
+    }
+  };
     if (!sharedSocket) return
 
     const newSocket = sharedSocket
@@ -980,13 +984,18 @@ export default function DirectMessages() {
                     }}
                   >
                     <div className="conversation-avatar">
-                      {conv.user?.avatar_url ? (
-                        <img src={conv.user.avatar_url} alt={conv.user.username} />
-                      ) : (
-                        <div className="avatar-placeholder-small">
+                      <div className="avatar-container-rel">
+                        {conv.user?.avatar_url && (
+                          <img 
+                            src={conv.user.avatar_url} 
+                            alt={conv.user.username} 
+                            onError={handleImageError}
+                          />
+                        )}
+                        <div className="avatar-placeholder-small" style={{ display: conv.user?.avatar_url ? 'none' : 'flex' }}>
                           {conv.user?.first_name?.[0]?.toUpperCase() || conv.user?.username?.[0]?.toUpperCase() || 'U'}
                         </div>
-                      )}
+                      </div>
                       {conv.unread_count > 0 && (
                         <span className="unread-badge">{conv.unread_count}</span>
                       )}
@@ -1039,13 +1048,18 @@ export default function DirectMessages() {
                   onClick={() => navigate(`/profile/${selectedUser.user_id}`)}
                   title="View profile"
                 >
-                  {selectedUser.user?.avatar_url ? (
-                    <img src={selectedUser.user.avatar_url} alt={selectedUser.user.username} />
-                  ) : (
-                    <div className="avatar-placeholder">
+                  <div className="avatar-container-rel">
+                    {selectedUser.user?.avatar_url && (
+                      <img 
+                        src={selectedUser.user.avatar_url} 
+                        alt={selectedUser.user.username} 
+                        onError={handleImageError}
+                      />
+                    )}
+                    <div className="avatar-placeholder" style={{ display: selectedUser.user?.avatar_url ? 'none' : 'flex' }}>
                       {selectedUser.user?.first_name?.[0]?.toUpperCase() || selectedUser.user?.username?.[0]?.toUpperCase() || 'U'}
                     </div>
-                  )}
+                  </div>
                 </div>
                 <div>
                   <div
@@ -1106,7 +1120,11 @@ export default function DirectMessages() {
                     src="/assets/images/dm-aura.png" 
                     alt="Inbox Aura" 
                     className="empty-state-illustration" 
+                    onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.querySelector('.empty-state-icon-fallback').style.display = 'flex'; }}
                   />
+                  <div className="empty-state-icon-fallback" style={{ display: 'none', justifyContent: 'center', marginBottom: '20px', color: 'var(--dm-accent)', opacity: 0.5 }}>
+                    <FiMessageCircle size={100} />
+                  </div>
                   <h3>Your Inbox is a Blank Canvas</h3>
                   <p>Start a new conversation or send a professional greeting to get things moving.</p>
                 </div>

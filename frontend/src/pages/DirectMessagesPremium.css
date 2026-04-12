@@ -1,6 +1,19 @@
 /* DirectMessagesPremium.css */
 
-:root {
+.header-action-btn svg, .action-button svg, .send-btn svg {
+    color: inherit;
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.dm-search-box .search-icon {
+    color: var(--dm-text-tertiary);
+    z-index: 5;
+}
+
+.no-messages h3, .no-conversation-selected h3 {
+    margin-top: 0;
+}
     --dm-bg-primary: #FFFFFF;
     --dm-bg-secondary: #F8FAFC;
     --dm-bg-tertiary: #F1F5F9;
