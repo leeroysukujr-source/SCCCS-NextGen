@@ -29,7 +29,7 @@ class Config:
     if _pg_host and _pg_pass:
         from urllib.parse import quote_plus
         SQLALCHEMY_DATABASE_URI = (
-            f"postgresql://{_pg_user}:{quote_plus(_pg_pass)}@{_pg_host}:{_pg_port}/{_pg_db}?sslmode=require&connect_timeout=10&options=-csearch_path%3Dscccs_prod,public"
+            f"postgresql://{_pg_user}:{quote_plus(_pg_pass)}@{_pg_host}:{_pg_port}/{_pg_db}?sslmode=require&connect_timeout=10"
         )
     else:
         db_url = os.getenv('DATABASE_URL', 'sqlite:///instance/scccs.db')

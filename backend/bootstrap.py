@@ -19,15 +19,12 @@ def nuclear_bootstrap():
         try:
             with engine.connect() as conn:
                 conn.execute(text("COMMIT"))
-                print("1. Annihilating old environment (Public & Prod)...")
+                print("💣 PHASE ONE: Data Plane Purge (Neon PostgreSQL)...")
                 conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE"))
                 conn.execute(text("CREATE SCHEMA public"))
-                conn.execute(text("DROP SCHEMA IF EXISTS scccs_prod CASCADE"))
-                conn.execute(text("CREATE SCHEMA scccs_prod"))
                 conn.execute(text("GRANT ALL ON SCHEMA public TO public"))
-                conn.execute(text("GRANT ALL ON SCHEMA scccs_prod TO public"))
                 conn.execute(text("COMMIT"))
-                print("   [OK] Environment is now pristine.")
+                print("   ✅ [OK] Public schema annihilated and recreated.")
 
             # IMPORTANT: Re-map SQLAlchemy to the new schema
             # Since we added search_path to the URI in config.py, 
