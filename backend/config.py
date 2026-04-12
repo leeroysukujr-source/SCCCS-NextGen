@@ -132,11 +132,6 @@ class Config:
     OAUTH_REDIRECT_URI = os.getenv('OAUTH_REDIRECT_URI', f'{FRONTEND_URL}/auth/callback')
     # Socket.IO message queue (Redis) - use REDIS_URL or SOCKET_MESSAGE_QUEUE env var
     # NOTE: don't default to localhost:6379 to avoid connection attempts when
-    # Register tenant resolution and jurisdictional isolation middleware
-    from app.middleware.tenant import resolve_tenant
-    from app.utils.middleware import jurisdiction_check
-    app.before_request(resolve_tenant)
-    app.before_request(jurisdiction_check)
     # Redis is not available on developer machines. If neither env var is set,
     # leave as None to run Socket.IO in single-process mode.
     SOCKET_MESSAGE_QUEUE = os.getenv('SOCKET_MESSAGE_QUEUE') or os.getenv('REDIS_URL') or None
