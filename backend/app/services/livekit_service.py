@@ -5,10 +5,11 @@ from flask import current_app
 
 class LiveKitService:
     def __init__(self):
-        # Default defaults
-        self.api_key = os.getenv('LIVEKIT_API_KEY', 'devkey')
-        self.api_secret = os.getenv('LIVEKIT_API_SECRET', 'secret')
-        self.host = os.getenv('LIVEKIT_URL', 'wss://scccs-nextgen-v888916d.livekit.cloud')
+        # Default defaults - Forced to empty to prioritize environment
+        self.api_key = os.getenv('LIVEKIT_API_KEY')
+        self.api_secret = os.getenv('LIVEKIT_API_SECRET')
+        # Use the specific cloud URL provided by the user as a secondary fallback
+        self.host = os.getenv('LIVEKIT_URL', 'wss://scccs-ng-jloxzhcg.livekit.cloud')
 
         # Try to load from Flask config if available
         try:
@@ -97,8 +98,13 @@ class LiveKitService:
         return self.host
 
     def create_token(self, room_name, participant_identity, participant_name, is_admin=False):
+        # Sanity check: Ensure identity is NEVER empty
+        if not participant_identity or str(participant_identity).strip() == "":
+            import uuid
+            participant_identity = f"anonymous-{uuid.uuid4().hex[:8]}"
+            
         token = api.AccessToken(self.api_key, self.api_secret)
-        token.with_identity(participant_identity)
+        token.with_identity(str(participant_identity))
         token.with_name(participant_name)
         
         # Room permissions
