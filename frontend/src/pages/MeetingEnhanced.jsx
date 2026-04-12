@@ -696,7 +696,6 @@ function PremiumMeetingHeader({ roomId, roomInfo = {}, recordingActive, handsRai
   };
 
   return (
-  return (
     <div className="h-20 border-b backdrop-blur-2xl flex items-center justify-between px-8 shrink-0 shadow-2xl" style={{ background: 'var(--mt-header-grad)', borderColor: 'var(--mt-border)' }}>
       {/* Left - Title & Status */}
       <div className="flex items-center gap-4">
@@ -794,7 +793,6 @@ function PremiumSidebar({
     tabs.splice(2, 0, { id: 'breakout', label: 'Breakout', icon: <IoSwapHorizontal /> });
   }
 
-  return (
   return (
     <div className={`absolute md:relative right-0 z-50 w-full md:w-96 border-l backdrop-blur-2xl flex flex-col h-full shadow-2xl transition-all`} style={{ background: 'var(--mt-bg-sidebar)', borderColor: 'var(--mt-border)' }}>
       {/* Header with Tab Selection */}
@@ -1968,7 +1966,6 @@ function PremiumPreJoinScreen({ onJoin, username, roomId, roomInfo = {} }) {
     };
   }, [videoEnabled, selectedCamera]);
 
-  return (
   return (
     <div className="flex h-screen w-full items-center justify-center p-4" style={{ background: 'var(--vb-bg-root)' }}>
       {/* Animated Background */}
