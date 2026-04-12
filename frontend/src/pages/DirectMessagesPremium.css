@@ -14,6 +14,8 @@
 .no-messages h3, .no-conversation-selected h3 {
     margin-top: 0;
 }
+
+:root {
     --dm-bg-primary: #FFFFFF;
     --dm-bg-secondary: #F8FAFC;
     --dm-bg-tertiary: #F1F5F9;
