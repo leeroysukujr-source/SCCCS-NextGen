@@ -401,7 +401,8 @@ class Class(db.Model):
     lessons = db.relationship('Lesson', backref='class_obj', lazy='dynamic', cascade='all, delete-orphan')
     assignments = db.relationship('Assignment', backref='associated_class', lazy=True, 
                                  primaryjoin="Class.id == Assignment.class_id", cascade='all, delete-orphan')
-    channels = db.relationship('Channel', backref='course_obj', lazy='dynamic')
+    channels = db.relationship('Channel', backref='associated_class', lazy='dynamic',
+                               primaryjoin="Class.id == Channel.class_id")
     
     def to_dict(self):
         teacher_info = None
@@ -601,6 +602,7 @@ class Channel(db.Model):
     name = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     type = db.Column(db.String(20), default='private')  # public, private, course
+    class_id = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=True)
     course_code = db.Column(db.String(20))
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     is_encrypted = db.Column(db.Boolean, default=True)
