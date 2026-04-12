@@ -21,7 +21,7 @@ export default function StudyRoomLive() {
     const navigate = useNavigate()
     const { user } = useAuthStore()
     const [token, setToken] = useState('')
-    const [liveKitUrl, setLiveKitUrl] = useState(import.meta.env.VITE_LIVEKIT_URL || "wss://scccs-ng-jloxzhcg.livekit.cloud")
+    const [liveKitUrl, setLiveKitUrl] = useState(import.meta.env.VITE_LIVEKIT_URL || "wss://scccs-nextgen-v888916d.livekit.cloud")
 
     // Determine active tab from URL path
     const isDocsRoute = window.location.pathname.endsWith('/docs')

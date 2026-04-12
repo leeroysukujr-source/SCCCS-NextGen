@@ -8,8 +8,8 @@ class LiveKitService:
         # Default defaults - Forced to empty to prioritize environment
         self.api_key = os.getenv('LIVEKIT_API_KEY')
         self.api_secret = os.getenv('LIVEKIT_API_SECRET')
-        # Use the specific cloud URL provided by the user as a secondary fallback
-        self.host = os.getenv('LIVEKIT_URL', 'wss://scccs-ng-jloxzhcg.livekit.cloud')
+        # Use the specific production cloud URL provided by the user
+        self.host = os.getenv('LIVEKIT_URL', 'wss://scccs-nextgen-v888916d.livekit.cloud')
 
         # Try to load from Flask config if available
         try:
