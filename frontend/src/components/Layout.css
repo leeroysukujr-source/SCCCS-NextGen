@@ -121,19 +121,15 @@
   transition: all 0.3s ease;
 }
 
-.sidebar.expanded .logo-subtitle {
+.sidebar.expanded .logo-subtitle,
+.sidebar.mobile-open .logo-subtitle {
   opacity: 1;
   height: auto;
   margin-top: -2px;
 }
 
-.logo-text-wrapper {
-  opacity: 0;
-  width: 0;
-  transition: all 0.3s ease;
-}
-
-.sidebar.expanded .logo-text-wrapper {
+.sidebar.expanded .logo-text-wrapper,
+.sidebar.mobile-open .logo-text-wrapper {
   opacity: 1;
   width: auto;
 }
@@ -182,7 +178,8 @@
   overflow: hidden;
 }
 
-.sidebar.expanded .sidebar-user-info {
+.sidebar.expanded .sidebar-user-info,
+.sidebar.mobile-open .sidebar-user-info {
   opacity: 1;
   width: auto;
 }
@@ -329,7 +326,8 @@
   transition: all 0.3s ease;
 }
 
-.sidebar.expanded .nav-text {
+.sidebar.expanded .nav-text,
+.sidebar.mobile-open .nav-text {
   opacity: 1;
   width: auto;
 }
@@ -391,7 +389,8 @@
   gap: 0.5rem;
 }
 
-.sidebar.expanded .admin-actions-header span {
+.sidebar.expanded .admin-actions-header span,
+.sidebar.mobile-open .admin-actions-header span {
   display: inline;
 }
 
