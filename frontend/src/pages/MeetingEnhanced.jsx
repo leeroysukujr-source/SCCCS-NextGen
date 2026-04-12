@@ -25,7 +25,8 @@ import {
   FaShieldAlt, FaRegClock, FaSignal, FaVolumeUp, FaDesktop, FaCommentAlt,
   FaSmile, FaEllipsisH, FaTimes, FaPaperPlane, FaCircle, FaPhone, FaHandPaper,
   FaEye, FaEyeSlash, FaCog, FaStopCircle, FaCheckCircle, FaTimesCircle,
-  FaVolumeOff, FaCheck, FaBrain, FaSpinner, FaSignOutAlt, FaChartLine, FaRobot, FaLock, FaUser
+  FaVolumeOff, FaCheck, FaBrain, FaSpinner, FaSignOutAlt, FaChartLine, FaRobot, FaLock, FaUser,
+  FaWindowMaximize
 } from 'react-icons/fa';
 import { IoNotifications, IoSwapHorizontal } from 'react-icons/io5';
 import { FiShare2, FiChevronDown, FiEdit3, FiFile, FiClock, FiVideo, FiMessageSquare } from 'react-icons/fi';
@@ -1431,19 +1432,36 @@ function AdvancedControlBar({
     }
   };
 
+  const handlePiP = async () => {
+    try {
+      const videoElement = document.querySelector('.lk-tile-custom video');
+      if (videoElement && document.pictureInPictureEnabled) {
+          if (document.pictureInPictureElement) {
+              await document.exitPictureInPicture();
+          } else {
+              await videoElement.requestPictureInPicture();
+          }
+      } else {
+          notify('info', 'Floating window (PiP) is not supported or no video found');
+      }
+    } catch (e) {
+      console.error("PiP error", e);
+    }
+  };
+
   return (
-    <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 px-2 sm:px-6 z-[60] flex justify-center pointer-events-none animate-slideUp">
-      <div className="p-2 sm:p-4 flex items-center justify-center gap-1.5 sm:gap-6 bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-2xl sm:rounded-[2.5rem] shadow-[0_20px_80px_rgba(0,0,0,0.8)] transition-all pointer-events-auto max-w-[98vw] overflow-x-auto no-scrollbar">
+    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-auto max-w-[95vw] pointer-events-none animate-slideUp">
+      <div className="p-3 sm:p-4 flex items-center justify-center gap-2 sm:gap-6 bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-2xl sm:rounded-[3rem] shadow-[0_32px_100px_rgba(0,0,0,0.8)] transition-all pointer-events-auto overflow-x-auto no-scrollbar">
         
-        {/* Info & Stats (Hidden on mobile) */}
-        <div className="hidden md:flex items-center gap-2">
+        {/* Info & Stats - Forced Visible */}
+        <div className="flex items-center gap-2">
           <button
             id="copy-link-btn"
             onClick={copyMeetingLink}
             className="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-transparent text-slate-400 hover:text-white hover:bg-white/5"
             title="Copy Meeting Link"
           >
-            <FiShare2 size={16} />
+            <FiShare2 size={18} />
           </button>
           
           <button
@@ -1451,7 +1469,15 @@ function AdvancedControlBar({
             className="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-transparent text-slate-400 hover:text-white hover:bg-white/5"
             title="Sytem Stats"
           >
-            <FaSignal size={14} />
+            <FaSignal size={16} />
+          </button>
+
+          <button
+            onClick={handlePiP}
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-transparent text-slate-400 hover:text-white hover:bg-white/5"
+            title="Floating Window (PiP)"
+          >
+            <FaWindowMaximize size={16} />
           </button>
         </div>
 
