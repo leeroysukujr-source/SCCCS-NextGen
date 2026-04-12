@@ -328,9 +328,9 @@ export default function DirectMessages() {
 
   // Send message mutation
   const sendMessageMutation = useMutation({
-    mutationFn: async (data) => {
-      if (!selectedUser?.user_id) throw new Error('No user selected')
-      return directMessagesAPI.sendMessage(selectedUser.user_id, data)
+    mutationFn: async ({ recipientId, data }) => {
+      if (!recipientId) throw new Error('No recipient identified')
+      return directMessagesAPI.sendMessage(recipientId, data)
     },
     onSuccess: () => {
       // Refresh context
@@ -385,13 +385,16 @@ export default function DirectMessages() {
     setUploadingFiles(true)
     let uploadedFileIds = []
 
+    const recipientId = selectedUser.user_id
+
     try {
       if (currentFiles.length > 0) {
         const uploadPromises = currentFiles.map(async (fileObj) => {
           if (fileObj.id) return fileObj.id
           if (fileObj.file) {
             try {
-              const response = await filesAPI.uploadFile(fileObj.file, selectedUser.user_id)
+              // Direct messages don't use channel_id, pass null for channelId arg
+              const response = await filesAPI.uploadFile(fileObj.file, null)
               return response.id
             } catch (err) {
               console.error('File upload failed', err)
@@ -423,11 +426,13 @@ export default function DirectMessages() {
     }
 
     try {
-      await sendMessageMutation.mutateAsync(messageData)
+      await sendMessageMutation.mutateAsync({ recipientId, data: messageData })
     } catch (error) {
-      // Restore message to input if mutation fails completely? 
-      // Professional apps usually don't to avoid jarring jumps, but keep for manual retry.
       console.error('Send failed:', error)
+      // Optimistic Recovery: Restore the message if it failed to send
+      setMessage(currentMessage)
+      setSelectedFiles(currentFiles)
+      notify('error', 'Message failed to send. We\'ve restored your text.')
     } finally {
       setUploadingFiles(false)
     }
