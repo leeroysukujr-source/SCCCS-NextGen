@@ -1,14 +1,21 @@
 import json
 from app.models import GlobalFeatureFlag, WorkspaceFeatureOverride
 
-WELL_KNOWN_FEATURES = {
-    'smart_docs': {'enabled': True, 'config': {'ai_enabled': True, 'collaboration_enabled': True}},
-    'ai_assistant': {'enabled': True, 'config': {'model': 'gemini-1.5-pro'}},
-    'data_sheets': {'enabled': True, 'config': {'formulas_enabled': True}},
-    'presentations': {'enabled': True, 'config': {'ai_slides_enabled': True}},
-    'whiteboard': {'enabled': True, 'config': {'collaboration_enabled': True}},
-    'creation_hub': {'enabled': True, 'config': {}}
-}
+from config import Config
+
+def get_well_known_features():
+    """Returns well-known features with dynamic status based on configuration."""
+    ai_enabled = bool(Config.GEMINI_API_KEY)
+    
+    return {
+        'smart_docs': {'enabled': True, 'config': {'ai_enabled': ai_enabled, 'collaboration_enabled': True}},
+        'ai_assistant': {'enabled': ai_enabled, 'config': {'model': Config.GEMINI_MODEL}},
+        'study_hub': {'enabled': ai_enabled, 'config': {}},
+        'data_sheets': {'enabled': True, 'config': {'formulas_enabled': True}},
+        'presentations': {'enabled': True, 'config': {'ai_slides_enabled': ai_enabled}},
+        'whiteboard': {'enabled': True, 'config': {'collaboration_enabled': True}},
+        'creation_hub': {'enabled': True, 'config': {}}
+    }
 
 def get_effective_feature_config(workspace_id=None):
     """
@@ -16,7 +23,7 @@ def get_effective_feature_config(workspace_id=None):
     Returns a dictionary of {feature_name: {enabled, config}}.
     """
     # Start with well-known defaults
-    results = {name: dict(val) for name, val in WELL_KNOWN_FEATURES.items()}
+    results = get_well_known_features()
     
     # Get all global flags (these override hardcoded defaults)
     global_flags = GlobalFeatureFlag.query.all()
