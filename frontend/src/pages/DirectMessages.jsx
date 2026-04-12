@@ -107,6 +107,69 @@ export default function DirectMessages() {
     enabled: false
   })
 
+  // -------------------------------------------------------------------
+  // DERIVED DATA (Calculated once per render, before effects)
+  // -------------------------------------------------------------------
+  
+  // Deduplicate conversations by user_id (API may sometimes return duplicates).
+  // Keep the conversation with the newest last_message or highest unread_count.
+  const uniqueByUser = new Map()
+  for (const conv of conversations) {
+    const key = String(conv.user_id || conv.user?.id || '')
+    if (!key) continue
+    const existing = uniqueByUser.get(key)
+    if (!existing) {
+      uniqueByUser.set(key, conv)
+      continue
+    }
+
+    // Prefer conversation with unread messages
+    const existingUnread = existing.unread_count || 0
+    const convUnread = conv.unread_count || 0
+    if (convUnread > existingUnread) {
+      uniqueByUser.set(key, conv)
+      continue
+    }
+
+    // Otherwise prefer the one with newer last_message
+    const existingTime = existing.last_message?.created_at ? new Date(existing.last_message.created_at).getTime() : 0
+    const convTime = conv.last_message?.created_at ? new Date(conv.last_message.created_at).getTime() : 0
+    if (convTime > existingTime) {
+      uniqueByUser.set(key, conv)
+    }
+  }
+
+  const dedupedConversations = Array.from(uniqueByUser.values())
+
+  // Sort conversations: unread first, then by last message time
+  const sortedConversations = [...dedupedConversations].sort((a, b) => {
+    // Unread messages first
+    if (a.unread_count > 0 && b.unread_count === 0) return -1
+    if (a.unread_count === 0 && b.unread_count > 0) return 1
+
+    // Then by last message time (most recent first)
+    const timeA = a.last_message?.created_at ? new Date(a.last_message.created_at).getTime() : 0
+    const timeB = b.last_message?.created_at ? new Date(b.last_message.created_at).getTime() : 0
+    return timeB - timeA
+  })
+
+  const filteredConversations = sortedConversations.filter(conv => {
+    if (!conv.user) return false
+    const query = searchQuery.toLowerCase()
+    return (
+      conv.user.username?.toLowerCase().includes(query) ||
+      conv.user.first_name?.toLowerCase().includes(query) ||
+      conv.user.last_name?.toLowerCase().includes(query)
+    )
+  })
+
+  // Show search results in sidebar when searching
+  const isSearching = searchQuery.length > 0 && searchResults.length > 0
+
+  // -------------------------------------------------------------------
+  // EFFECTS (Must come after derived data)
+  // -------------------------------------------------------------------
+
   // Synchronize selectedUser with userId URL parameter
   useEffect(() => {
     if (userId && !selectedUser) {
@@ -764,61 +827,6 @@ export default function DirectMessages() {
     }
     return `${minutes}:${String(secs).padStart(2, '0')}`
   }
-
-  // Deduplicate conversations by user_id (API may sometimes return duplicates).
-  // Keep the conversation with the newest last_message or highest unread_count.
-  const uniqueByUser = new Map()
-  for (const conv of conversations) {
-    const key = String(conv.user_id || conv.user?.id || '')
-    if (!key) continue
-    const existing = uniqueByUser.get(key)
-    if (!existing) {
-      uniqueByUser.set(key, conv)
-      continue
-    }
-
-    // Prefer conversation with unread messages
-    const existingUnread = existing.unread_count || 0
-    const convUnread = conv.unread_count || 0
-    if (convUnread > existingUnread) {
-      uniqueByUser.set(key, conv)
-      continue
-    }
-
-    // Otherwise prefer the one with newer last_message
-    const existingTime = existing.last_message?.created_at ? new Date(existing.last_message.created_at).getTime() : 0
-    const convTime = conv.last_message?.created_at ? new Date(conv.last_message.created_at).getTime() : 0
-    if (convTime > existingTime) {
-      uniqueByUser.set(key, conv)
-    }
-  }
-
-  const dedupedConversations = Array.from(uniqueByUser.values())
-
-  // Sort conversations: unread first, then by last message time
-  const sortedConversations = [...dedupedConversations].sort((a, b) => {
-    // Unread messages first
-    if (a.unread_count > 0 && b.unread_count === 0) return -1
-    if (a.unread_count === 0 && b.unread_count > 0) return 1
-
-    // Then by last message time (most recent first)
-    const timeA = a.last_message?.created_at ? new Date(a.last_message.created_at).getTime() : 0
-    const timeB = b.last_message?.created_at ? new Date(b.last_message.created_at).getTime() : 0
-    return timeB - timeA
-  })
-
-  const filteredConversations = sortedConversations.filter(conv => {
-    if (!conv.user) return false
-    const query = searchQuery.toLowerCase()
-    return (
-      conv.user.username?.toLowerCase().includes(query) ||
-      conv.user.first_name?.toLowerCase().includes(query) ||
-      conv.user.last_name?.toLowerCase().includes(query)
-    )
-  })
-
-  // Show search results in sidebar when searching
-  const isSearching = searchQuery.length > 0 && searchResults.length > 0
 
   return (
     <div className={`direct-messages ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'} ${isMobile ? 'is-mobile' : ''}`}>
