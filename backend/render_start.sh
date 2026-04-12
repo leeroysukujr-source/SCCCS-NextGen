@@ -2,26 +2,19 @@
 export SOCKETIO_ASYNC_MODE=eventlet
 export LIVEKIT_AUTOSTART=false
 
-# PHASE ONE: Data Plane Purge (Neon PostgreSQL)
-echo "=== Step 0: Executing Phase One Data Plane Purge ==="
-python bootstrap.py
+# STABILIZATION MODE: Your data is now persistent.
+echo "=== Step 1: Aligning Migration State ==="
+flask db stamp head || echo "Migration state already aligned."
 
-# PHASE TWO: Manual Table Creation (3NF SQLAlchemy core)
-echo "=== Step 1: Force-Creating Tables (db.create_all) ==="
-python -c "from app import create_app, db; app=create_app(); with app.app_context(): db.create_all(); print('✅ ALL TABLES CREATED MANUALLY')"
+# PHASE ONE: Surgical Elevation (globalimpactinnovators26@gmail.com)
+echo "=== Step 2: Elevating Root SuperAdmin ==="
+python elevate_admin.py
 
-# PHASE THREE: Migration Alignment
-echo "=== Step 2: Aligning Migration History (flask db stamp head) ==="
-flask db stamp head || echo "Stamp failed - check if migrations directory is missing"
-
-# PHASE FOUR: SuperAdmin & RBAC Injection
-echo "=== Step 3: Injecting SuperAdmin (globalimpactinnovators26@gmail.com) ==="
-flask seed-superadmin --email globalimpactinnovators26@gmail.com --role SUPER_ADMIN
-
-echo "=== Step 4: Seeding System Reference Data ==="
+# PHASE FOUR: Ensure System Reference Data
+echo "=== Step 3: Seeding System Reference Data ==="
 python seed_system_settings.py || echo "seed_system_settings skipped"
 python seed_features.py || echo "seed_features skipped"
 
-# PHASE FIVE: Server Initialization
-echo "=== Step 5: Handoff to Gunicorn ==="
+# PHASE FIVE: Production Server Start
+echo "=== Step 4: Starting Gunicorn Server ==="
 exec gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT run:app
