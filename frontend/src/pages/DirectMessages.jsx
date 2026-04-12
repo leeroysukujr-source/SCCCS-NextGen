@@ -963,12 +963,10 @@ export default function DirectMessages() {
                   <button onClick={() => refetchConversations()}>Retry</button>
                 </div>
               ) : filteredConversations.length === 0 ? (
-                <div className="no-conversations">
-                  <div className="empty-state-icon">
-                    <FiMessageCircle />
-                  </div>
-                  <h3>No chats yet</h3>
-                  <p>Search for anyone to start messaging</p>
+                <div className="no-conversations-captivating">
+                  <div className="aura-pulse-mini"></div>
+                  <h3>Quiet Room</h3>
+                  <p>Search for a colleague or student to ignite a professional dialogue.</p>
                 </div>
               ) : (
                 filteredConversations.map(conv => (
@@ -1104,8 +1102,13 @@ export default function DirectMessages() {
                 </div>
               ) : messages.length === 0 ? (
                 <div className="no-messages">
-                  <FiMessageCircle />
-                  <p>No messages yet. Start the conversation!</p>
+                  <img 
+                    src="/assets/images/dm-aura.png" 
+                    alt="Inbox Aura" 
+                    className="empty-state-illustration" 
+                  />
+                  <h3>Your Inbox is a Blank Canvas</h3>
+                  <p>Start a new conversation or send a professional greeting to get things moving.</p>
                 </div>
               ) : (
                 <>
@@ -1427,9 +1430,13 @@ export default function DirectMessages() {
           </>
         ) : (
           <div className="no-conversation-selected">
-            <FiMessageCircle />
-            <h3>Select a conversation</h3>
-            <p>Choose a conversation from the sidebar or start a new one</p>
+            <img 
+              src="/assets/images/dm-aura.png" 
+              alt="Inbox Aura" 
+              className="empty-state-illustration" 
+            />
+            <h3>Inbox Center</h3>
+            <p>Select a colleague or student from your sidebar to start a secure, real-time professional conversation.</p>
           </div>
         )}
       </div>
