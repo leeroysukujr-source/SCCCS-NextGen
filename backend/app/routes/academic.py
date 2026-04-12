@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from app.utils.decorators import audit_logger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models import Document, Submission, User
@@ -9,6 +10,7 @@ academic_bp = Blueprint('academic', __name__)
 
 @academic_bp.route('/submit', methods=['POST'])
 @jwt_required()
+@audit_logger('ASSIGNMENT_SUBMIT', 'submission')
 def submit_assignment():
     current_user_id = get_jwt_identity()
     data = request.get_json()
@@ -49,6 +51,7 @@ def get_submissions(id):
 
 @academic_bp.route('/submission/<int:id>/grade', methods=['POST'])
 @jwt_required()
+@audit_logger('GRADE_CHANGE', 'submission')
 def grade_submission(id):
     current_user_id = get_jwt_identity()
     sub = Submission.query.get_or_404(id)

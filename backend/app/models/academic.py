@@ -1,5 +1,6 @@
 from datetime import datetime
 from app import db
+from app.utils.encryption import EncryptionService
 
 class Submission(db.Model):
     __tablename__ = 'submissions'
@@ -13,7 +14,11 @@ class Submission(db.Model):
     status = db.Column(db.String(50), default='submitted') # 'submitted', 'graded', 'returned'
     
     grade = db.Column(db.Float)
-    feedback = db.Column(db.Text)
+    
+    # Encrypted fields
+    _feedback = db.Column('feedback', db.Text)
+    _private_notes = db.Column('private_notes', db.Text)
+    
     rubric_scores = db.Column(db.Text) # JSON string: {criteria_id: score}
     
     is_group = db.Column(db.Boolean, default=False)
@@ -22,6 +27,22 @@ class Submission(db.Model):
     student = db.relationship('User', foreign_keys=[student_id], backref='submissions')
     assignment_doc = db.relationship('Document', foreign_keys=[assignment_doc_id], backref='all_submissions')
     work_doc = db.relationship('Document', foreign_keys=[work_doc_id])
+
+    @property
+    def feedback(self):
+        return EncryptionService.decrypt(self._feedback)
+
+    @feedback.setter
+    def feedback(self, value):
+        self._feedback = EncryptionService.encrypt(value)
+
+    @property
+    def private_notes(self):
+        return EncryptionService.decrypt(self._private_notes)
+
+    @private_notes.setter
+    def private_notes(self, value):
+        self._private_notes = EncryptionService.encrypt(value)
 
     def to_dict(self):
         import json
@@ -34,7 +55,8 @@ class Submission(db.Model):
             'status': self.status,
             'grade': self.grade,
             'feedback': self.feedback,
+            'private_notes': self.private_notes,
             'rubric_scores': json.loads(self.rubric_scores) if self.rubric_scores else {},
             'is_group': self.is_group,
-            'student_name': self.student.username
+            'student_name': self.student.username if self.student else 'Unknown'
         }

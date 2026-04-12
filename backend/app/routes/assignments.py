@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
+from app.utils.decorators import audit_logger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models import User, Assignment, AssignmentGroup, AssignmentGroupMember, Workspace, Group, GroupMember, File
@@ -28,15 +29,35 @@ def get_assignments():
 
     query = Assignment.query.filter_by(workspace_id=user.workspace_id)
     
+    # Filter by course (id) if provided
+    course_id = request.args.get('course_id')
+    if course_id:
+        query = query.filter_by(course_id=course_id)
+        
     channel_id = request.args.get('channel_id')
     if channel_id:
         query = query.filter_by(channel_id=channel_id)
 
     if user.role == 'student':
         query = query.filter_by(status='published')
-        # Only show assignments in channels the student is a member of, or public ones
-        from app.models import ChannelMember
+        
+        # Jurisdictional Lockdown: Student MUST be enrolled in the course
+        from app.models import ClassMember
+        enrolled_course_ids = [m.class_id for m in ClassMember.query.filter_by(user_id=user.id).all()]
+        
+        # If they filtered by course, check if they're enrolled
+        if course_id and int(course_id) not in enrolled_course_ids:
+             return jsonify({"error": "You are not enrolled in this course"}), 403
+             
+        # Only show assignments from enrolled courses or public workspace ones
         from sqlalchemy import or_
+        query = query.filter(or_(
+            Assignment.course_id.in_(enrolled_course_ids),
+            Assignment.course_id == None
+        ))
+        
+        # Further scope by channel if applicable
+        from app.models import ChannelMember
         student_channel_ids = [m.channel_id for m in ChannelMember.query.filter_by(user_id=user.id).all()]
         query = query.filter(or_(
             Assignment.channel_id.in_(student_channel_ids),
@@ -48,6 +69,7 @@ def get_assignments():
 
 @assignments_bp.route('/', methods=['POST'])
 @jwt_required()
+@audit_logger('ASSIGNMENT_CREATE', 'assignment')
 def create_assignment():
     """Create a new assignment (Lecturer/Admin only)"""
     current_user_id = get_jwt_identity()
@@ -69,6 +91,7 @@ def create_assignment():
         title=data.get('title'),
         description=data.get('description'),
         workspace_id=user.workspace_id,
+        course_id=data.get('course_id'),
         channel_id=data.get('channel_id'),
         created_by=user.id,
         due_date=datetime.fromisoformat(due_date_str) if due_date_str else None,
@@ -78,6 +101,11 @@ def create_assignment():
     
     db.session.add(new_assignment)
     db.session.commit()
+    
+    # Secure Collaboration: Notify course/channel room via Socket.IO
+    from app import socketio
+    room_id = f"course_{new_assignment.course_id}" if new_assignment.course_id else f"ws_{user.workspace_id}"
+    socketio.emit('new_assignment', new_assignment.to_dict(), room=room_id)
     
     return jsonify(new_assignment.to_dict()), 201
 
@@ -99,6 +127,7 @@ def get_assignment_detail(assignment_id):
 
 @assignments_bp.route('/<int:assignment_id>', methods=['PUT'])
 @jwt_required()
+@audit_logger('ASSIGNMENT_UPDATE', 'assignment')
 def update_assignment(assignment_id):
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)

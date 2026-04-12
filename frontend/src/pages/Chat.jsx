@@ -99,6 +99,7 @@ export default function Chat() {
   const [slashQuery, setSlashQuery] = useState('')
   const [showEmojiPicker, setShowEmojiPicker] = useState(false) // Phase 2: Emoji Picker
   const [showAssignmentModal, setShowAssignmentModal] = useState(false) // Phase 2: Assignment Builder
+  const [showLecturerTools, setShowLecturerTools] = useState(false) // FAB tools toggle
   const [isSidebarOpen, setIsSidebarOpen] = useState(true) // Mobile Responsive Sidebar State
   const [activeSidebarTab, setActiveSidebarTab] = useState('joined') // 'joined' or 'discover'
   const [availableChannels, setAvailableChannels] = useState([])
@@ -2848,6 +2849,45 @@ export default function Chat() {
           setSelectedFiles([])
         }}
       />
+
+      {/* Lecturer Floating Action Button */}
+      {(user?.role === 'teacher' || user?.role === 'admin' || user?.role === 'super_admin') && (
+        <div className={`lecturer-fab-container ${showLecturerTools ? 'active' : ''}`}>
+          <div className="lecturer-fab-menu">
+            <button 
+              className="fab-item" 
+              onClick={() => setShowAssignmentModal(true)}
+              title="Create Assignment"
+            >
+              <FiList />
+              <span>Assignment</span>
+            </button>
+            <button 
+              className="fab-item" 
+              onClick={() => navigate('/creation-hub')}
+              title="Creation Hub"
+            >
+              <FiZap />
+              <span>Creation Hub</span>
+            </button>
+            <button 
+              className="fab-item" 
+              onClick={() => navigate('/analytics')}
+              title="View Insights"
+            >
+              <FiTrendingUp />
+              <span>Insights</span>
+            </button>
+          </div>
+          <button 
+            className="lecturer-fab-main" 
+            onClick={() => setShowLecturerTools(!showLecturerTools)}
+            title="Academic Tools"
+          >
+            {showLecturerTools ? <FiX /> : <FiPlus />}
+          </button>
+        </div>
+      )}
 
       <AssignmentBuilderModal
         isOpen={showAssignmentModal}

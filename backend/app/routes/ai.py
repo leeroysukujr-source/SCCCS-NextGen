@@ -154,6 +154,32 @@ def get_ai_status():
         'offline_enabled': Config.OFFLINE_AI_ENABLED,
         'online_enabled': Config.ONLINE_AI_ENABLED,
         'mode': Config.AI_MODE,
-        'online_configured': bool(Config.OPENAI_API_KEY)
+        'online_configured': bool(Config.OPENAI_API_KEY),
+        'gemini_configured': bool(Config.GEMINI_API_KEY)
+    }), 200
+
+@ai_bp.route('/suggested-answers', methods=['GET'])
+@jwt_required()
+def get_ai_suggested_answers():
+    """
+    Suggest answers based on historical workspace queries.
+    Visible only to lecturers/admins.
+    """
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if not user or user.role not in ['teacher', 'admin', 'super_admin']:
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    query = request.args.get('q')
+    if not query:
+        return jsonify({"error": "Query parameter 'q' is required"}), 400
+        
+    from app.services.meeting_service import MeetingAIService
+    suggestions = MeetingAIService.get_suggested_answers(user.workspace_id, query)
+    
+    return jsonify({
+        "suggestions": suggestions,
+        "mode": "gemini-1.5-flash"
     }), 200
 

@@ -3898,4 +3898,94 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
-}
+}
+
+/* Added: Lecturer Floating Action Button (FAB) */
+.lecturer-fab-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.lecturer-fab-main {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.lecturer-fab-main:hover {
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 12px 48px rgba(99, 102, 241, 0.5);
+}
+
+.lecturer-fab-container.active .lecturer-fab-main {
+  background: #f43f5e;
+  transform: rotate(0deg);
+}
+
+.lecturer-fab-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lecturer-fab-container.active .lecturer-fab-menu {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.fab-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 100px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.fab-item:hover {
+  background: rgba(30, 41, 59, 1);
+  transform: translateX(-8px);
+  border-color: var(--primary);
+}
+
+.fab-item svg {
+  font-size: 1.125rem;
+}
+
+@media (max-width: 768px) {
+  .lecturer-fab-container {
+    bottom: 5.5rem; /* Avoid overlap with mobile nav */
+    right: 1.25rem;
+  }
+}

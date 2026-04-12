@@ -68,12 +68,24 @@ def create_room():
     if meeting_type_value == 'direct':
         room_name = data.get('name', 'Direct Call')
         max_participants = 2
+        meeting_type_value = 'direct'
     else:
         room_name = data.get('name', 'New Meeting')
         # Respect global/workspace capacity limits from Feature Lab
         max_limit = feature_config.get('max_participants', 50)
         requested_limit = data.get('max_participants', max_limit)
         max_participants = min(requested_limit, max_limit)
+        meeting_type_value = data.get('meeting_type', meeting_type)
+    channel_id = data.get('channel_id')
+    
+    # Jurisdiction: Inherit privacy from channel
+    if channel_id:
+        from app.models import Channel
+        channel = Channel.query.get(channel_id)
+        if channel and channel.workspace_id == user.workspace_id:
+            # If channel is private, force the room to be restricted or direct
+            if channel.type == 'private':
+                meeting_type_value = 'direct' # Or a new 'restricted' type
     
     room = Room(
         name=room_name,
@@ -84,6 +96,7 @@ def create_room():
         duration_minutes=duration_minutes,
         meeting_type=meeting_type_value,
         scheduled_at=scheduled_at,
+        channel_id=channel_id,
         workspace_id=user.workspace_id or get_current_workspace_id()
     )
     
@@ -127,13 +140,26 @@ def get_rooms():
             return jsonify([room.to_dict() for room in all_rooms]), 200
         
         # Regular users:
-        # Public meetings (instant, scheduled) are visible to all in workspace
-        # Private meetings (direct) are visible only to participants
-        # We assume scope_query handles the workspace filtering
+        # 1. Workspace Isolation: Handled by scope_query (mostly)
+        # 2. Jurisdictional Filtering:
+        #    - Show rooms the user is a host or participant of
+        #    - Show public rooms in their workspace
+        #    - Show rooms linked to channels/courses they are enrolled in
+        
+        from app.models import ChannelMember, ClassMember
+        user_channel_ids = [m.channel_id for m in ChannelMember.query.filter_by(user_id=user.id).all()]
+        user_course_ids = [m.class_id for m in ClassMember.query.filter_by(user_id=user.id).all()]
+        
         participant_rooms = scope_query(Room.query, Room).filter(
             db.or_(
-                Room.meeting_type != 'direct', # Public/Scheduled/Instant are visible
-                Room.participants.any(user_id=current_user_id) # Direct/Private require participation
+                Room.host_id == current_user_id,
+                Room.participants.any(user_id=current_user_id),
+                Room.meeting_type == 'public', # Explicitly public
+                Room.channel_id.in_(user_channel_ids), # Enrolled in channel
+                db.and_(
+                    Room.meeting_type != 'direct',
+                    Room.channel_id == None
+                ) # Default public rooms (not direct)
             )
         ).order_by(Room.created_at.desc()).all()
         

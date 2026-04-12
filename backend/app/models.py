@@ -399,6 +399,8 @@ class Class(db.Model):
     # Relationships
     members = db.relationship('ClassMember', backref='class_obj', lazy='dynamic', cascade='all, delete-orphan')
     lessons = db.relationship('Lesson', backref='class_obj', lazy='dynamic', cascade='all, delete-orphan')
+    assignments = db.relationship('Assignment', backref='course', lazy='dynamic', cascade='all, delete-orphan')
+    channels = db.relationship('Channel', backref='course_obj', lazy='dynamic')
     
     def to_dict(self):
         teacher_info = None
@@ -523,6 +525,13 @@ class Room(db.Model):
     breakout_status = db.Column(db.String(20), default='not_started') # not_started, active, closed
     breakout_config = db.Column(db.Text) # JSON for timer, auto-join, etc.
     
+    # Jurisdiction: Link to a channel for inherited privacy
+    channel_id = db.Column(db.Integer, db.ForeignKey('channels.id'), nullable=True)
+    
+    # Ephemeral Data Control
+    is_ephemeral = db.Column(db.Boolean, default=False)
+    expires_at = db.Column(db.DateTime)
+    
     is_locked = db.Column(db.Boolean, default=False)
     
     # Relationships
@@ -552,6 +561,8 @@ class Room(db.Model):
             'workspace_id': self.workspace_id,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'is_breakout': self.is_breakout or False,
+            'is_ephemeral': self.is_ephemeral or False,
+            'expires_at': self.expires_at.isoformat() if self.expires_at else None,
             'parent_id': self.parent_id,
             'breakout_status': self.breakout_status or 'not_started',
             'breakout_config': b_config,
@@ -589,6 +600,7 @@ class Channel(db.Model):
     name = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     type = db.Column(db.String(20), default='private')  # public, private, course
+    course_id = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=True)
     course_code = db.Column(db.String(20))
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     is_encrypted = db.Column(db.Boolean, default=True)
@@ -1340,6 +1352,7 @@ class Assignment(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     workspace_id = db.Column(db.Integer, db.ForeignKey('workspaces.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=True)
     channel_id = db.Column(db.Integer, db.ForeignKey('channels.id'), nullable=True)
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     due_date = db.Column(db.DateTime)

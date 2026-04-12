@@ -7,6 +7,7 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'dev-jwt-secret-key-change-in-production')
+    ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', '3k_Q9qZ-r8_J2Z7yWv1X3t4A6c8E0g2I4k6M8o0Q2s4=') # Base64 32B key
     
     _priv = os.getenv('JWT_PRIVATE_KEY')
     _pub = os.getenv('JWT_PUBLIC_KEY')
@@ -131,6 +132,11 @@ class Config:
     OAUTH_REDIRECT_URI = os.getenv('OAUTH_REDIRECT_URI', f'{FRONTEND_URL}/auth/callback')
     # Socket.IO message queue (Redis) - use REDIS_URL or SOCKET_MESSAGE_QUEUE env var
     # NOTE: don't default to localhost:6379 to avoid connection attempts when
+    # Register tenant resolution and jurisdictional isolation middleware
+    from app.middleware.tenant import resolve_tenant
+    from app.utils.middleware import jurisdiction_check
+    app.before_request(resolve_tenant)
+    app.before_request(jurisdiction_check)
     # Redis is not available on developer machines. If neither env var is set,
     # leave as None to run Socket.IO in single-process mode.
     SOCKET_MESSAGE_QUEUE = os.getenv('SOCKET_MESSAGE_QUEUE') or os.getenv('REDIS_URL') or None

@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, url_for, send_file, make_response
+from app.utils.decorators import audit_logger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models import User
@@ -317,6 +318,7 @@ def add_student():
 
 @users_bp.route('/students/<int:student_id>', methods=['DELETE'])
 @jwt_required()
+@audit_logger('STUDENT_REMOVE', 'user')
 def remove_student(student_id):
     """Remove a student (admin only)"""
     current_user_id = get_jwt_identity()
@@ -814,6 +816,7 @@ def get_active_users():
 
 @users_bp.route('/<int:user_id>', methods=['DELETE'])
 @jwt_required()
+@audit_logger('USER_DELETE', 'user')
 def delete_user(user_id):
     """Delete a user account (Admin/Super Admin only)"""
     current_user_id = get_jwt_identity()

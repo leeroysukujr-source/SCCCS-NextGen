@@ -147,9 +147,11 @@ def create_app(config_class=Config):
             return str(user)
         return str(user)
     
-    # Register tenant resolution middleware
+    # Register tenant resolution and jurisdictional isolation middleware
     from app.middleware.tenant import resolve_tenant
+    from app.utils.middleware import jurisdiction_check
     app.before_request(resolve_tenant)
+    app.before_request(jurisdiction_check)
 
     # --- Security Middleware (OWASP/Hardening) ---
     from app.middleware.security import security_headers, waf_middleware
