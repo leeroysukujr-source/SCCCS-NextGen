@@ -23,7 +23,8 @@ def jurisdiction_check():
         'health_check'
     ]
     
-    if request.endpoint in public_endpoints or not request.endpoint:
+    # Skip static files, auth routes, and OPTIONS requests
+    if request.method == "OPTIONS" or not request.endpoint or 'static' in request.endpoint or 'auth.' in request.endpoint:
         return None
 
     # 3. Attempt to verify JWT; if it fails, let @jwt_required handles it on the route
@@ -69,6 +70,10 @@ def feature_required(feature_name):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
+            # Allow OPTIONS requests for CORS preflight
+            if request.method == "OPTIONS":
+                return f(*args, **kwargs)
+
             user_id = get_jwt_identity()
             user = User.query.get(user_id) if user_id else None
             

@@ -27,9 +27,9 @@ auth_bp = Blueprint('auth', __name__)
 def check_workspace_status():
     """Global guard to block access if workspace is suspended"""
     try:
-        # Skip static files and auth routes (login/register/public)
-        if not request.endpoint or 'static' in request.endpoint or 'auth.' in request.endpoint:
-            return
+        # Skip static files, auth routes, and OPTIONS requests
+        if request.method == "OPTIONS" or not request.endpoint or 'static' in request.endpoint or 'auth.' in request.endpoint:
+            return None
             
         verify_jwt_in_request(optional=True)
         user_id = get_jwt_identity()
