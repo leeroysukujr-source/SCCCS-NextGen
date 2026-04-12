@@ -3,7 +3,8 @@ import eventlet
 
 # DNS lookup time out fix for Render/Redis
 # We patch everything but keep native DNS resolver to avoid greendns issues
-eventlet.monkey_patch(all=True, dns=False)
+# We explicitly patch modules instead of 'all=True' to avoid TypeError in some Eventlet versions
+eventlet.monkey_patch(os=True, select=True, socket=True, thread=True, time=True)
 
 from config import Config
 
