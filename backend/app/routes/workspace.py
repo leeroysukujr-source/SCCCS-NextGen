@@ -252,13 +252,23 @@ def create_workspace():
             if Workspace.query.filter(Workspace.code.ilike(code)).first():
                 return jsonify({'error': 'Workspace code already exists'}), 400
 
-        # 4. INSTANTIATION
+        # 4. ADMIN ID NORMALIZATION (Type safety for PostgreSQL)
+        admin_id_val = data.get('admin_id')
+        if admin_id_val is None or str(admin_id_val).strip() == "" or str(admin_id_val).lower() == "undefined":
+            admin_id = None
+        else:
+            try:
+                admin_id = int(admin_id_val)
+            except (ValueError, TypeError):
+                admin_id = None
+
+        # 5. INSTANTIATION
         workspace = Workspace(
             name=name,
             slug=slug,
             code=code,
             description=data.get('description', ''),
-            admin_id=data.get('admin_id'),
+            admin_id=admin_id,
             logo_url=data.get('logo_url'),
             status='active'
         )

@@ -276,16 +276,26 @@ const SuperAdminDashboard = () => {
         e.preventDefault();
         try {
             let wsId;
+            
+            // Clean up the data for PostgreSQL type safety (convert empty strings to null)
+            const cleanedData = { ...wsForm };
+            if (!cleanedData.admin_id || cleanedData.admin_id === '') {
+                cleanedData.admin_id = null;
+            } else {
+                cleanedData.admin_id = parseInt(cleanedData.admin_id);
+            }
+            
+            // Remove the file from JSON payload
+            const { logoFile, ...submitData } = cleanedData;
+
             if (editingWs) {
                 // Update workspace details
-                const { logoFile, ...updateData } = wsForm; // Don't send file in JSON body
-                await apiClient.put(`/superadmin/workspaces/${editingWs.id}`, updateData);
+                await apiClient.put(`/superadmin/workspaces/${editingWs.id}`, submitData);
                 wsId = editingWs.id;
                 notify('Workspace updated successfully', 'success');
             } else {
                 // Create workspace
-                const { logoFile, ...createData } = wsForm;
-                const res = await apiClient.post('/superadmin/workspaces', createData);
+                const res = await apiClient.post('/superadmin/workspaces', submitData);
                 wsId = res.data.workspace.id;
                 notify('Workspace created successfully', 'success');
             }
