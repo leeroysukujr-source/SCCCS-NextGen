@@ -38,139 +38,151 @@ def allowed_file(filename):
 @files_bp.route('/upload', methods=['POST'])
 @jwt_required()
 def upload_file():
-    current_user_id = get_jwt_identity()
-    
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file provided'}), 400
-    
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No file selected'}), 400
-    
-    if not allowed_file(file.filename):
-        return jsonify({'error': 'File type not allowed'}), 400
-    
-    filename = secure_filename(file.filename)
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
-    unique_filename = timestamp + filename
-    
-    # Use absolute path relative to this file
-    current_file_dir = os.path.dirname(os.path.abspath(__file__))
-    backend_dir = os.path.dirname(os.path.dirname(current_file_dir))
-    upload_folder = os.path.join(backend_dir, UPLOAD_FOLDER)
-    
-    file_path = os.path.join(upload_folder, unique_filename)
-    
-    # Ensure upload directory exists
-    os.makedirs(upload_folder, exist_ok=True)
-    
-    # Get MIME type with better audio format detection
-    mime_type, _ = mimetypes.guess_type(filename)
-    
-    # Map audio extensions to proper MIME types
-    file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
-    audio_mime_types = {
-        'webm': 'audio/webm',
-        'ogg': 'audio/ogg',
-        'mp3': 'audio/mpeg',
-        'mp4': 'audio/mp4',
-        'm4a': 'audio/mp4',
-        'wav': 'audio/wav',
-        'aac': 'audio/aac',
-        'flac': 'audio/flac',
-        'opus': 'audio/opus'
-    }
-    
-    if file_ext in audio_mime_types:
-        mime_type = audio_mime_types[file_ext]
-    elif not mime_type:
-        mime_type = 'application/octet-stream'
-    
-    # Read file data
-    file_data = file.read()
-    file_size = len(file_data)
-    
-    # Check if encryption is needed (from channel if message_id provided)
-    is_encrypted = False
-    channel_id = request.form.get('channel_id', type=int)
-    lesson_id = request.form.get('lesson_id', type=int)
-    
-    if channel_id:
-        channel = Channel.query.get(channel_id)
-        if channel and channel.is_encrypted and channel.encryption_key:
+    try:
+        current_user_id = get_jwt_identity()
+        
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file provided'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'File type not allowed'}), 400
+        
+        filename = secure_filename(file.filename)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+        unique_filename = timestamp + filename
+        
+        # Use absolute path relative to this file
+        current_file_dir = os.path.dirname(os.path.abspath(__file__))
+        backend_dir = os.path.dirname(os.path.dirname(current_file_dir))
+        upload_folder = os.path.join(backend_dir, UPLOAD_FOLDER)
+        
+        file_path = os.path.join(upload_folder, unique_filename)
+        
+        # Ensure upload directory exists
+        os.makedirs(upload_folder, exist_ok=True)
+        
+        # Get MIME type with better audio format detection
+        mime_type, _ = mimetypes.guess_type(filename)
+        
+        # Map audio extensions to proper MIME types
+        file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+        audio_mime_types = {
+            'webm': 'audio/webm',
+            'ogg': 'audio/ogg',
+            'mp3': 'audio/mpeg',
+            'mp4': 'audio/mp4',
+            'm4a': 'audio/mp4',
+            'wav': 'audio/wav',
+            'aac': 'audio/aac',
+            'flac': 'audio/flac',
+            'opus': 'audio/opus'
+        }
+        
+        if file_ext in audio_mime_types:
+            mime_type = audio_mime_types[file_ext]
+        elif not mime_type:
+            mime_type = 'application/octet-stream'
+        
+        # Read file data
+        file_data = file.read()
+        file_size = len(file_data)
+        
+        # Check if encryption is needed (from channel if message_id provided)
+        is_encrypted = False
+        channel_id = request.form.get('channel_id', type=int)
+        lesson_id = request.form.get('lesson_id', type=int)
+        
+        if channel_id:
+            channel = Channel.query.get(channel_id)
+            if channel and channel.is_encrypted and channel.encryption_key:
+                try:
+                    encryption_key = channel.encryption_key.encode('utf-8')
+                    file_data = encrypt_file_data(file_data, encryption_key)
+                    is_encrypted = True
+                except Exception as e:
+                    print(f"[Upload] Encryption failed: {str(e)}")
+                    # File encryption failed - continue without encryption
+                    pass
+        
+        # Cloud Storage Logic
+        storage_url = None
+        from app.utils.storage import upload_fileobj, get_public_url
+        from flask import current_app
+        
+        if current_app.config.get('S3_ENDPOINT') and current_app.config.get('S3_BUCKET') and 'localhost' not in current_app.config.get('S3_ENDPOINT'):
+            # Upload to S3
+            file_stream = BytesIO(file_data)
+            folder = 'files'
+            if lesson_id: folder = 'materials'
+            elif channel_id: folder = f'channels/{channel_id}'
+            
+            key = f"{folder}/{unique_filename}"
             try:
-                encryption_key = channel.encryption_key.encode('utf-8')
-                file_data = encrypt_file_data(file_data, encryption_key)
-                is_encrypted = True
-            except Exception:
-                # File encryption failed - continue without encryption
-                pass
-    
-    # Cloud Storage Logic
-    storage_url = None
-    from app.utils.storage import upload_fileobj, get_public_url
-    from flask import current_app
-    
-    if current_app.config.get('S3_ENDPOINT') and current_app.config.get('S3_BUCKET'):
-        # Upload to S3
-        file_stream = BytesIO(file_data)
-        folder = 'files'
-        if lesson_id: folder = 'materials'
-        elif channel_id: folder = f'channels/{channel_id}'
-        
-        key = f"{folder}/{unique_filename}"
-        if upload_fileobj(file_stream, key):
-            storage_url = get_public_url(key)
-            # If uploaded to S3, we use the storage_url as the path or keep track of it
-            # Actually, the model expects 'file_path'. We'll store the URL there if it's cloud.
-            file_path = storage_url
+                if upload_fileobj(file_stream, key):
+                    storage_url = get_public_url(key)
+                    file_path = storage_url
+                    print(f"[Upload] Successfully uploaded to cloud: {storage_url}")
+            except Exception as e:
+                print(f"[Upload] Cloud storage upload failed: {str(e)}")
+                # Error will fallback to local save if not uploaded to cloud
 
-    # Fallback to Local Save if not uploaded to cloud (only works locally)
-    if not storage_url:
-        with open(file_path, 'wb') as f:
-            f.write(file_data)
+        # Fallback to Local Save if not uploaded to cloud
+        if not storage_url:
+            print(f"[Upload] Saving locally to: {file_path}")
+            with open(file_path, 'wb') as f:
+                f.write(file_data)
+        
+        # Get current user
+        user = User.query.get(current_user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
 
-    
-    # Get current user
-    user = User.query.get(current_user_id)
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-
-    if lesson_id:
-        # Verify user has permission to upload to this lesson
-        from app.models import Lesson, Class, ClassMember
-        lesson = Lesson.query.get(lesson_id)
-        if not lesson:
-            return jsonify({'error': 'Lesson not found'}), 404
+        if lesson_id:
+            # Verify user has permission to upload to this lesson
+            from app.models import Lesson, Class, ClassMember
+            lesson = Lesson.query.get(lesson_id)
+            if not lesson:
+                return jsonify({'error': 'Lesson not found'}), 404
+            
+            # Check if user is teacher/admin or member of the class
+            class_obj = Class.query.get(lesson.class_id)
+            if not class_obj:
+                return jsonify({'error': 'Class not found'}), 404
+            
+            member = ClassMember.query.filter_by(class_id=lesson.class_id, user_id=current_user_id).first()
+            
+            # Only teachers/admins can upload course materials
+            if not (user.role in ['admin', 'teacher'] or class_obj.teacher_id == current_user_id or (member and member.role in ['teacher', 'ta'])):
+                return jsonify({'error': 'Only teachers can upload course materials'}), 403
         
-        # Check if user is teacher/admin or member of the class
-        class_obj = Class.query.get(lesson.class_id)
-        if not class_obj:
-            return jsonify({'error': 'Class not found'}), 404
+        file_obj = File(
+            filename=unique_filename,
+            original_filename=filename,
+            file_path=file_path,
+            file_size=file_size,
+            mime_type=mime_type,
+            uploaded_by=current_user_id,
+            message_id=request.form.get('message_id', type=int),
+            lesson_id=lesson_id,
+            group_id=request.form.get('group_id', type=int),
+            workspace_id=user.workspace_id if user.workspace_id else None
+        )
         
-        member = ClassMember.query.filter_by(class_id=lesson.class_id, user_id=current_user_id).first()
+        db.session.add(file_obj)
+        db.session.commit()
         
-        # Only teachers/admins can upload course materials
-        if not (user.role in ['admin', 'teacher'] or class_obj.teacher_id == current_user_id or (member and member.role in ['teacher', 'ta'])):
-            return jsonify({'error': 'Only teachers can upload course materials'}), 403
-    
-    file_obj = File(
-        filename=unique_filename,
-        original_filename=filename,
-        file_path=file_path,
-        file_size=file_size,
-        mime_type=mime_type,
-        uploaded_by=current_user_id,
-        message_id=request.form.get('message_id', type=int),
-        lesson_id=lesson_id,
-        group_id=request.form.get('group_id', type=int),
-        workspace_id=user.workspace_id if user.workspace_id else None
-    )
-    
-    db.session.add(file_obj)
-    db.session.commit()
-    
-    return jsonify(file_obj.to_dict()), 201
+        return jsonify(file_obj.to_dict()), 201
+        
+    except Exception as e:
+        import traceback
+        import sys
+        print(f"!!! CRITICAL UPLOAD ERROR: {str(e)}", file=sys.stderr)
+        traceback.print_exc()
+        return jsonify({'error': str(e), 'details': 'Critical internal server error during file upload'}), 500
 
 from flask_cors import cross_origin
 

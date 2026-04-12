@@ -103,6 +103,49 @@ export default function Chat() {
   const [activeSidebarTab, setActiveSidebarTab] = useState('joined') // 'joined' or 'discover'
   const [availableChannels, setAvailableChannels] = useState([])
   const [isDiscoverLoading, setIsDiscoverLoading] = useState(false)
+  
+  // Implementation of missing offline message queue functions
+  const enqueueUnsentMessage = useCallback((tempMsg, payload) => {
+    try {
+      const queue = JSON.parse(localStorage.getItem('scccs_unsent_messages') || '[]')
+      queue.push({ tempMsg, payload, timestamp: Date.now() })
+      localStorage.setItem('scccs_unsent_messages', JSON.stringify(queue))
+      console.log('[Chat] Message enqueued for retry:', tempMsg.id)
+    } catch (e) {
+      console.error('[Chat] Failed to enqueue message:', e)
+    }
+  }, [])
+
+  const flushUnsentQueue = useCallback(async () => {
+    try {
+      const queue = JSON.parse(localStorage.getItem('scccs_unsent_messages') || '[]')
+      if (queue.length === 0) return
+      
+      console.log(`[Chat] Flushing ${queue.length} unsent messages...`)
+      
+      const remaining = []
+      for (const item of queue) {
+        try {
+          // If message is too old (e.g. > 24h), discard it
+          if (Date.now() - item.timestamp > 86400000) continue
+          
+          await messagesAPI.createMessage(item.tempMsg.channel_id, item.payload)
+          console.log('[Chat] Successfully flushed message:', item.tempMsg.id)
+        } catch (e) {
+          console.error('[Chat] Failed to flush message, keeping in queue:', item.tempMsg.id, e)
+          remaining.push(item)
+        }
+      }
+      
+      localStorage.setItem('scccs_unsent_messages', JSON.stringify(remaining))
+      if (remaining.length === 0) {
+        queryClient.invalidateQueries(['messages'])
+      }
+    } catch (e) {
+      console.error('[Chat] Failed to flush unsent queue:', e)
+    }
+  }, [queryClient])
+
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const [isRecordingPaused, setIsRecordingPaused] = useState(false)
   const typingTimeoutRef = useRef(null)
