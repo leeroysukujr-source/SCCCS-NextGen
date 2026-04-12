@@ -388,3 +388,68 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ============================================================================
+   MOBILE RESPONSIVENESS OVERRIDES
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .vb-greeting {
+        font-size: 1.75rem;
+    }
+
+    .vb-home-container {
+        padding: 1.25rem;
+    }
+
+    /* Fixed Video Grid Collapse */
+    .premium-lk-grid {
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        padding: 4px !important;
+    }
+
+    .lk-tile-custom {
+        height: min-content !important;
+        flex-grow: 1 !important;
+        min-height: 200px !important;
+    }
+
+    /* Scattered Control Bar Fix */
+    .vb-dock-container {
+        bottom: 12px;
+    }
+
+    .vb-dock {
+        padding: 6px 12px;
+        gap: 4px;
+        border-radius: 16px;
+        max-width: 98vw;
+        overflow-x: auto;
+    }
+
+    .vb-dock-item {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+        border-radius: 10px;
+        flex-shrink: 0;
+    }
+    
+    /* Ensure meeting room grid fills viewport */
+    .vb-meeting-root, .meeting-root {
+        height: 100vh !important;
+        height: -webkit-fill-available !important;
+    }
+}
+
+/* Hide scrollbars but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

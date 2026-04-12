@@ -522,9 +522,9 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
                  <Whiteboard roomId={roomId} onExit={() => setShowWhiteboard(false)} />
                </div>
              ) : (
-                 <div className="w-full h-full animate-fadeIn">
-                  <VideoConference 
-                    className="premium-lk-grid h-full"
+                  <div className="w-full h-full min-h-[50vh] animate-fadeIn flex-1">
+                   <VideoConference 
+                     className="premium-lk-grid h-full w-full"
                     participantRenderer={(p) => (
                       <div className="w-full h-full p-2 relative group overflow-hidden rounded-[2.5rem]">
                         <ParticipantTile participant={p} className="lk-tile-custom" />
@@ -696,7 +696,7 @@ function PremiumMeetingHeader({ roomId, roomInfo = {}, recordingActive, handsRai
   };
 
   return (
-    <div className="h-20 border-b backdrop-blur-2xl flex items-center justify-between px-8 shrink-0 shadow-2xl" style={{ background: 'var(--mt-header-grad)', borderColor: 'var(--mt-border)' }}>
+    <div className="h-16 md:h-20 border-b backdrop-blur-2xl flex items-center justify-between px-4 md:px-8 shrink-0 shadow-2xl" style={{ background: 'var(--mt-header-grad)', borderColor: 'var(--mt-border)' }}>
       {/* Left - Title & Status */}
       <div className="flex items-center gap-4">
         <h2 className="font-bold text-xl truncate max-w-xs" style={{ color: 'var(--mt-text-primary)' }}>{(roomInfo && (roomInfo.name || roomInfo.title)) || 'Live Meeting'}</h2>
@@ -720,8 +720,8 @@ function PremiumMeetingHeader({ roomId, roomInfo = {}, recordingActive, handsRai
         )}
       </div>
 
-      {/* Center - Time & Network */}
-      <div className="flex items-center gap-6">
+      {/* Center - Time & Network (Hidden on mobile) */}
+      <div className="hidden lg:flex items-center gap-6">
         <div className="flex items-center gap-2 text-slate-300">
           <FaRegClock className="text-blue-400" />
           <span className="tabular-nums font-semibold">{formatTime(elapsed)}</span>
@@ -747,6 +747,20 @@ function PremiumMeetingHeader({ roomId, roomInfo = {}, recordingActive, handsRai
             <span className="text-xs font-semibold text-amber-300">{handsRaised.size} hand(s) raised</span>
           </div>
         )}
+      </div>
+
+      {/* Right - More Menu (Mobile friendly) */}
+      <div className="flex items-center gap-3">
+        <div className="hidden sm:flex flex-col items-end mr-4">
+           <span className="text-[9px] text-slate-500 font-black uppercase tracking-widest">{roomInfo?.is_active ? 'Live Broadcast' : 'Session Ready'}</span>
+           <span className="text-[11px] text-indigo-400 font-bold tabular-nums">{elapsed > 0 ? formatTime(elapsed) : '00:00'}</span>
+        </div>
+        <button className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white border border-white/5 transition-all">
+          <IoNotifications size={18} />
+        </button>
+        <button className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 transition-all active:scale-95 lg:hidden">
+          <FaEllipsisH size={18} />
+        </button>
       </div>
 
       {/* Right - Actions */}
@@ -794,7 +808,13 @@ function PremiumSidebar({
   }
 
   return (
-    <div className={`absolute md:relative right-0 z-50 w-full md:w-96 border-l backdrop-blur-2xl flex flex-col h-full shadow-2xl transition-all`} style={{ background: 'var(--mt-bg-sidebar)', borderColor: 'var(--mt-border)' }}>
+    <div className={`fixed md:relative inset-0 md:inset-auto right-0 z-[999] w-full md:w-96 border-l backdrop-blur-3xl flex flex-col h-full shadow-2xl transition-all ${view ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}`} style={{ background: 'var(--mt-bg-sidebar)', borderColor: 'var(--mt-border)' }}>
+      {/* Mobile Close Button */}
+      <div className="md:hidden flex justify-end p-4">
+        <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white">
+          <FaTimes />
+        </button>
+      </div>
       {/* Header with Tab Selection */}
       <div className="flex flex-col border-b px-4 pt-6 pb-4" style={{ borderColor: 'var(--mt-border)', background: 'transparent' }}>
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 px-2" style={{ color: 'var(--mt-text-secondary)' }}>Operational Interface</h3>
@@ -1411,27 +1431,30 @@ function AdvancedControlBar({
     }
   };
 
+  // Hide control bar when sidebar is open on very small screens to avoid overlap
+  if (sidebarView && typeof window !== 'undefined' && window.innerWidth < 768) return null;
+
   return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-auto max-w-[95vw]">
-      <div className="bg-slate-900/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] px-4 py-3 flex items-center gap-2 sm:gap-4 shadow-[0_32px_100px_rgba(0,0,0,0.6)] animate-slideUp">
+    <div className="fixed md:absolute bottom-4 sm:bottom-6 left-0 right-0 px-2 sm:px-6 z-[60] flex justify-center pointer-events-none animate-slideUp">
+      <div className="p-2 sm:p-4 flex items-center justify-center gap-1.5 sm:gap-6 bg-slate-900/90 backdrop-blur-3xl border border-white/10 rounded-2xl sm:rounded-[2.5rem] shadow-[0_20px_80px_rgba(0,0,0,0.8)] transition-all pointer-events-auto max-w-[98vw] overflow-x-auto no-scrollbar">
         
-        {/* Connection & Share */}
-        <div className="flex items-center bg-white/5 rounded-3xl p-1 gap-1">
+        {/* Info & Stats (Hidden on mobile) */}
+        <div className="hidden md:flex items-center gap-2">
           <button
             id="copy-link-btn"
             onClick={copyMeetingLink}
-            className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all bg-transparent text-slate-400 hover:text-white hover:bg-white/5"
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-transparent text-slate-400 hover:text-white hover:bg-white/5"
             title="Copy Meeting Link"
           >
-            <FiShare2 size={18} />
+            <FiShare2 size={16} />
           </button>
           
           <button
             onClick={onStatsToggle}
-            className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all bg-transparent text-slate-400 hover:text-white hover:bg-white/5"
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-transparent text-slate-400 hover:text-white hover:bg-white/5"
             title="Sytem Stats"
           >
-            <FaSignal size={16} />
+            <FaSignal size={14} />
           </button>
         </div>
 
