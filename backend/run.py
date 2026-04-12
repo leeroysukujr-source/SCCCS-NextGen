@@ -1,55 +1,19 @@
-"""Run the Flask app with a WebSocket-capable worker.
-
-Monkey-patch before importing the Flask app so Socket.IO picks up the chosen
-async library. If neither `eventlet` nor `gevent` is installed, fall back to
-Werkzeug/threading (websocket upgrades disabled) instead of exiting.
-
-Additionally, auto-start a local LiveKit server (via Docker Compose) when the
-configured LiveKit URL targets localhost. This keeps meetings/video features
-working in dev without an extra manual step. Set `LIVEKIT_AUTOSTART=false` to
-skip or change `LIVEKIT_URL` to a cloud host to avoid the local start."""
-
 import os
+import eventlet
+
+# DNS lookup time out fix for Render/Redis
+# We patch everything but keep native DNS resolver to avoid greendns issues
+eventlet.monkey_patch(all=True, dns=False)
+
 from config import Config
 
 def _apply_monkey_patch(preferred_mode: str | None) -> str:
-    """Patch stdlib for the requested async mode, with a safe fallback."""
-    modes_to_try = []
+    """Choose the best async mode. Note: eventlet is already patched if selected."""
+    if not preferred_mode:
+        return "eventlet"
+    return preferred_mode.lower()
 
-    if preferred_mode:
-        normalized = preferred_mode.lower()
-        if normalized == "threading":
-            return "threading"
-        if normalized in ("eventlet", "gevent"):
-            modes_to_try.append(normalized)
-    else:
-        # Auto-detect: eventlet -> gevent
-        modes_to_try.extend(["eventlet", "gevent"])
-
-    for mode in modes_to_try:
-        try:
-            if mode == "eventlet":
-                import eventlet
-
-                eventlet.monkey_patch()
-            else:
-                import gevent
-                from gevent import monkey
-
-                monkey.patch_all()
-            return mode
-        except Exception as exc:
-            print(f"[run.py] Warning: {mode} monkey patch failed: {exc}")
-
-    print(
-        "[run.py] Info: running without eventlet/gevent; "
-        "Socket.IO will use Werkzeug/threading (no websocket upgrades)."
-    )
-    return "threading"
-
-
-preferred_mode = os.getenv("SOCKETIO_ASYNC_MODE") or Config.SOCKETIO_ASYNC_MODE
-_used_async = _apply_monkey_patch(preferred_mode)
+_used_async = _apply_monkey_patch(os.getenv("SOCKETIO_ASYNC_MODE") or Config.SOCKETIO_ASYNC_MODE)
 
 import socket
 import subprocess
