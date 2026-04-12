@@ -329,9 +329,8 @@ export default function DirectMessages() {
       if (!selectedUser?.user_id) throw new Error('No user selected')
       return directMessagesAPI.sendMessage(selectedUser.user_id, data)
     },
-    onSuccess: (newMessage) => {
-      setMessage('')
-      setSelectedFiles([])
+    onSuccess: () => {
+      // Refresh context
       queryClient.invalidateQueries(['directMessages', 'conversation', selectedUser?.user_id])
       queryClient.invalidateQueries(['directMessages', 'conversations'])
 
@@ -422,8 +421,13 @@ export default function DirectMessages() {
 
     try {
       await sendMessageMutation.mutateAsync(messageData)
+      // Professional Standard: Always clear the input states immediately after success
+      setMessage('')
+      setSelectedFiles([])
+      setReplyToMessage(null)
+      setEditingMessage(null)
     } catch (error) {
-      // Error handled in mutation callback usually, but we catch locally to ensure final block runs
+      // Error handled in mutation callback
     } finally {
       setUploadingFiles(false)
     }
