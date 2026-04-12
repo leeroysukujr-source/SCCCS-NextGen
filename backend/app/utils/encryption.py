@@ -42,3 +42,7 @@ def encrypt(data):
 def decrypt(data):
     """Top-level helper for decryption"""
     return EncryptionService.decrypt(data)
+
+# Aliases for different route requirements
+encrypt_message = encrypt
+decrypt_message = decrypt
