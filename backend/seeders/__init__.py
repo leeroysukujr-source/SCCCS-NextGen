@@ -4,8 +4,9 @@ from app.models import GlobalFeatureFlag
 from app.models.system_settings import SystemSetting
 import json
 
-def run_all_seeders():
-    app = create_app()
+def run_all_seeders(app=None):
+    if app is None:
+        app = create_app()
     with app.app_context():
         print("--- RUNNING AUTOMATED SEEDING ENGINE ---")
         

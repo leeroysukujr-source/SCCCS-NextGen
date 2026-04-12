@@ -112,6 +112,15 @@ from app import create_app, socketio
 
 app = create_app(Config)
 
+# Self-Bootstrapping Seeder: Restore SuperAdmin governance on every boot
+try:
+    from seeders import run_all_seeders
+    run_all_seeders(app)
+except ImportError:
+    print("[run.py] Seeding skipped: 'seeders' package not found.")
+except Exception as e:
+    print(f"[run.py] Auto-seeding failed: {e}")
+
 if __name__ == '__main__':
     print(f"[run.py] Selected async mode: {_used_async}")
     socketio.run(
