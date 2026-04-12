@@ -216,63 +216,86 @@ def get_my_workspaces():
 @platform_super_admin_required
 def create_workspace():
     """Create a new workspace"""
-    data = request.get_json()
-    
-    if not data.get('name') or not data.get('slug'):
-        return jsonify({'error': 'Name and slug are required'}), 400
-        
-    # Check if slug exists
-    if Workspace.query.filter_by(slug=data['slug']).first():
-        return jsonify({'error': 'Workspace with this slug already exists'}), 400
-        
-    # Generate or validate code
-    code = data.get('code')
-    if not code:
-        # Generate random unique code: e.g. "WS-X9Y2"
-        import secrets
-        import string
-        while True:
-            suffix = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6))
-            candidate = f"WS-{suffix}"
-            if not Workspace.query.filter_by(code=candidate).first():
-                code = candidate
-                break
-    else:
-        # Check uniqueness of provided code
-        if Workspace.query.filter_by(code=code).first():
-            return jsonify({'error': 'Workspace code already exists'}), 400
-
-    workspace = Workspace(
-        name=data['name'],
-        slug=data['slug'],
-        code=code,
-        description=data.get('description', ''),
-        admin_id=data.get('admin_id')
-    )
-    
-    db.session.add(workspace)
-    db.session.commit()
-    
-    # Audit Log
     try:
-        current_user_id = get_jwt_identity()
-        log = AuditLog(
-            user_id=current_user_id,
-            action='create_workspace',
-            resource_type='workspace',
-            resource_id=workspace.id,
-            details_data=json.dumps({'name': workspace.name, 'slug': workspace.slug}),
-            status='success'
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+            
+        name = data.get('name', '').strip()
+        if not name:
+            return jsonify({'error': 'Workspace name is required'}), 400
+            
+        # 1. SLUG GENERATION (If missing)
+        slug = data.get('slug', '').strip()
+        if not slug:
+            # Generate slug from name: "SCCCS Test" -> "scccs-test"
+            import re
+            slug = re.sub(r'[^a-zA-Z0-9]', '-', name.lower())
+            slug = re.sub(r'-+', '-', slug).strip('-')
+        
+        # 2. UNIQUE SLUG CHECK
+        if Workspace.query.filter(Workspace.slug.ilike(slug)).first():
+            return jsonify({'error': f'A workspace with slug "{slug}" already exists'}), 400
+            
+        # 3. CODE GENERATION
+        code = data.get('code', '').strip()
+        if not code:
+            import secrets
+            import string
+            while True:
+                suffix = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+                candidate = f"WS-{suffix}"
+                if not Workspace.query.filter_by(code=candidate).first():
+                    code = candidate
+                    break
+        else:
+            if Workspace.query.filter(Workspace.code.ilike(code)).first():
+                return jsonify({'error': 'Workspace code already exists'}), 400
+
+        # 4. INSTANTIATION
+        workspace = Workspace(
+            name=name,
+            slug=slug,
+            code=code,
+            description=data.get('description', ''),
+            admin_id=data.get('admin_id'),
+            logo_url=data.get('logo_url'),
+            status='active'
         )
-        db.session.add(log)
+        
+        db.session.add(workspace)
         db.session.commit()
+        
+        # 5. AUDIT LOGGING
+        try:
+            current_user_id = get_jwt_identity()
+            log = AuditLog(
+                user_id=current_user_id,
+                action='create_workspace',
+                resource_type='workspace',
+                resource_id=workspace.id,
+                details_data=json.dumps({'name': workspace.name, 'slug': workspace.slug}),
+                status='success'
+            )
+            db.session.add(log)
+            db.session.commit()
+        except Exception as audit_err:
+            print(f"Audit log failed (non-critical): {audit_err}")
+        
+        return jsonify({
+            'message': 'Workspace created successfully',
+            'workspace': workspace.to_dict()
+        }), 201
+
     except Exception as e:
-        print(f"Audit log failed: {e}")
-    
-    return jsonify({
-        'message': 'Workspace created successfully',
-        'workspace': workspace.to_dict()
-    }), 201
+        db.session.rollback()
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"WORKSPACE CREATION ERROR: {str(e)}\n{error_trace}")
+        return jsonify({
+            'error': 'Internal server error during workspace creation',
+            'details': str(e)
+        }), 500
 
 @workspace_bp.route('/<int:ws_id>', methods=['PUT'])
 @jwt_required()
