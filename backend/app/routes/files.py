@@ -259,7 +259,11 @@ def get_file(file_id):
     file_obj = File.query.get(file_id)
     
     if not file_obj:
+        print(f"DEBUG ERROR: File ID {file_id} not found in database")
         return jsonify({'error': 'File not found'}), 404
+    
+    print(f"DEBUG: Processing file ID {file_id}: {file_obj.original_filename}")
+    print(f"DEBUG: Stored file_path: {file_obj.file_path}")
     
     # Check privacy if file is associated with a message/channel
     if file_obj.message_id:
@@ -267,6 +271,7 @@ def get_file(file_id):
         if message:
             channel = Channel.query.get(message.channel_id)
             if channel and not can_access_channel(current_user_id, channel.id):
+                print(f"DEBUG: Access denied for user {current_user_id} to file {file_id}")
                 return jsonify({'error': 'Access denied'}), 403
     
     real_file_path = file_obj.file_path
@@ -275,16 +280,20 @@ def get_file(file_id):
     # Handle Cloud Storage vs Local Storage
     if real_file_path.startswith('http'):
         import requests
+        print(f"DEBUG: Fetching cloud file: {real_file_path}")
         try:
             # If the file is NOT encrypted and no special processing is needed, we COULD redirect.
             # However, for consistency with the rest of the logic (encryption, mime types),
             # we fetch it to the server first.
-            response = requests.get(real_file_path)
+            response = requests.get(real_file_path, timeout=10)
             if response.status_code == 200:
                 file_data = response.content
+                print(f"DEBUG: Successfully fetched {len(file_data)} bytes from cloud")
             else:
-                return jsonify({'error': 'Failed to fetch file from cloud storage'}), 500
+                print(f"DEBUG ERROR: Cloud storage returned {response.status_code} for {real_file_path}")
+                return jsonify({'error': 'Failed to fetch file from cloud storage', 'status': response.status_code}), 500
         except Exception as e:
+            print(f"DEBUG ERROR Fetching Cloud: {str(e)}")
             return jsonify({'error': f'Cloud storage access error: {str(e)}'}), 500
     else:
         # Handle relative paths (legacy) by making them absolute relative to backend root
@@ -293,12 +302,23 @@ def get_file(file_id):
             backend_dir = os.path.dirname(os.path.dirname(current_file_dir))
             real_file_path = os.path.join(backend_dir, real_file_path)
         
+        print(f"DEBUG: Checking local path: {real_file_path}")
         if not os.path.exists(real_file_path):
-            return jsonify({'error': 'File not found on server'}), 404
+            print(f"DEBUG ERROR: Local file missing at {real_file_path}")
+            return jsonify({
+                'error': 'File not found on server', 
+                'path': real_file_path,
+                'is_render': 'RENDER' in os.environ
+            }), 404
         
         # Read local file
-        with open(real_file_path, 'rb') as f:
-            file_data = f.read()
+        try:
+            with open(real_file_path, 'rb') as f:
+                file_data = f.read()
+            print(f"DEBUG: Successfully read {len(file_data)} bytes from local storage")
+        except Exception as e:
+            print(f"DEBUG ERROR Reading Local: {str(e)}")
+            return jsonify({'error': f'Local file access error: {str(e)}'}), 500
     
     # Check if file is encrypted (from channel)
     if file_obj.message_id:

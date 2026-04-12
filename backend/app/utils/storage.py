@@ -13,6 +13,7 @@ def get_s3_client():
         
     access_key = current_app.config.get('S3_ACCESS_KEY')
     secret_key = current_app.config.get('S3_SECRET_KEY')
+    region = current_app.config.get('S3_REGION')
     # Use unsigned or specific config if needed
     session = boto3.session.Session()
     s3 = session.client(
@@ -20,6 +21,7 @@ def get_s3_client():
         endpoint_url=endpoint,
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
+        region_name=region
     )
     return s3
 

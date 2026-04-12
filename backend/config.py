@@ -114,6 +114,7 @@ class Config:
     S3_ACCESS_KEY = os.getenv('S3_ACCESS_KEY', os.getenv('MINIO_ROOT_USER', 'minioadmin'))
     S3_SECRET_KEY = os.getenv('S3_SECRET_KEY', os.getenv('MINIO_ROOT_PASSWORD', 'minioadmin'))
     S3_BUCKET = os.getenv('S3_BUCKET', 'scccs-files')
+    S3_REGION = os.getenv('S3_REGION', 'us-east-1')
     
     # Server Configuration
     SERVER_HOST = os.getenv('SERVER_HOST', '0.0.0.0')
