@@ -30,9 +30,14 @@ def get_assignments():
     query = Assignment.query.filter_by(workspace_id=user.workspace_id)
     
     # Filter by channel if provided
-    channel_id = request.args.get('channel_id')
-    if channel_id:
-        query = query.filter_by(channel_id=channel_id)
+    channel_id_str = request.args.get('channel_id')
+    channel_id = None
+    if channel_id_str:
+        try:
+            channel_id = int(channel_id_str)
+            query = query.filter_by(channel_id=channel_id)
+        except (ValueError, TypeError):
+            return jsonify({"error": "Invalid channel_id", "details": "The provided channel_id must be an integer."}), 400
 
     if user.role == 'student':
         query = query.filter_by(status='published')
@@ -42,7 +47,7 @@ def get_assignments():
         enrolled_channel_ids = [m.channel_id for m in ChannelMember.query.filter_by(user_id=user.id).all()]
         
         # If they filtered by channel, check if they're enrolled
-        if channel_id and int(channel_id) not in enrolled_channel_ids:
+        if channel_id and channel_id not in enrolled_channel_ids:
              return jsonify({"error": "You are not enrolled in this course channel"}), 403
              
         # Only show assignments from enrolled channels or public workspace ones
