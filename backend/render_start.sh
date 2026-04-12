@@ -6,12 +6,9 @@ export LIVEKIT_AUTOSTART=false
 echo "=== Step 0: Executing Phase One Data Plane Purge ==="
 python bootstrap.py
 
-# NUCLEAR RESET: Phase Three (Building 3NF Schema & Branding Migration History)
-echo "=== Step 1: Performing 3NF Schema Rebuild (db.create_all) ==="
-python -c "from app import create_app, db; app=create_app(); with app.app_context(): db.create_all()"
-
-echo "=== Step 2: Branding Migration History (flask db stamp head) ==="
-flask db stamp head || echo "Stamp failed - check if migrations directory is missing"
+# NUCLEAR RESET: Phase Three (Standardized Migration Deployment)
+echo "=== Step 1: Executing Surgerically Ordered Migration (flask db upgrade) ==="
+flask db upgrade || echo "Migration failed - check logs for dependency deadlocks"
 
 # STEP 3: Seed reference data (Phase Four)
 echo "=== Step 3: Running seeders (RBAC Seeding) ==="
