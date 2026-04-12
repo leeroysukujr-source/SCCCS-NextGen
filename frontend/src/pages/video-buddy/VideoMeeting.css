@@ -2,12 +2,21 @@
 .vb-meeting-header{display:flex;justify-content:space-between;align-items:center}
 .vb-meeting-search input{padding:8px 12px;border-radius:10px;border:1px solid #e6eefc;min-width:220px}
 .vb-meeting-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-.vb-meeting-card{background:linear-gradient(180deg,#091226,#071029);border-radius:14px;padding:18px;color:#fff;box-shadow:0 10px 30px rgba(2,6,23,0.35);transition:transform .18s ease}
+.vb-meeting-card {
+  background: var(--vb-bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--vb-border);
+  border-radius: 14px;
+  padding: 18px;
+  color: var(--vb-text-primary);
+  box-shadow: 0 10px 30px var(--vb-dock-shadow);
+  transition: transform .18s ease, background 0.3s ease, color 0.3s ease;
+}
 .vb-meeting-card:hover{transform:translateY(-6px)}
 .vb-meeting-card-inner{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 .vb-card-title{font-weight:800;font-size:18px;width:100%}
 .live-badge{font-weight:900;letter-spacing:0.5px;box-shadow:0 0 10px rgba(16,185,129,0.5)}
-.vb-card-sub{font-size:13px;color:#cbd5e1}
+.vb-card-sub{font-size:13px;color:var(--vb-text-secondary)}
 .vb-card-actions{display:flex;gap:8px;margin-top:8px}
 .vb-action.small{padding:6px 10px;border-radius:8px;font-weight:700}
 .vb-btn-icon{width:44px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:none;cursor:pointer;font-size:16px;color:white}

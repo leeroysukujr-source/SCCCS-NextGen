@@ -24,24 +24,22 @@
     --vb-font: 'Plus Jakarta Sans', sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        /* DARK MODE */
-        --vb-bg-root: #000000;
-        --vb-bg-main-grad-1: rgba(56, 189, 248, 0.08);
-        --vb-bg-main-grad-2: rgba(139, 92, 246, 0.08);
-        --vb-bg-card: rgba(30, 41, 59, 0.4);
-        --vb-bg-dock: rgba(15, 23, 42, 0.75);
-        --vb-dock-shadow: rgba(0, 0, 0, 0.5);
-        --vb-border: rgba(255, 255, 255, 0.08);
-        --vb-text-primary: #f8fafc;
-        --vb-text-secondary: #94a3b8;
-        --vb-primary: #3b82f6;
-        --vb-hover-bg: rgba(255, 255, 255, 0.05);
-        --vb-active-bg: rgba(59, 130, 246, 0.15);
-        --vb-greeting-grad-start: #ffffff;
-        --vb-greeting-grad-end: #cbd5e1;
-    }
+[data-theme='dark'] {
+    /* DARK MODE */
+    --vb-bg-root: #000000;
+    --vb-bg-main-grad-1: rgba(56, 189, 248, 0.08);
+    --vb-bg-main-grad-2: rgba(139, 92, 246, 0.08);
+    --vb-bg-card: rgba(30, 41, 59, 0.4);
+    --vb-bg-dock: rgba(15, 23, 42, 0.75);
+    --vb-dock-shadow: rgba(0, 0, 0, 0.5);
+    --vb-border: rgba(255, 255, 255, 0.08);
+    --vb-text-primary: #f8fafc;
+    --vb-text-secondary: #94a3b8;
+    --vb-primary: #3b82f6;
+    --vb-hover-bg: rgba(255, 255, 255, 0.05);
+    --vb-active-bg: rgba(59, 130, 246, 0.15);
+    --vb-greeting-grad-start: #ffffff;
+    --vb-greeting-grad-end: #cbd5e1;
 }
 
 .vb-root {

@@ -170,9 +170,9 @@ export default function MeetingEnhanced({ roomId: propRoomId, onReady }) {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-950 text-red-500 overflow-hidden relative">
+      <div className="flex items-center justify-center h-screen overflow-hidden relative" style={{ background: 'var(--vb-bg-root)', color: 'var(--vb-text-primary)' }}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-900/10 via-transparent to-transparent z-0"></div>
-        <div className="bg-slate-900/40 backdrop-blur-3xl p-10 rounded-[2.5rem] shadow-2xl border border-red-500/20 max-w-md text-center z-10">
+        <div className="backdrop-blur-3xl p-10 rounded-[2.5rem] shadow-2xl border border-red-500/20 max-w-md text-center z-10" style={{ background: 'var(--vb-bg-card)' }}>
           <div className="h-20 w-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-500/10">
             <FaShieldAlt className="text-3xl text-red-500 animate-pulse" />
           </div>
@@ -200,19 +200,19 @@ export default function MeetingEnhanced({ roomId: propRoomId, onReady }) {
 
   if (isJoining) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-b from-slate-950 via-blue-950/20 to-black relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-950 to-black z-0"></div>
+      <div className="flex flex-col items-center justify-center h-screen relative overflow-hidden" style={{ background: 'var(--vb-bg-root)' }}>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/10 via-transparent to-transparent z-0"></div>
         <div className="z-10 flex flex-col items-center">
           <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-6"></div>
-          <p className="text-slate-400 text-lg font-semibold">Connecting to meeting...</p>
-          <p className="text-slate-500 text-sm mt-2">Setting up your audio and video</p>
+          <p className="text-lg font-semibold" style={{ color: 'var(--vb-text-primary)' }}>Connecting to meeting...</p>
+          <p className="text-sm mt-2" style={{ color: 'var(--vb-text-secondary)' }}>Setting up your audio and video</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen w-screen bg-black overflow-hidden">
+    <div className="h-screen w-screen overflow-hidden" style={{ background: 'var(--vb-bg-root)' }}>
       {!shouldJoin ? (
         <PremiumPreJoinScreen
           onJoin={(choices, guestName) => handleJoinMeeting(choices, guestName)}
@@ -226,7 +226,7 @@ export default function MeetingEnhanced({ roomId: propRoomId, onReady }) {
           audio={preJoinChoices.audioEnabled}
           token={livekitToken}
           serverUrl={livekitUrl}
-          data-lk-theme="dark"
+          data-lk-theme={document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'}
           connectOptions={{
             autoSubscribe: true,
             adaptiveStream: true,
@@ -494,7 +494,7 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
   const layout = getGridLayout();
 
   return (
-    <div className={`flex flex-col h-full bg-slate-950 text-white overflow-hidden transition-all duration-700 ${isCinematic ? 'scale-[0.98] rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.8)]' : ''}`}>
+    <div className={`flex flex-col h-full overflow-hidden transition-all duration-700 ${isCinematic ? 'scale-[0.98] rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.8)]' : ''}`} style={{ background: 'var(--vb-bg-root)', color: 'var(--vb-text-primary)' }}>
       <PremiumMeetingHeader 
         roomId={roomId} 
         roomInfo={roomInfo} 
@@ -618,6 +618,27 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
             });
           }}
         />
+        <style>{`
+          [data-theme='light'] {
+             --mt-bg-root: #f8fafc;
+             --mt-bg-card: rgba(255, 255, 255, 0.7);
+             --mt-bg-sidebar: rgba(255, 255, 255, 0.9);
+             --mt-text-primary: #0f172a;
+             --mt-text-secondary: #64748b;
+             --mt-border: rgba(0, 0, 0, 0.06);
+             --mt-header-grad: linear-gradient(to right, #ffffff, #f1f5f9);
+          }
+
+          [data-theme='dark'] {
+             --mt-bg-root: #020617;
+             --mt-bg-card: rgba(30, 41, 59, 0.4);
+             --mt-bg-sidebar: rgba(15, 23, 42, 0.9);
+             --mt-text-primary: #f8fafc;
+             --mt-text-secondary: #94a3b8;
+             --mt-border: rgba(255, 255, 255, 0.08);
+             --mt-header-grad: linear-gradient(to right, #0f172a, #020617);
+          }
+        `}</style>
         <MeetingStyles />
       </div>
 
@@ -675,11 +696,12 @@ function PremiumMeetingHeader({ roomId, roomInfo = {}, recordingActive, handsRai
   };
 
   return (
-    <div className="h-20 bg-gradient-to-r from-slate-900/95 via-slate-950 to-slate-900/95 border-b border-white/10 backdrop-blur-2xl flex items-center justify-between px-8 shrink-0 shadow-2xl">
+  return (
+    <div className="h-20 border-b backdrop-blur-2xl flex items-center justify-between px-8 shrink-0 shadow-2xl" style={{ background: 'var(--mt-header-grad)', borderColor: 'var(--mt-border)' }}>
       {/* Left - Title & Status */}
       <div className="flex items-center gap-4">
-        <h2 className="text-white font-bold text-xl truncate max-w-xs">{(roomInfo && (roomInfo.name || roomInfo.title)) || 'Live Meeting'}</h2>
-        <div className="px-3 py-1.5 bg-slate-800/50 rounded-lg text-xs text-slate-300 border border-white/10 hover:border-white/20 cursor-pointer transition-all">
+        <h2 className="font-bold text-xl truncate max-w-xs" style={{ color: 'var(--mt-text-primary)' }}>{(roomInfo && (roomInfo.name || roomInfo.title)) || 'Live Meeting'}</h2>
+        <div className="px-3 py-1.5 rounded-lg text-xs border cursor-pointer transition-all" style={{ background: 'var(--vb-hover-bg)', color: 'var(--mt-text-secondary)', borderColor: 'var(--mt-border)' }}>
           {roomId?.substring(0, 8)}...
         </div>
         {isInitiator && (
@@ -773,11 +795,12 @@ function PremiumSidebar({
   }
 
   return (
-    <div className={`absolute md:relative right-0 z-50 w-full md:w-96 bg-gradient-to-b from-slate-900/98 via-slate-950 to-slate-900/98 border-l border-white/10 backdrop-blur-2xl flex flex-col h-full shadow-2xl transition-all`}>
+  return (
+    <div className={`absolute md:relative right-0 z-50 w-full md:w-96 border-l backdrop-blur-2xl flex flex-col h-full shadow-2xl transition-all`} style={{ background: 'var(--mt-bg-sidebar)', borderColor: 'var(--mt-border)' }}>
       {/* Header with Tab Selection */}
-      <div className="flex flex-col border-b border-white/5 bg-slate-950/40 px-4 pt-6 pb-4">
-        <h3 className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-4 px-2">Operational Interface</h3>
-        <div className="flex gap-1.5 p-1 bg-black/40 rounded-2xl border border-white/5">
+      <div className="flex flex-col border-b px-4 pt-6 pb-4" style={{ borderColor: 'var(--mt-border)', background: 'transparent' }}>
+        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 px-2" style={{ color: 'var(--mt-text-secondary)' }}>Operational Interface</h3>
+        <div className="flex gap-1.5 p-1 rounded-2xl border" style={{ background: 'var(--vb-hover-bg)', borderColor: 'var(--mt-border)' }}>
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -1946,7 +1969,8 @@ function PremiumPreJoinScreen({ onJoin, username, roomId, roomInfo = {} }) {
   }, [videoEnabled, selectedCamera]);
 
   return (
-    <div className="flex h-screen w-full bg-gradient-to-br from-slate-950 via-slate-950 to-black items-center justify-center p-4">
+  return (
+    <div className="flex h-screen w-full items-center justify-center p-4" style={{ background: 'var(--vb-bg-root)' }}>
       {/* Animated Background */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_50%)] pointer-events-none"></div>
 
@@ -2002,7 +2026,7 @@ function PremiumPreJoinScreen({ onJoin, username, roomId, roomInfo = {} }) {
         </div>
 
         {/* User Info & Meeting Details - Bottom Section */}
-        <div className="bg-gradient-to-b from-slate-900/95 via-slate-950 to-slate-950 rounded-3xl p-8 border border-white/10 shadow-2xl">
+        <div className="rounded-3xl p-8 border shadow-2xl" style={{ background: 'var(--mt-bg-card)', borderColor: 'var(--mt-border)' }}>
           
           {/* Name Input */}
           <div className="mb-8 relative group">
@@ -2217,11 +2241,11 @@ const MeetingStyles = () => (
     }
     .lk-tile-custom {
       border: none !important;
-      background: rgba(30, 41, 59, 0.4) !important;
+      background: var(--mt-bg-card) !important;
       border-radius: 2.5rem !important;
       overflow: hidden !important;
       transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+      box-shadow: 0 10px 30px var(--vb-dock-shadow) !important;
     }
 
     .lk-participant-tile {
@@ -2259,7 +2283,7 @@ const MeetingStyles = () => (
 
     /* Ensure avatars are centered in tiles */
     .lk-participant-placeholder {
-      background: radial-gradient(circle at center, #1e293b 0%, #020617 100%) !important;
+      background: radial-gradient(circle at center, var(--mt-bg-card) 0%, var(--mt-bg-root) 100%) !important;
     }
 
     /* Operational Sidebar Content Fixes */

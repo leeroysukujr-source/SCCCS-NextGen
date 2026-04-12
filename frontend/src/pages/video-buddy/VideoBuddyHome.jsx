@@ -138,8 +138,8 @@ export default function VideoBuddyHome() {
                     <div className="flex items-center gap-4">
                       <div className="w-2 h-10 rounded-full bg-blue-500"></div>
                       <div>
-                        <div className="font-bold text-lg text-slate-200">{meeting.name || 'Untitled Meeting'}</div>
-                        <div className="text-sm text-slate-400">ID: {meeting.id}</div>
+                        <div className="font-bold text-lg" style={{ color: 'var(--vb-text-primary)' }}>{meeting.name || 'Untitled Meeting'}</div>
+                        <div className="text-sm" style={{ color: 'var(--vb-text-secondary)' }}>ID: {meeting.id}</div>
                       </div>
                     </div>
                     <div className="vb-list-time">
@@ -184,9 +184,9 @@ export default function VideoBuddyHome() {
             {invitations.length > 0 ? (
               <div className="flex flex-col gap-2">
                 {invitations.map(inv => (
-                  <div key={inv.id} className="p-3 rounded-xl bg-white/5 border border-white/10">
-                    <div className="font-bold text-sm text-slate-200 mb-1">{inv.name}</div>
-                    <div className="text-xs text-slate-400 mb-3">Invited by {inv.inviter_name || 'Someone'}</div>
+                  <div key={inv.id} className="p-3 rounded-xl border" style={{ background: 'var(--vb-hover-bg)', borderColor: 'var(--vb-border)' }}>
+                    <div className="font-bold text-sm mb-1" style={{ color: 'var(--vb-text-primary)' }}>{inv.name}</div>
+                    <div className="text-xs mb-3" style={{ color: 'var(--vb-text-secondary)' }}>Invited by {inv.inviter_name || 'Someone'}</div>
                     <div className="flex gap-2">
                       <button className="flex-1 py-1.5 bg-blue-600 rounded-lg text-xs font-bold hover:bg-blue-500">Accept</button>
                       <button className="flex-1 py-1.5 bg-white/10 rounded-lg text-xs font-bold hover:bg-white/20">Decline</button>
