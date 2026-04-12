@@ -348,24 +348,36 @@ export default function DirectMessages() {
   })
 
   const handleSendMessage = async (e) => {
-    e.preventDefault()
-    if (!message.trim() && selectedFiles.length === 0) return
+    if (e) e.preventDefault()
+    
+    const currentMessage = message.trim()
+    const currentFiles = [...selectedFiles]
+    
+    if (!currentMessage && currentFiles.length === 0) return
     if (!selectedUser) return
 
-    // If editing, update message instead
+    // Immediately clear for professional standard
+    setMessage('')
+    setSelectedFiles([])
+    setReplyToMessage(null)
+    setEditingMessage(null)
+
+    // Reset textarea height after clear
+    if (messageInputRef.current) {
+      messageInputRef.current.style.height = 'auto'
+    }
+
     if (editingMessage) {
       try {
         await directMessagesAPI.updateMessage(editingMessage.id, {
-          content: message.trim()
+          content: currentMessage
         })
-        setMessage('')
-        setEditingMessage(null)
-        setReplyToMessage(null)
         queryClient.invalidateQueries(['directMessages', 'conversation', selectedUser?.user_id])
         return
       } catch (error) {
         console.error('Error updating message:', error)
         notify('error', 'Failed to update message')
+        // Restore if failed? Usually not desired in DMs as users just try again
         return
       }
     }
@@ -374,19 +386,11 @@ export default function DirectMessages() {
     let uploadedFileIds = []
 
     try {
-      if (selectedFiles.length > 0) {
-        const uploadPromises = selectedFiles.map(async (fileObj) => {
-          // If it already has an ID (e.g. voice notes), return it
+      if (currentFiles.length > 0) {
+        const uploadPromises = currentFiles.map(async (fileObj) => {
           if (fileObj.id) return fileObj.id
-
-          // If it has a file object, upload it
           if (fileObj.file) {
             try {
-              // Using the same API signature as seen in voice recording: uploadFile(file, userId)
-              // Adjust if your API implementation differentiates between FormData and File object
-              // But usually uploadFile handles FormData creation if passed a File, or we pass FormData.
-              // Given line 383: filesAPI.uploadFile(audioFile, selectedUser.id)
-              // We will assume it takes the file object directly.
               const response = await filesAPI.uploadFile(fileObj.file, selectedUser.user_id)
               return response.id
             } catch (err) {
@@ -396,7 +400,6 @@ export default function DirectMessages() {
           }
           return null
         })
-
         uploadedFileIds = (await Promise.all(uploadPromises)).filter(Boolean)
       }
     } catch (error) {
@@ -407,16 +410,13 @@ export default function DirectMessages() {
     }
 
     let msgType = 'text'
-    if (selectedFiles.length > 0) {
-      // Check if any file is a voice note
-      const hasVoice = selectedFiles.some(f => f.type === 'voice' || f.mime_type?.startsWith('audio/') || f.name?.endsWith('.webm') || f.name?.endsWith('.mp3'))
-      if (hasVoice) {
-        msgType = 'voice'
-      }
+    if (currentFiles.length > 0) {
+      const hasVoice = currentFiles.some(f => f.type === 'voice' || f.mime_type?.startsWith('audio/') || f.name?.endsWith('.webm') || f.name?.endsWith('.mp3'))
+      if (hasVoice) msgType = 'voice'
     }
 
     const messageData = {
-      content: message.trim() || (uploadedFileIds.length > 0 ? '[File]' : ''),
+      content: currentMessage || (uploadedFileIds.length > 0 ? '[File]' : ''),
       message_type: msgType,
       file_ids: uploadedFileIds,
       reply_to: replyToMessage?.id || null
@@ -424,13 +424,10 @@ export default function DirectMessages() {
 
     try {
       await sendMessageMutation.mutateAsync(messageData)
-      // Professional Standard: Always clear the input states immediately after success
-      setMessage('')
-      setSelectedFiles([])
-      setReplyToMessage(null)
-      setEditingMessage(null)
     } catch (error) {
-      // Error handled in mutation callback
+      // Restore message to input if mutation fails completely? 
+      // Professional apps usually don't to avoid jarring jumps, but keep for manual retry.
+      console.error('Send failed:', error)
     } finally {
       setUploadingFiles(false)
     }
