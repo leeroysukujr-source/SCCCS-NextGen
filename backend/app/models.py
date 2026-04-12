@@ -600,7 +600,6 @@ class Channel(db.Model):
     name = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     type = db.Column(db.String(20), default='private')  # public, private, course
-    course_id = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=True)
     course_code = db.Column(db.String(20))
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     is_encrypted = db.Column(db.Boolean, default=True)
@@ -1352,7 +1351,6 @@ class Assignment(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     workspace_id = db.Column(db.Integer, db.ForeignKey('workspaces.id'), nullable=False)
-    course_id = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=True)
     channel_id = db.Column(db.Integer, db.ForeignKey('channels.id'), nullable=True)
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     due_date = db.Column(db.DateTime)

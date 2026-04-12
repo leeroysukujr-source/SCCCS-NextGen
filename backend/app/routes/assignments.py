@@ -29,11 +29,7 @@ def get_assignments():
 
     query = Assignment.query.filter_by(workspace_id=user.workspace_id)
     
-    # Filter by course (id) if provided
-    course_id = request.args.get('course_id')
-    if course_id:
-        query = query.filter_by(course_id=course_id)
-        
+    # Filter by channel if provided
     channel_id = request.args.get('channel_id')
     if channel_id:
         query = query.filter_by(channel_id=channel_id)
@@ -41,19 +37,19 @@ def get_assignments():
     if user.role == 'student':
         query = query.filter_by(status='published')
         
-        # Jurisdictional Lockdown: Student MUST be enrolled in the course
-        from app.models import ClassMember
-        enrolled_course_ids = [m.class_id for m in ClassMember.query.filter_by(user_id=user.id).all()]
+        # Jurisdictional Lockdown: Student MUST be enrolled in the channel
+        from app.models import ChannelMember
+        enrolled_channel_ids = [m.channel_id for m in ChannelMember.query.filter_by(user_id=user.id).all()]
         
-        # If they filtered by course, check if they're enrolled
-        if course_id and int(course_id) not in enrolled_course_ids:
-             return jsonify({"error": "You are not enrolled in this course"}), 403
+        # If they filtered by channel, check if they're enrolled
+        if channel_id and int(channel_id) not in enrolled_channel_ids:
+             return jsonify({"error": "You are not enrolled in this course channel"}), 403
              
-        # Only show assignments from enrolled courses or public workspace ones
+        # Only show assignments from enrolled channels or public workspace ones
         from sqlalchemy import or_
         query = query.filter(or_(
-            Assignment.course_id.in_(enrolled_course_ids),
-            Assignment.course_id == None
+            Assignment.channel_id.in_(enrolled_channel_ids),
+            Assignment.channel_id == None
         ))
         
         # Further scope by channel if applicable
@@ -91,7 +87,6 @@ def create_assignment():
         title=data.get('title'),
         description=data.get('description'),
         workspace_id=user.workspace_id,
-        course_id=data.get('course_id'),
         channel_id=data.get('channel_id'),
         created_by=user.id,
         due_date=datetime.fromisoformat(due_date_str) if due_date_str else None,
@@ -104,7 +99,7 @@ def create_assignment():
     
     # Secure Collaboration: Notify course/channel room via Socket.IO
     from app import socketio
-    room_id = f"course_{new_assignment.course_id}" if new_assignment.course_id else f"ws_{user.workspace_id}"
+    room_id = f"channel_{new_assignment.channel_id}" if new_assignment.channel_id else f"ws_{user.workspace_id}"
     socketio.emit('new_assignment', new_assignment.to_dict(), room=room_id)
     
     return jsonify(new_assignment.to_dict()), 201
