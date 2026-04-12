@@ -67,6 +67,9 @@ def decrypt(data, key=None):
     """Top-level helper for decryption"""
     return EncryptionService.decrypt(data, key)
 
+# Re-export e2e utilities for convenience and to fix import errors in legacy routes
+from app.utils.e2e_encryption import derive_key_from_password
+
 # Aliases for different route requirements
 encrypt_message = encrypt
 decrypt_message = decrypt
