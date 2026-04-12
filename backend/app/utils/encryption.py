@@ -30,3 +30,15 @@ class EncryptionService:
             return f.decrypt(encrypted_data.encode()).decode()
         except Exception:
             return "[Decryption Error]"
+
+def generate_key():
+    """Generate a new Fernet key for channel encryption"""
+    return Fernet.generate_key()
+
+def encrypt(data):
+    """Top-level helper for encryption"""
+    return EncryptionService.encrypt(data)
+
+def decrypt(data):
+    """Top-level helper for decryption"""
+    return EncryptionService.decrypt(data)
