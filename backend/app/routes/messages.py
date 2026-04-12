@@ -138,25 +138,40 @@ def create_message(channel_id):
 
         db.session.commit()
 
-        # Prepare message dict for response and socket
+        # Prepare message dict for response and socket (Authorized Stream)
         message_dict = message.to_dict()
 
-        # Decrypt message content if encrypted (for both socket and response)
-        if channel.is_encrypted and channel.encryption_key and message.is_encrypted:
+        # Robust Decryption for the Authorized Stream
+        if message.is_encrypted and message.content:
             try:
-                encryption_key = channel.encryption_key.encode('utf-8')
-                if message_dict.get('content') and message_dict['content'] != '[File]':
-                    decrypted = decrypt_message(message_dict['content'], encryption_key)
-                    # Handle legacy double-encryption (if content is still a Fernet token)
-                    if decrypted and decrypted.startswith('gAAAA'):
-                        try:
+                # 1. Try Channel Key
+                decrypted = None
+                if channel.is_encrypted and channel.encryption_key:
+                    try:
+                        encryption_key = channel.encryption_key.encode('utf-8')
+                        decrypted = decrypt_message(message.content, encryption_key)
+                        
+                        # Handle legacy double-encryption
+                        if decrypted and isinstance(decrypted, str) and decrypted.startswith('gAAAA'):
                             decrypted = decrypt_message(decrypted, encryption_key)
-                        except:
-                            pass
+                    except:
+                        decrypted = None
+                
+                # 2. Try Master Key Fallback (if channel key failed or missing)
+                if not decrypted or decrypted == "[Decryption Error]":
+                    try:
+                        decrypted = decrypt_message(message.content) # Uses system ENCRYPTION_KEY
+                    except:
+                        pass
+                
+                if decrypted and decrypted != "[Decryption Error]":
                     message_dict['content'] = decrypted
+                else:
+                    # Final fallback for UI safety
+                    if not message_dict['content'] or message_dict['content'].startswith('gAAAA'):
+                        message_dict['content'] = '[Encrypted Message]'
             except Exception:
-                # Decryption failed - show placeholder
-                message_dict['content'] = '[Message]'
+                message_dict['content'] = '[Encrypted Message]'
 
         # Emit real-time message via Socket.IO
         try:
@@ -191,26 +206,35 @@ def get_messages(channel_id):
         Message.created_at.desc()
     ).limit(50).all()
     
-    # Decrypt messages if encryption is enabled
-    if channel.is_encrypted and channel.encryption_key:
-        try:
-            encryption_key = channel.encryption_key.encode('utf-8')
-            for message in messages:
-                if message.is_encrypted and message.content:
-                    decrypted = decrypt_message(message.content, encryption_key)
-                    # Handle legacy double-encryption
-                    if decrypted and decrypted.startswith('gAAAA'):
-                        try:
+    # Decrypt messages for the Authorized Stream
+    for message in messages:
+        if message.is_encrypted and message.content:
+            try:
+                # 1. Try Channel Key
+                decrypted = None
+                if channel.is_encrypted and channel.encryption_key:
+                    try:
+                        encryption_key = channel.encryption_key.encode('utf-8')
+                        decrypted = decrypt_message(message.content, encryption_key)
+                        # Handle legacy double-encryption
+                        if decrypted and isinstance(decrypted, str) and decrypted.startswith('gAAAA'):
                             decrypted = decrypt_message(decrypted, encryption_key)
-                        except:
-                            pass
+                    except:
+                        decrypted = None
+                
+                # 2. Try Master Key Fallback
+                if not decrypted or decrypted == "[Decryption Error]":
+                    try:
+                        decrypted = decrypt_message(message.content) # Uses system ENCRYPTION_KEY
+                    except:
+                        pass
+                
+                if decrypted and decrypted != "[Decryption Error]":
                     message.content = decrypted
-        except Exception as e:
-            # Decryption failed - continue with encrypted content
-            import traceback
-            print(f"Decryption failed for message: {e}")
-            traceback.print_exc()
-            pass
+                else:
+                    message.content = '[Encrypted Message]'
+            except Exception:
+                message.content = '[Encrypted Message]'
     
     # Update last read
     member = ChannelMember.query.filter_by(channel_id=channel_id, user_id=current_user_id).first()

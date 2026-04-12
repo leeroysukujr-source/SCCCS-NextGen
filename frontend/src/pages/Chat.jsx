@@ -1460,6 +1460,11 @@ export default function Chat() {
   const renderMessageContent = (msg) => {
     if (!msg.content) return ''
 
+    // Phase 4: Standardize Debug Logging
+    if (msg.content === '[Decryption Error]') {
+      console.error("Decryption failed for key:", selectedChannel?.encryption_key || encryptionKey)
+    }
+
     // Parse mentions (@username) and highlight them
     const content = msg.content
     const parts = []

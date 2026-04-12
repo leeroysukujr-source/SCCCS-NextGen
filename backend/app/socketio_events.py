@@ -249,15 +249,36 @@ def register_socketio_events(socketio):
                 emit('error', {'message': 'Missing channel_id'})
                 return
             
-            # Don't create message here - let the API route handle it
-            # Just broadcast to channel for real-time updates
-            # The API route will create the message and emit the full message data
+            # Ensure real-time broadcast is decrypted for the Authorized Stream
+            if content and isinstance(content, str) and content.startswith('gAAAA'):
+                try:
+                    from app.utils.encryption import decrypt_message
+                    channel = Channel.query.get(channel_id)
+                    decrypted = None
+                    if channel and channel.is_encrypted and channel.encryption_key:
+                        try:
+                            decrypted = decrypt_message(content, channel.encryption_key.encode('utf-8'))
+                        except:
+                            decrypted = None
+                    
+                    if not decrypted or decrypted == "[Decryption Error]":
+                        try:
+                            decrypted = decrypt_message(content) # Master Key Fallback
+                        except:
+                            pass
+                    
+                    if decrypted and decrypted != "[Decryption Error]":
+                        content = decrypted
+                except:
+                    pass
+
             socketio.emit('message_received', {
                 'channel_id': channel_id,
                 'author_id': user_id,
                 'content': content,
                 'message_type': data.get('message_type', 'text'),
-                'timestamp': datetime.utcnow().isoformat()
+                'timestamp': datetime.utcnow().isoformat(),
+                'is_realtime_broadcast': True # Flag to distinguish from official DB-saved message
             }, room=f'channel_{channel_id}')
         except Exception as e:
             emit('error', {'message': str(e)})
