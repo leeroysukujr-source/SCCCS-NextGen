@@ -260,7 +260,7 @@ export default function MeetingEnhanced({ roomId: propRoomId, onReady }) {
 
 // ============= PREMIUM ROOM INNER =============
 function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchRoom }) {
-  const [sidebarView, setSidebarView] = useState('chat');
+  const [sidebarView, setSidebarView] = useState(null);
   const [recordingActive, setRecordingActive] = useState(false);
   const [layoutMode, setLayoutMode] = useState('grid');
   const [handRaised, setHandRaised] = useState(false);
@@ -526,7 +526,7 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
                    <VideoConference 
                      className="premium-lk-grid h-full w-full"
                     participantRenderer={(p) => (
-                      <div className="w-full h-full p-2 relative group overflow-hidden rounded-[2.5rem]">
+                      <div className={`w-full h-full p-2 relative group overflow-hidden rounded-[2.5rem] transition-all duration-500 ${p.isSpeaking ? 'speaking-active-bloom' : ''}`}>
                         <ParticipantTile participant={p} className="lk-tile-custom" />
                         
                         {/* Hand raised indicator overlay */}
@@ -1526,7 +1526,7 @@ function AdvancedControlBar({
           </button>
 
           <button
-            onClick={onToggleSidebar}
+            onClick={() => onToggleSidebar('chat')}
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all ${
               sidebarView
                 ? 'bg-indigo-500 text-white'
