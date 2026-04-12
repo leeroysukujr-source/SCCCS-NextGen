@@ -61,7 +61,7 @@ def create_app(config_class=Config):
     CORS(app, 
          resources={r"/api/*": {"origins": cors_origins}}, 
          supports_credentials=True,
-         allow_headers=["Content-Type", "Authorization", "X-Workspace-ID", "X-Platform-ID", "Request-Id"],
+         allow_headers=["Content-Type", "Authorization", "X-Workspace-ID", "X-Platform-ID", "Request-Id", "bypass-tunnel-reminder", "Upgrade-Insecure-Requests"],
          expose_headers=["Content-Type", "Authorization"],
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"])
 
