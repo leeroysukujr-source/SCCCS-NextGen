@@ -401,8 +401,8 @@ class Class(db.Model):
     lessons = db.relationship('Lesson', backref='class_obj', lazy='dynamic', cascade='all, delete-orphan')
     assignments = db.relationship('Assignment', backref='associated_class', lazy=True, 
                                  primaryjoin="Class.id == Assignment.class_id", cascade='all, delete-orphan')
-    channels = db.relationship('Channel', backref='associated_class', lazy='dynamic',
-                               primaryjoin="Class.id == Channel.class_id")
+    channels = db.relationship('Channel', back_populates='associated_class', lazy='dynamic',
+                               primaryjoin="Class.id == Channel.class_id", cascade='all, delete-orphan')
     
     def to_dict(self):
         teacher_info = None
@@ -625,6 +625,12 @@ class Channel(db.Model):
     # Relationships
     members = db.relationship('ChannelMember', backref='channel', lazy='dynamic', cascade='all, delete-orphan')
     messages = db.relationship('Message', backref='channel', lazy='dynamic', cascade='all, delete-orphan')
+    
+    # Explicit relationship for academic linking
+    associated_class = db.relationship('Class', 
+                                     foreign_keys=[class_id], 
+                                     back_populates='channels',
+                                     overlaps="associated_class,channels")
     
     def to_dict(self):
         return {

@@ -4,7 +4,7 @@ from app.models import Permission, Role, User, Workspace
 app = create_app()
 
 def seed_rbac():
-    print("🚀 Starting RBAC Seeding...")
+    print("Starting RBAC Seeding...")
     with app.app_context():
         # 1. Create Default Permissions
         permissions_list = [
@@ -15,7 +15,9 @@ def seed_rbac():
             {'name': 'view_content', 'desc': 'View educational content'},
             {'name': 'create_content', 'desc': 'Create/Edit educational content'},
             {'name': 'grade_assignments', 'desc': 'Grade student submissions'},
-            {'name': 'submit_assignments', 'desc': 'Submit assignments'}
+            {'name': 'submit_assignments', 'desc': 'Submit assignments'},
+            {'name': 'publish_channel', 'desc': 'Publish draft courses to the campus'},
+            {'name': 'manage_assignments', 'desc': 'Full control over academic assignments'}
         ]
         
         perms = {}
@@ -40,7 +42,8 @@ def seed_rbac():
                 admin_role = Role(name='Workspace Admin', workspace_id=ws.id, description='Full Control')
                 admin_role.permissions = [
                     perms['manage_workspace'], perms['manage_users'], perms['manage_classes'], 
-                    perms['view_classes'], perms['view_content'], perms['create_content']
+                    perms['view_classes'], perms['view_content'], perms['create_content'],
+                    perms['publish_channel'], perms['manage_assignments']
                 ]
                 db.session.add(admin_role)
             
@@ -50,7 +53,8 @@ def seed_rbac():
                 lecturer_role = Role(name='Lecturer', workspace_id=ws.id, description='Content Creator')
                 lecturer_role.permissions = [
                     perms['manage_classes'], perms['view_classes'], perms['view_content'], 
-                    perms['create_content'], perms['grade_assignments']
+                    perms['create_content'], perms['grade_assignments'],
+                    perms['publish_channel'], perms['manage_assignments']
                 ]
                 db.session.add(lecturer_role)
             
@@ -86,7 +90,7 @@ def seed_rbac():
             
             db.session.commit()
             
-    print("✅ RBAC Seeding & Migration Completed.")
+    print("RBAC Seeding & Migration Completed.")
 
 if __name__ == "__main__":
     seed_rbac()

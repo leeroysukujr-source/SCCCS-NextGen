@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from app.models import ChannelInvite
 from app.utils.email_utils import send_email
 from app.utils.middleware import feature_required
+from app.utils.decorators import permission_required
 
 channels_bp = Blueprint('channels', __name__)
 
@@ -708,20 +709,30 @@ def update_member_role(channel_id, user_id):
 
 @channels_bp.route('/<int:channel_id>/publish', methods=['PUT'])
 @jwt_required()
+@permission_required('publish_channel')
 def publish_channel(channel_id):
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
     channel = Channel.query.get(channel_id)
-    if not channel: return jsonify({'error': 'Not found'}), 404
+    if not channel: 
+        return jsonify({'error': 'Channel not found'}), 404
     
-    # Admin or creator
-    is_admin = user and user.role == 'admin'
-    if not is_admin and channel.created_by != current_user_id:
-        return jsonify({'error': 'Unauthorized'}), 403
+    # Permission logic: Admin OR the creator of the channel
+    is_admin = user and (user.role == 'admin' or user.platform_role == 'SUPER_ADMIN')
+    is_creator = str(channel.created_by) == str(current_user_id)
+    
+    if not is_admin and not is_creator:
+        return jsonify({
+            'error': 'Forbidden',
+            'details': 'You do not have permission to publish this channel. Only the creator or an administrator can publish course channels.'
+        }), 403
         
     channel.status = 'published'
     db.session.commit()
-    return jsonify(channel.to_dict()), 200
+    return jsonify({
+        'message': 'Channel published successfully',
+        'channel': channel.to_dict()
+    }), 200
 
 @channels_bp.route('/available', methods=['GET'])
 @jwt_required()
