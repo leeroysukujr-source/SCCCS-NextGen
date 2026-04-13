@@ -205,7 +205,24 @@ export default function Settings() {
           {activeTab === 'preferences' && (
             <div className="settings-section">
               <h2>Preferences</h2>
-              <p>Additional preferences coming soon...</p>
+              <div className="preferences-item">
+                <div className="pref-info">
+                  <h3>System Cache</h3>
+                  <p>If you are experiencing decryption errors or see [Encrypted Message] placeholders, clearing your local cache can resolve synchronization issues.</p>
+                </div>
+                <button 
+                  className="clear-cache-button"
+                  onClick={() => {
+                    if (window.confirm("Are you sure you want to clear the local cache? You will be logged out.")) {
+                      localStorage.clear();
+                      sessionStorage.clear();
+                      window.location.href = '/login';
+                    }
+                  }}
+                >
+                  Clear Local Cache
+                </button>
+              </div>
             </div>
           )}
         </div>

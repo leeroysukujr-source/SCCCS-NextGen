@@ -21,23 +21,11 @@ def format_message_preview(content):
     """Format message content for preview display - handles encrypted content"""
     if not content or content == '[File]':
         return '[File]'
-    
-    # If it's already a placeholder, return as is
-    if content in ['[Message]', '[Encrypted Message]']:
-        return content
-    
-    # Check if content looks like encrypted/base64 data (long alphanumeric string)
-    # Only check if it's a very long string (encrypted messages are typically 100+ chars)
-    if isinstance(content, str) and len(content) > 80:
-        # If it's a long base64-like string, it's probably encrypted
-        # Check if it contains typical base64 characters and is mostly alphanumeric
-        clean_content = content.replace('=', '').replace('-', '').replace('_', '').replace('/', '').replace('+', '').replace(' ', '').replace('\n', '')
-        # If after removing base64 chars, it's mostly alphanumeric and long, it might be encrypted
-        if len(clean_content) > 50 and clean_content.isalnum():
-            # But only if it doesn't look like normal text (check for common words/patterns)
-            if not any(word in content.lower() for word in ['the', 'and', 'is', 'are', 'you', 'your', 'this', 'that', 'hello', 'hi', 'how']):
-                return '[Encrypted Message]'  # Show placeholder instead of encrypted string
-    
+
+    # Handle key mismatch markers
+    if isinstance(content, str) and '[Key Mismatch]' in content:
+        return '[Decryption Error]'
+
     # Truncate long content for preview (but not if it looks encrypted)
     if isinstance(content, str) and len(content) > 100:
         return content[:100] + '...'
@@ -149,30 +137,12 @@ def send_direct_message(other_user_id):
     
     db.session.commit()
     
-    # Decrypt for response - support both old and new HMAC-based encryption
+    # Decrypt for response
     message_dict = dm.to_dict()
     if dm.is_encrypted and dm.content and dm.content != '[File]':
-        try:
-            encryption_key, _ = get_e2e_key(current_user_id, other_user_id)
-            # Try new HMAC-based format first (without strict HMAC verification for backward compatibility)
-            try:
-                encrypted_data = json.loads(dm.content)
-                # Try to decrypt without strict HMAC verification first
-                message_dict['content'] = decrypt_message_with_hmac(encrypted_data, encryption_key, verify_integrity=False)
-            except (json.JSONDecodeError, ValueError, TypeError, KeyError):
-                # Fall back to old format (plain encrypted string)
-                try:
-                    message_dict['content'] = decrypt_message(dm.content, encryption_key)
-                except Exception:
-                    raise
-        except Exception as e:
-            # Try old key method
-            try:
-                old_key = get_dm_encryption_key(current_user_id, other_user_id)
-                message_dict['content'] = decrypt_message(dm.content, old_key)
-            except Exception:
-                # Both methods failed - show placeholder
-                message_dict['content'] = '[Encrypted Message]'
+        encryption_key, _ = get_e2e_key(current_user_id, other_user_id)
+        # Safe decryption handles all formats
+        message_dict['content'] = decrypt_message(dm.content, encryption_key)
     
     # Emit real-time message via Socket.IO
     try:
@@ -206,59 +176,13 @@ def get_conversation(other_user_id):
             try:
                 msg_dict = message.to_dict()
                 
-                # Decrypt message content if encrypted - try all methods (old format first for backward compatibility)
+                # Decrypt message content if encrypted
                 if message.is_encrypted and message.content and message.content != '[File]':
-                    decrypted = False
                     encryption_key, _ = get_e2e_key(message.sender_id, message.recipient_id)
                     
-                    # Strategy: Try old format first (most existing messages), then new format
-                    
-                    # Method 1: Try old simple encrypted format first (backward compatibility)
-                    try:
-                        msg_dict['content'] = decrypt_message(message.content, encryption_key)
-                        decrypted = True
-                    except Exception:
-                        pass
-                    
-                    # Method 2: Try new HMAC-based format (JSON with encrypted_content and hmac)
-                    if not decrypted:
-                        try:
-                            encrypted_data = json.loads(message.content)
-                            msg_dict['content'] = decrypt_message_with_hmac(encrypted_data, encryption_key, verify_integrity=False)
-                            decrypted = True
-                        except (json.JSONDecodeError, ValueError, TypeError, KeyError):
-                            pass
-                    
-                    # Method 3: Try old key method (different key derivation)
-                    if not decrypted:
-                        try:
-                            old_key = get_dm_encryption_key(message.sender_id, message.recipient_id)
-                            msg_dict['content'] = decrypt_message(message.content, old_key)
-                            decrypted = True
-                        except Exception:
-                            pass
-                    
-                    # Method 4: Try old legacy method (original key derivation)
-                    if not decrypted:
-                        try:
-                            old_key_raw = f"{message.sender_id}_{message.recipient_id}".encode('utf-8')
-                            old_key_32 = hashlib.sha256(old_key_raw).digest()
-                            old_key_b64 = base64.urlsafe_b64encode(old_key_32)
-                            msg_dict['content'] = decrypt_message(message.content, old_key_b64)
-                            decrypted = True
-                        except Exception:
-                            pass
-                    
-                    # Method 5: Check if it's actually plain text (not encrypted)
-                    if not decrypted:
-                        # If content is short and looks like plain text, use it as-is
-                        if len(message.content) < 200 and not all(c.isalnum() or c in '-_=+/' for c in message.content.replace(' ', '')):
-                            msg_dict['content'] = message.content
-                            decrypted = True
-                    
-                    # If all methods failed, show placeholder
-                    if not decrypted:
-                        msg_dict['content'] = '[Encrypted Message]'
+                    # Try to decrypt using the DM-specific key
+                    # The enhanced decrypt_message handles formatted JSON (HMAC) and raw strings
+                    msg_dict['content'] = decrypt_message(message.content, encryption_key)
                 
                 messages_dict.append(msg_dict)
             except Exception:
@@ -322,62 +246,11 @@ def get_conversations():
                     preview_content = msg.content
                     if msg.content and msg.content != '[File]':
                         if msg.is_encrypted:
-                            decrypted = False
                             encryption_key, _ = get_e2e_key(msg.sender_id, msg.recipient_id)
-                            
-                            # Strategy: Try old format first (most existing messages), then new format
-                            
-                            # Method 1: Try old simple encrypted format first (backward compatibility)
-                            try:
-                                preview_content = decrypt_message(msg.content, encryption_key)
-                                decrypted = True
-                            except Exception:
-                                pass
-                            
-                            # Method 2: Try new HMAC-based format (JSON with encrypted_content and hmac)
-                            if not decrypted:
-                                try:
-                                    encrypted_data = json.loads(msg.content)
-                                    preview_content = decrypt_message_with_hmac(encrypted_data, encryption_key, verify_integrity=False)
-                                    decrypted = True
-                                except (json.JSONDecodeError, ValueError, TypeError, KeyError):
-                                    pass
-                            
-                            # Method 3: Try old key method (different key derivation)
-                            if not decrypted:
-                                try:
-                                    old_key = get_dm_encryption_key(msg.sender_id, msg.recipient_id)
-                                    preview_content = decrypt_message(msg.content, old_key)
-                                    decrypted = True
-                                except Exception:
-                                    pass
-                            
-                            # Method 4: Try old legacy method (original key derivation)
-                            if not decrypted:
-                                try:
-                                    old_key_raw = f"{msg.sender_id}_{msg.recipient_id}".encode('utf-8')
-                                    old_key_32 = hashlib.sha256(old_key_raw).digest()
-                                    old_key_b64 = base64.urlsafe_b64encode(old_key_32)
-                                    preview_content = decrypt_message(msg.content, old_key_b64)
-                                    decrypted = True
-                                except Exception:
-                                    pass
-                            
-                            # Method 5: Check if it's actually plain text (not encrypted)
-                            if not decrypted:
-                                # If content is short and looks like plain text, use it as-is
-                                if len(msg.content) < 200 and not all(c.isalnum() or c in '-_=+/' for c in msg.content.replace(' ', '')):
-                                    preview_content = msg.content
-                                    decrypted = True
-                            
-                            # Format preview content (truncate if too long)
-                            if decrypted and preview_content and preview_content != '[File]':
-                                # Ensure preview is a string and format it
-                                preview_content = format_message_preview(str(preview_content))
-                            elif not decrypted:
-                                # Only show encrypted message if we truly couldn't decrypt
-                                preview_content = '[Encrypted Message]'
-                            # If decrypted but empty or [File], keep as is
+                            # Safe decryption with enhanced utility
+                            preview_content = decrypt_message(msg.content, encryption_key)
+                            # Format for preview
+                            preview_content = format_message_preview(str(preview_content))
                 
                     last_messages.append((
                         msg.id,
@@ -422,62 +295,11 @@ def get_conversations():
                         preview_content = msg.content
                         if msg.content and msg.content != '[File]':
                             if msg.is_encrypted:
-                                decrypted = False
                                 encryption_key, _ = get_e2e_key(msg.sender_id, msg.recipient_id)
-                                
-                                # Strategy: Try old format first (most existing messages), then new format
-                                
-                                # Method 1: Try old simple encrypted format first (backward compatibility)
-                                try:
-                                    preview_content = decrypt_message(msg.content, encryption_key)
-                                    decrypted = True
-                                except Exception:
-                                    pass
-                                
-                                # Method 2: Try new HMAC-based format (JSON with encrypted_content and hmac)
-                                if not decrypted:
-                                    try:
-                                        encrypted_data = json.loads(msg.content)
-                                        preview_content = decrypt_message_with_hmac(encrypted_data, encryption_key, verify_integrity=False)
-                                        decrypted = True
-                                    except (json.JSONDecodeError, ValueError, TypeError, KeyError):
-                                        pass
-                                
-                                # Method 3: Try old key method (different key derivation)
-                                if not decrypted:
-                                    try:
-                                        old_key = get_dm_encryption_key(msg.sender_id, msg.recipient_id)
-                                        preview_content = decrypt_message(msg.content, old_key)
-                                        decrypted = True
-                                    except Exception:
-                                        pass
-                                
-                                # Method 4: Try old legacy method (original key derivation)
-                                if not decrypted:
-                                    try:
-                                        old_key_raw = f"{msg.sender_id}_{msg.recipient_id}".encode('utf-8')
-                                        old_key_32 = hashlib.sha256(old_key_raw).digest()
-                                        old_key_b64 = base64.urlsafe_b64encode(old_key_32)
-                                        preview_content = decrypt_message(msg.content, old_key_b64)
-                                        decrypted = True
-                                    except Exception:
-                                        pass
-                                
-                                # Method 5: Check if it's actually plain text (not encrypted)
-                                if not decrypted:
-                                    # If content is short and looks like plain text, use it as-is
-                                    if len(msg.content) < 200 and not all(c.isalnum() or c in '-_=+/' for c in msg.content.replace(' ', '')):
-                                        preview_content = msg.content
-                                        decrypted = True
-                                
-                                # Format preview content (truncate if too long)
-                                if decrypted and preview_content and preview_content != '[File]':
-                                    # Ensure preview is a string and format it
-                                    preview_content = format_message_preview(str(preview_content))
-                                elif not decrypted:
-                                    # Only show encrypted message if we truly couldn't decrypt
-                                    preview_content = '[Encrypted Message]'
-                                # If decrypted but empty or [File], keep as is
+                                # Safe decryption with enhanced utility
+                                preview_content = decrypt_message(msg.content, encryption_key)
+                                # Format for preview
+                                preview_content = format_message_preview(str(preview_content))
                     
                         last_messages.append((
                             msg.id,

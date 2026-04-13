@@ -35,13 +35,19 @@ class EncryptionService:
     @classmethod
     def decrypt(cls, encrypted_data, key=None):
         if not encrypted_data:
-            return None
+            return ""
         try:
             # Use provided key or fallback to system key
             enc_key = key if key else cls.get_key()
             
+            orig_data = encrypted_data
+
             # Handle string input
             if isinstance(encrypted_data, str):
+                # If not starting with known prefixes, return as is (likely plain text)
+                if not (encrypted_data.startswith('gAAAA') or encrypted_data.startswith('\\x6741')):
+                    return encrypted_data
+                
                 # Handle hex-encoded data (e.g., \x6741...) often seen in Postgres
                 if encrypted_data.startswith('\\x'):
                     try:
@@ -49,7 +55,6 @@ class EncryptionService:
                         hex_data = encrypted_data[2:]
                         encrypted_data = bytes.fromhex(hex_data)
                     except:
-                        # Fallback to standard encoding if hex conversion fails
                         encrypted_data = encrypted_data.encode()
                 else:
                     encrypted_data = encrypted_data.encode()
@@ -57,7 +62,7 @@ class EncryptionService:
             f = Fernet(enc_key)
             decrypted = f.decrypt(encrypted_data)
             
-            # Try to return as string, fallback to bytes for binary files
+            # Try to return as string
             try:
                 if isinstance(decrypted, bytes):
                     return decrypted.decode('utf-8')
@@ -65,7 +70,11 @@ class EncryptionService:
             except UnicodeDecodeError:
                 return decrypted
         except Exception:
-            return "[Decryption Error]"
+            # Final fallback to prevent the [Decryption Error] loop
+            # Provide partial ciphertext for debugging as requested
+            content_str = str(orig_data or "")
+            prefix = content_str[:10]
+            return f"Ciphertext: {prefix}... [Key Mismatch]"
 
 def generate_key():
     """Generate a new Fernet key for channel encryption"""
