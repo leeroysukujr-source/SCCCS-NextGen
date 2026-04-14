@@ -52,24 +52,38 @@ def iron_sync():
             print("⚒️  4. Checking for missing columns (Schema Drift Recovery)...")
             inspector = inspect(engine)
             
-            # 4a. Check Assignments Table
-            columns = [c['name'] for c in inspector.get_columns('assignments')]
             with engine.connect() as conn:
-                if 'rubric' not in columns:
-                    print("   ➕ Adding missing 'rubric' column to assignments...")
-                    conn.execute(text("ALTER TABLE assignments ADD COLUMN rubric TEXT"))
-                    conn.execute(text("COMMIT"))
-                if 'settings' not in columns:
-                    print("   ➕ Adding missing 'settings' column to assignments...")
-                    conn.execute(text("ALTER TABLE assignments ADD COLUMN settings TEXT"))
-                    conn.execute(text("COMMIT"))
+                # 4a. Check Assignments Table
+                if 'assignments' in inspector.get_table_names():
+                    columns = [c['name'] for c in inspector.get_columns('assignments')]
+                    if 'rubric' not in columns:
+                        print("   ➕ Adding missing 'rubric' column to assignments...")
+                        conn.execute(text("ALTER TABLE assignments ADD COLUMN rubric TEXT"))
+                        conn.execute(text("COMMIT"))
+                    if 'settings' not in columns:
+                        print("   ➕ Adding missing 'settings' column to assignments...")
+                        conn.execute(text("ALTER TABLE assignments ADD COLUMN settings TEXT"))
+                        conn.execute(text("COMMIT"))
+                
+                # 4b. Check Assignment Grades Table
+                if 'assignment_grades' in inspector.get_table_names():
+                    grade_columns = [c['name'] for c in inspector.get_columns('assignment_grades')]
+                    if 'rubric_scores' not in grade_columns:
+                        print("   ➕ Adding missing 'rubric_scores' column to assignment_grades...")
+                        conn.execute(text("ALTER TABLE assignment_grades ADD COLUMN rubric_scores TEXT"))
+                        conn.execute(text("COMMIT"))
 
-                # 4b. Check Files Table
-                file_columns = [c['name'] for c in inspector.get_columns('files')]
-                if 'submission_id' not in file_columns:
-                    print("   ➕ Adding missing 'submission_id' column to files...")
-                    conn.execute(text("ALTER TABLE files ADD COLUMN submission_id INTEGER REFERENCES assignment_submissions(id)"))
-                    conn.execute(text("COMMIT"))
+                # 4c. Check Files Table
+                if 'files' in inspector.get_table_names():
+                    file_columns = [c['name'] for c in inspector.get_columns('files')]
+                    if 'submission_id' not in file_columns:
+                        print("   ➕ Adding missing 'submission_id' column to files...")
+                        try:
+                            conn.execute(text("ALTER TABLE files ADD COLUMN submission_id INTEGER REFERENCES assignment_submissions(id)"))
+                            conn.execute(text("COMMIT"))
+                        except Exception as e:
+                            print(f"      ⚠️  Could not add submission_id: {e}")
+                            conn.execute(text("ROLLBACK"))
 
             # 5. FINAL PHYSICAL AUDIT
             print("\n⚒️  5. Final Physical Audit...")
