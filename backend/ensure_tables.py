@@ -48,9 +48,31 @@ def iron_sync():
                     else:
                         print(f"   ❌ Error on table '{table_name}': {str(e)}")
 
-            # 4. FINAL PHYSICAL AUDIT
-            print("\n⚒️  4. Final Physical Audit...")
+            # 4. ADVANCED SCHEMA DRIFT RECOVERY (Added for Production Robustness)
+            print("⚒️  4. Checking for missing columns (Schema Drift Recovery)...")
             inspector = inspect(engine)
+            
+            # 4a. Check Assignments Table
+            columns = [c['name'] for c in inspector.get_columns('assignments')]
+            with engine.connect() as conn:
+                if 'rubric' not in columns:
+                    print("   ➕ Adding missing 'rubric' column to assignments...")
+                    conn.execute(text("ALTER TABLE assignments ADD COLUMN rubric TEXT"))
+                    conn.execute(text("COMMIT"))
+                if 'settings' not in columns:
+                    print("   ➕ Adding missing 'settings' column to assignments...")
+                    conn.execute(text("ALTER TABLE assignments ADD COLUMN settings TEXT"))
+                    conn.execute(text("COMMIT"))
+
+                # 4b. Check Files Table
+                file_columns = [c['name'] for c in inspector.get_columns('files')]
+                if 'submission_id' not in file_columns:
+                    print("   ➕ Adding missing 'submission_id' column to files...")
+                    conn.execute(text("ALTER TABLE files ADD COLUMN submission_id INTEGER REFERENCES assignment_submissions(id)"))
+                    conn.execute(text("COMMIT"))
+
+            # 5. FINAL PHYSICAL AUDIT
+            print("\n⚒️  5. Final Physical Audit...")
             existing_tables = inspector.get_table_names()
             print(f"   📊 TABLES CURRENTLY IN DB: {', '.join(existing_tables)}")
             

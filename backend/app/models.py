@@ -1367,15 +1367,7 @@ class Assignment(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     due_date = db.Column(db.DateTime)
     status = db.Column(db.String(20), default='draft', nullable=False) # draft, published
-    
-    # JSON settings: 
-    # { 
-    #   "group_size": 4, 
-    #   "enable_video": true, 
-    #   "enable_whiteboard": true,
-    #   "allow_student_rooms": true,
-    #   "group_creation_mode": "manual" | "random" | "self_select"
-    # }
+    settings = db.Column(db.Text) # JSON settings: group_size, enable_video, etc.
     rubric = db.Column(db.Text) # JSON template for rubric: [ { name: "Accuracy", max: 10 }, ... ]
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
