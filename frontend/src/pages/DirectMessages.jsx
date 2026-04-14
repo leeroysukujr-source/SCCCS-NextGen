@@ -62,7 +62,7 @@ export default function DirectMessages() {
   const [isCalling, setIsCalling] = useState(false)
   const [showActionMenu, setShowActionMenu] = useState(false)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 1100)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
   const messagesEndRef = useRef(null)

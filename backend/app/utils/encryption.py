@@ -44,6 +44,17 @@ class EncryptionService:
 
             # Handle string input
             if isinstance(encrypted_data, str):
+                # Handle JSON-wrapped DM messages (HMAC format)
+                if encrypted_data.strip().startswith('{') and '"encrypted_content"' in encrypted_data:
+                    try:
+                        import json
+                        from app.utils.e2e_encryption import decrypt_message_with_hmac
+                        data_dict = json.loads(encrypted_data)
+                        return decrypt_message_with_hmac(data_dict, enc_key)
+                    except Exception as e:
+                        # Fallback if JSON decryption fails
+                        pass
+
                 # If not starting with known prefixes, return as is (likely plain text)
                 if not (encrypted_data.startswith('gAAAA') or encrypted_data.startswith('\\x6741')):
                     return encrypted_data
