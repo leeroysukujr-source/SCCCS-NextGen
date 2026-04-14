@@ -4,25 +4,20 @@ import { useYjsStore } from './useYjsStore';
 import 'tldraw/tldraw.css';
 import { FiSave } from 'react-icons/fi';
 import apiClient from '../../api/client';
+import { getCollabUrl } from '../../utils/api';
 import './Whiteboard.css'; // Keep existing CSS for container styles if needed
 
 export default function Whiteboard({ roomId = 'global', isReadOnly = false }) {
-  // If not provided, try to get from URL or default
-  // In video-buddy context, it might be 'global' or 'personal'
-  // But in StudyRoom it will be the room ID.
-
   const [featureConfig, setFeatureConfig] = useState(null);
 
   useEffect(() => {
     // Fetch feature config to check governance
     apiClient.get('/features/config').then(res => {
       // Expecting { whiteboard: { config: ... }, ... } or similar
-      // If it returns list:
       if (Array.isArray(res.data)) {
         const wbFeature = res.data.find(f => f.name === 'whiteboard');
         if (wbFeature) setFeatureConfig(wbFeature.config);
       } else if (res.data.whiteboard) {
-        // If returns dict
         setFeatureConfig(res.data.whiteboard.config || res.data.whiteboard);
       }
     }).catch(err => console.error("Failed to load flags", err));
@@ -30,7 +25,7 @@ export default function Whiteboard({ roomId = 'global', isReadOnly = false }) {
 
   const store = useYjsStore({
     roomId: roomId,
-    hostUrl: window.location.hostname === 'localhost' ? 'ws://localhost:1234' : 'wss://' + window.location.host + '/collab',
+    hostUrl: getCollabUrl(),
   });
 
   const [saving, setSaving] = useState(false);

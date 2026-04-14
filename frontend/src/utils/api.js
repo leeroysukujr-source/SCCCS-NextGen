@@ -59,23 +59,27 @@ export function getApiUrl() {
 
 /**
  * Get the Socket.IO URL (same hostname as API, default port for Flask-SocketIO)
- * Always uses localhost for WebSocket to avoid network IP issues
  */
 export function getSocketUrl() {
-  // If explicitly set in env, use it
   if (import.meta.env.VITE_SOCKET_URL) {
     return import.meta.env.VITE_SOCKET_URL
   }
+  return getApiBaseUrl()
+}
 
-  // Default to the same host as the API base URL to avoid cross-host mismatches.
-  // If the API is configured via VITE_API_URL, use that host; otherwise fall back to localhost.
-  try {
-    const apiBase = getApiBaseUrl()
-    // getApiBaseUrl returns a base like http://hostname:5000
-    return apiBase
-  } catch (e) {
-    return 'http://localhost:5000'
+/**
+ * Get the Collaboration (Y-Websocket) URL
+ */
+export function getCollabUrl() {
+  if (import.meta.env.VITE_COLLAB_URL) {
+    return import.meta.env.VITE_COLLAB_URL
   }
+
+  const base = getApiBaseUrl() // e.g., http://localhost:5000 or https://api.example.com
+  const protocol = base.startsWith('https') ? 'wss' : 'ws'
+  const host = base.replace(/^https?:\/\//, '')
+  
+  return `${protocol}://${host}/collab`
 }
 
 /**
