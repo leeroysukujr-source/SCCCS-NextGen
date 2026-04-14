@@ -1,4 +1,4 @@
-import React, { useEffect, Suspense } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import SuperAdminSidebar from './SuperAdminSidebar';
 import { initializeTheme } from '../store/themeStore';
@@ -8,7 +8,7 @@ import { FiMenu, FiGrid, FiArrowRight, FiChevronLeft } from 'react-icons/fi';
 import './SuperAdminLayout.css';
 
 const SuperAdminLayout = () => {
-    const [sidebarOpen, setSidebarOpen] = React.useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
         initializeTheme();
