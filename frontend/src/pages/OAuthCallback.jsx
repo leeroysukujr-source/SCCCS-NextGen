@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { authAPI } from '../api/auth'
+import { getApiUrl } from '../utils/api'
 import './Login.css'
 
 export default function OAuthCallback() {
@@ -113,8 +114,8 @@ export default function OAuthCallback() {
         }
         // Check if it's a network/connection error
         else if (err.code === 'ERR_NETWORK' || err.code === 'ECONNREFUSED' || err.message?.includes('Network Error') || err.message?.includes('timeout')) {
-          const apiUrl = err.config?.baseURL || 'http://localhost:5000/api'
-          errorMsg = `Cannot connect to the backend server at ${apiUrl}. Please make sure the backend is running on port 5000.`
+          const apiUrl = getApiUrl()
+          errorMsg = `Cannot connect to the backend server at ${apiUrl}. Please verify your connection.`
         }
         // Other errors
         else if (err.message) {

@@ -6,7 +6,7 @@ import { useAuthStore } from '../../store/authStore'
 import {
     FiUsers, FiVideo, FiMessageSquare, FiFileText, FiLayers,
     FiSettings, FiMaximize2, FiMinimize2, FiPhoneOff, FiMic, FiVideo as FiVideoIcon,
-    FiCheckSquare, FiFolder, FiActivity, FiTarget, FiSmartphone, FiCpu, FiGrid
+    FiCheckSquare, FiFolder, FiActivity, FiTarget, FiSmartphone, FiCpu, FiGrid, FiSend
 } from 'react-icons/fi'
 import {
     LiveKitRoom,
@@ -22,6 +22,7 @@ import AssignmentTasks from './assignment-group-components/AssignmentTasks'
 import AssignmentAssets from './assignment-group-components/AssignmentAssets'
 import AssignmentMembers from './assignment-group-components/AssignmentMembers'
 import AssignmentOverview from './assignment-group-components/AssignmentOverview'
+import AssignmentSubmission from './assignment-group-components/AssignmentSubmission'
 
 import './AssignmentGroupRoom.css'
 
@@ -69,6 +70,7 @@ export default function AssignmentGroupRoom() {
         { id: 'whiteboard', label: 'Whiteboard', icon: <FiLayers /> },
         { id: 'tasks', label: 'Missions', icon: <FiTarget /> },
         { id: 'assets', label: 'Vault', icon: <FiFolder /> },
+        { id: 'submit', label: 'Uplink', icon: <FiSend /> },
         { id: 'members', label: 'Team', icon: <FiUsers /> },
     ]
 
@@ -129,6 +131,7 @@ export default function AssignmentGroupRoom() {
                         {activeTab === 'whiteboard' && <AssignmentWhiteboard groupId={groupId} />}
                         {activeTab === 'tasks' && <AssignmentTasks groupId={groupId} />}
                         {activeTab === 'assets' && <AssignmentAssets groupId={groupId} />}
+                        {activeTab === 'submit' && <AssignmentSubmission assignmentId={groupData?.assignment_id} groupId={groupId} />}
                         {activeTab === 'members' && <AssignmentMembers groupId={groupId} user={user} />}
                     </Suspense>
                 </div>

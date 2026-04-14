@@ -41,6 +41,7 @@ import {
   FaEllipsisH
 } from 'react-icons/fa';
 import { IoNotifications, IoSwapHorizontal } from 'react-icons/io5';
+import { getApiUrl } from "../utils/api";
 import AISummaryButton from '../components/AISummaryButton';
 import LiveCaptions from '../components/LiveCaptions';
 import { useNotify } from '../components/NotificationProvider';
@@ -62,7 +63,7 @@ export default function Meeting({ roomId: propRoomId }) {
   useEffect(() => {
     async function fetchToken() {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const apiUrl = getApiUrl();
         const endpoints = [
           `${apiUrl}/meeting-livekit/token`,
           `${apiUrl}/livekit/token`,

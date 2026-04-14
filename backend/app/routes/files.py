@@ -415,6 +415,36 @@ def get_file_info(file_id):
 @jwt_required()
 def get_group_files(group_id):
     try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        
+        # Check if group is an AssignmentGroup or StudyGroup and if user is a member
+        from app.models import AssignmentGroup, GroupMember
+        
+        # Check if user is admin/super_admin
+        is_admin = user and user.role in ['admin', 'super_admin']
+        
+        if not is_admin:
+            # Check AssignmentGroup membership
+            assignment_group = AssignmentGroup.query.get(group_id)
+            is_member = False
+            
+            if assignment_group:
+                from app.models import AssignmentGroupMember, Assignment
+                # Check if user is a member or the creator of the assignment (teacher)
+                assignment = Assignment.query.get(assignment_group.assignment_id)
+                is_member = AssignmentGroupMember.query.filter_by(
+                    group_id=group_id, user_id=current_user_id
+                ).first() is not None or (assignment and assignment.created_by == current_user_id)
+            else:
+                # Check regular StudyGroup membership
+                is_member = GroupMember.query.filter_by(
+                    group_id=group_id, user_id=current_user_id
+                ).first() is not None
+                
+            if not is_member:
+                return jsonify({'error': 'Unauthorized. Not a member of this group.'}), 403
+
         files = File.query.filter_by(group_id=group_id).order_by(File.created_at.desc()).all()
         return jsonify([f.to_dict() for f in files])
     except Exception as e:

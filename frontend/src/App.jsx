@@ -59,6 +59,7 @@ const TopicDiscussions = lazy(() => import('./pages/study-room/TopicDiscussions'
 const StudyRoomLive = lazy(() => import('./pages/study-room/StudyRoomLive'))
 const StudyGroupDetail = lazy(() => import('./pages/study-room/StudyGroupDetail'))
 const AssignmentGroupRoom = lazy(() => import('./pages/study-room/AssignmentGroupRoom'))
+const AssignmentGrading = lazy(() => import('./pages/AssignmentGrading'))
 import Layout from './components/Layout'
 import SuperAdminLayout from './components/SuperAdminLayout'
 import SocketProvider from './contexts/SocketProvider'
@@ -441,6 +442,11 @@ function App() {
                   <Suspense fallback={<div style={{ padding: 20 }}>Loading Creation Hub...</div>}>
                     <CreationHub />
                   </Suspense>
+                </ErrorBoundary>
+              } />
+              <Route path="assignment/:assignmentId/grading" element={
+                <ErrorBoundary>
+                  <AssignmentGrading />
                 </ErrorBoundary>
               } />
             </Route>

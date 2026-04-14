@@ -12,7 +12,11 @@ import {
     FiAlertCircle,
     FiLayers,
     FiShield,
-    FiPenTool
+    FiPenTool,
+    FiLock,
+    FiTerminal,
+    FiCloud,
+    FiGlobe
 } from 'react-icons/fi';
 import apiClient from '../../api/client';
 
@@ -81,6 +85,13 @@ const FeatureLab = () => {
             case 'study_hub': return <FiCpu className="text-amber-500" />;
             case 'ai_study': return <FiCpu className="text-red-500" />;
             case 'whiteboard': return <FiPenTool className="text-pink-500" />;
+            case 'assignments_ecosystem': return <FiLayers className="text-indigo-500" />;
+            case 'rubric_analysis_ai': return <FiCpu className="text-emerald-500" />;
+            case 'group_study_vault': return <FiShield className="text-cyan-500" />;
+            case 'security_nexus': return <FiLock className="text-red-600" />;
+            case 'collaboration_engine': return <FiPenTool className="text-indigo-600" />;
+            case 'enhanced_connectivity': return <FiGlobe className="text-blue-600" />;
+            case 'ai_tutoring_system': return <FiCpu className="text-purple-600" />;
             default: return <FiBox className="text-slate-400" />;
         }
     };
@@ -294,6 +305,66 @@ const ModuleSpecificConfig = ({ name, config, onChange }) => {
                     {renderConfigInput('export_enabled', 'Allow Exports', 'Users can download boards as PNG/PDF', 'bool')}
                     {renderConfigInput('ai_shapes_enabled', 'AI Shape Guard', 'Auto-correct rough drawings into perfect shapes', 'bool')}
                     {renderConfigInput('max_pages', 'Max Pages', 'Constraint on board size to manage performance', 'number')}
+                </div>
+            );
+        case 'assignments_ecosystem':
+            return (
+                <div className="grid grid-cols-1 gap-4">
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2"><FiLayers /> Global Academic Policy</h3>
+                    {renderConfigInput('allow_anonymous_grading', 'Anonymous Bloom', 'Hides student identities during the primary grading phase', 'bool')}
+                    {renderConfigInput('max_file_size_mb', 'Max Upload (MB)', 'Global constraint on individual assignment file uploads', 'number')}
+                    {renderConfigInput('plagiarism_check_enabled', 'Integrity Guard', 'Auto-run similarity checks on all document submissions', 'bool')}
+                </div>
+            );
+        case 'rubric_analysis_ai':
+            return (
+                <div className="grid grid-cols-1 gap-4">
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2"><FiCpu /> Rubric Intelligence</h3>
+                    {renderConfigInput('ai_grading_assistant', 'Auto-Rubric Gen', 'Allow AI to suggest rubric criteria based on title/desc', 'bool')}
+                    {renderConfigInput('feedback_amplification', 'Feedback AI', 'Synthesize lecturer notes into comprehensive student reviews', 'bool')}
+                </div>
+            );
+        case 'group_study_vault':
+            return (
+                <div className="grid grid-cols-1 gap-4">
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2"><FiShield /> Collaborative Security</h3>
+                    {renderConfigInput('vault_encryption', 'Quantum-Safe', 'Enforce end-to-end encryption for all group document work', 'bool')}
+                    {renderConfigInput('version_history_days', 'History Buffer', 'Days to preserve document evolution history in the vault', 'number')}
+                </div>
+            );
+        case 'security_nexus':
+            return (
+                <div className="grid grid-cols-1 gap-4">
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2"><FiLock /> Security & Identity</h3>
+                    {renderConfigInput('enforce_2fa', 'Strict 2FA', 'Force every user to complete 2FA setup before accessing workspace', 'bool')}
+                    {renderConfigInput('session_timeout', 'Session Expiry (Min)', 'Minutes after which an idle user is automatically logged out', 'number')}
+                    {renderConfigInput('password_complexity', 'Passphrase Strictness', 'Complexity tier for system passwords', 'select', [
+                        { label: 'Standard', value: 'standard' },
+                        { label: 'Medium', value: 'medium' },
+                        { label: 'High (Military Grade)', value: 'high' }
+                    ])}
+                </div>
+            );
+        case 'collaboration_engine':
+            return (
+                <div className="grid grid-cols-1 gap-4">
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2"><FiPenTool /> Real-time Systems</h3>
+                    {renderConfigInput('live_editing_enabled', 'Sync Engine', 'Enable Yjs-based real-time multi-user document editing', 'bool')}
+                    {renderConfigInput('max_collaborators', 'Collab Limit', 'Maximum users allowed per concurrent document session', 'number')}
+                    {renderConfigInput('auto_save_interval', 'Save Frequency (ms)', 'Interval for flushing changes to database', 'number')}
+                </div>
+            );
+        case 'enhanced_connectivity':
+            return (
+                <div className="grid grid-cols-1 gap-4">
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2"><FiGlobe /> Global Infrastructure</h3>
+                    {renderConfigInput('meeting_provider', 'Voice/Video Host', 'Back-end engine powering communication', 'select', [
+                        { label: 'LiveKit Cloud', value: 'livekit' },
+                        { label: 'Local WebRTC', value: 'local' },
+                        { label: 'Zoom Integration', value: 'zoom' }
+                    ])}
+                    {renderConfigInput('whiteboard_integrated', 'Full Whiteboard', 'Inject interactive Canvas into all meeting sessions', 'bool')}
+                    {renderConfigInput('record_by_default', 'Auto-Archive', 'Start recording every meeting as soon as host joins', 'bool')}
                 </div>
             );
         default:

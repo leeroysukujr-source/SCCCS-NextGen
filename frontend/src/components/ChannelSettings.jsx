@@ -12,6 +12,7 @@ import {
 } from 'react-icons/fi'
 import './ChannelSettings.css'
 import { useConfirm, useNotify } from '../components/NotificationProvider'
+import { getApiBaseUrl } from '../utils/api'
 
 export default function ChannelSettings({ channel, onClose }) {
   const { user } = useAuthStore()
@@ -283,7 +284,7 @@ export default function ChannelSettings({ channel, onClose }) {
   const getAvatarUrl = (url) => {
     if (!url) return null
     if (url.startsWith('http')) return url
-    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+    const baseURL = getApiBaseUrl()
     return `${baseURL}${url}`
   }
 
@@ -652,7 +653,7 @@ export default function ChannelSettings({ channel, onClose }) {
                       <div><small>email: {inv.email || 'any'}</small> • <small>uses: {inv.uses}/{inv.max_uses || '∞'}</small> • <small>expires: {inv.expires_at || 'never'}</small></div>
                     </div>
                     <div>
-                      <button onClick={() => navigator.clipboard.writeText(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/join-invite/${inv.token}`)}>Copy Link</button>
+                      <button onClick={() => navigator.clipboard.writeText(`${getApiBaseUrl()}/join-invite/${inv.token}`)}>Copy Link</button>
                       <button onClick={() => revokeInviteMutation.mutate({ token: inv.token })}>Revoke</button>
                     </div>
                   </div>

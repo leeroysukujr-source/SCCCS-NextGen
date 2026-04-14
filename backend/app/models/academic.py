@@ -24,7 +24,7 @@ class Submission(db.Model):
     is_group = db.Column(db.Boolean, default=False)
     contribution_data = db.Column(db.Text) # JSON string: {user_id: percentage}
 
-    student = db.relationship('User', foreign_keys=[student_id], backref='submissions')
+    student = db.relationship('User', foreign_keys=[student_id], backref='academic_submissions')
     assignment_doc = db.relationship('Document', foreign_keys=[assignment_doc_id], backref='all_submissions')
     work_doc = db.relationship('Document', foreign_keys=[work_doc_id])
 

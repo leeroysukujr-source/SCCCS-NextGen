@@ -222,6 +222,7 @@ export default function TeacherDashboard() {
             actions={[
               { title: 'Start Class', subtitle: 'Begin instant class session', icon: <FiVideo size={18} />, onClick: () => setShowInstantMeetingModal(true) },
               { title: 'Create Class', subtitle: 'Add new course', icon: <FiPlus size={18} />, onClick: () => navigate('/classes') },
+              { title: 'Grading Hub', subtitle: 'Mark assignments', icon: <FiCheckCircle size={18} />, onClick: () => navigate('/classes') },
               { title: 'Schedule', subtitle: 'Plan class meeting', icon: <FiCalendar size={18} />, onClick: () => setShowScheduleModal(true) },
               { title: 'Upload Materials', subtitle: 'Add course notes', icon: <FiUpload size={18} />, onClick: () => navigate('/classes') }
             ]}

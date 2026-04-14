@@ -41,6 +41,12 @@ export function getApiBaseUrl() {
     return 'http://localhost:5000'
   }
 
+  // In production, if no VITE_API_URL is set, we assume the backend is on the same host
+  // but WITHOUT port 5000 (usually mapped to 80/443 in cloud environments)
+  if (import.meta.env.PROD) {
+    return `${window.location.protocol}//${hostname}`
+  }
+
   return `http://${hostname}:5000`
 }
 

@@ -16,7 +16,8 @@ import {
     FiShield,
     FiMessageSquare,
     FiZap,
-    FiEdit3
+    FiEdit3,
+    FiBookOpen
 } from 'react-icons/fi';
 
 const RESTRICTED_KEYS = ['APP_NAME', 'SYSTEM_LOGO_URL', 'SYSTEM_EMAIL', 'FOOTER_TEXT'];
@@ -112,6 +113,7 @@ const InstitutionalSettings = () => {
         { id: 'security', label: 'Security', icon: <FiShield /> },
         { id: 'ui_ux', label: 'Interface', icon: <FiMonitor /> },
         { id: 'communication', label: 'Communication', icon: <FiMessageSquare /> },
+        { id: 'academic', label: 'Academic', icon: <FiBookOpen /> },
     ];
 
     const filteredSettings = settings.filter(s => {

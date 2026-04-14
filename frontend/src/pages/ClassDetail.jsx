@@ -192,7 +192,20 @@ export default function ClassDetail() {
                       <FiEdit3 />
                     </div>
                     <div className="assignment-content">
-                      <h3>{assignment.title}</h3>
+                      <div className="assignment-header-row">
+                        <h3>{assignment.title}</h3>
+                        {(user?.role === 'teacher' || user?.role === 'admin' || user?.role === 'super_admin') && (
+                          <button 
+                            className="grade-now-btn"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigate(`/assignment/${assignment.id}/grading`)
+                            }}
+                          >
+                            Grade Work
+                          </button>
+                        )}
+                      </div>
                       <p>{assignment.description || 'No description'}</p>
                       <div className="assignment-meta">
                         {assignment.due_date && (

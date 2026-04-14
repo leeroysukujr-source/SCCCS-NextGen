@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, current_app
 from app.utils.decorators import audit_logger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from app.models import User, Assignment, AssignmentGroup, AssignmentGroupMember, Workspace, Group, GroupMember, File
+from app.models import User, Assignment, AssignmentGroup, AssignmentGroupMember, Workspace, Group, GroupMember, File, AssignmentSubmission, AssignmentGrade, Channel
 from datetime import datetime
 import json
 import random
@@ -908,3 +908,190 @@ def auto_allocate_students(assignment_id):
         "allocated_count": allocated_count,
         "remaining_unassigned": len(unassigned_students)
     }), 200
+
+# -------------------------------------------------------------------
+# ASSIGNMENT SUBMISSIONS & GRADING
+# -------------------------------------------------------------------
+
+@assignments_bp.route('/<int:assignment_id>/submit', methods=['POST'])
+@jwt_required()
+def submit_assignment(assignment_id):
+    """Students submit work for an assignment (Individual or Group)"""
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    assignment = Assignment.query.get_or_404(assignment_id)
+    
+    data = request.get_json()
+    group_id = data.get('group_id')
+    file_ids = data.get('file_ids', [])
+    content = data.get('content')
+    
+    # Check if this is a group assignment and user belongs to the group
+    if group_id:
+        membership = AssignmentGroupMember.query.filter_by(group_id=group_id, user_id=user.id).first()
+        if not membership:
+            return jsonify({"error": "You are not a member of this group"}), 403
+    
+    # Check for existing submission (Update or Create)
+    submission = None
+    if group_id:
+        submission = AssignmentSubmission.query.filter_by(assignment_id=assignment_id, group_id=group_id).first()
+    else:
+        submission = AssignmentSubmission.query.filter_by(assignment_id=assignment_id, user_id=user.id, group_id=None).first()
+        
+    if not submission:
+        submission = AssignmentSubmission(
+            assignment_id=assignment_id,
+            user_id=user.id,
+            group_id=group_id
+        )
+        db.session.add(submission)
+        db.session.flush() # Get ID
+    
+    submission.content = content
+    submission.submitted_at = datetime.utcnow()
+    submission.status = 'submitted'
+    if assignment.due_date and submission.submitted_at > assignment.due_date:
+        submission.status = 'late'
+        
+    # Link files
+    if file_ids:
+        # Clear old files if re-submitting
+        old_files = File.query.filter_by(submission_id=submission.id).all()
+        for f in old_files:
+            f.submission_id = None
+            
+        for f_id in file_ids:
+            f = File.query.get(f_id)
+            if f and (f.uploaded_by == user.id or (group_id and f.group_id == group_id)):
+                f.submission_id = submission.id
+    
+    db.session.commit()
+    return jsonify(submission.to_dict()), 201
+
+@assignments_bp.route('/<int:assignment_id>/my-submission', methods=['GET'])
+@jwt_required()
+def get_my_submission(assignment_id):
+    """Get the current user's submission for an assignment"""
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    # Check if they are in a group for this assignment
+    membership = AssignmentGroupMember.query.join(AssignmentGroup).filter(
+        AssignmentGroup.assignment_id == assignment_id,
+        AssignmentGroupMember.user_id == user.id
+    ).first()
+    
+    submission = None
+    if membership:
+        submission = AssignmentSubmission.query.filter_by(assignment_id=assignment_id, group_id=membership.group_id).first()
+    else:
+        submission = AssignmentSubmission.query.filter_by(assignment_id=assignment_id, user_id=user.id, group_id=None).first()
+        
+    if not submission:
+        return jsonify({"message": "No submission found"}), 404
+        
+    return jsonify(submission.to_dict())
+
+@assignments_bp.route('/<int:assignment_id>/submissions', methods=['GET'])
+@jwt_required()
+def get_submissions(assignment_id):
+    """List all submissions for an assignment (Lecturer only)"""
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    assignment = Assignment.query.get_or_404(assignment_id)
+    
+    if user.role == 'student' and assignment.created_by != user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    submissions = AssignmentSubmission.query.filter_by(assignment_id=assignment_id).all()
+    return jsonify([s.to_dict() for s in submissions])
+
+@assignments_bp.route('/submissions/<int:submission_id>/grade', methods=['POST'])
+@jwt_required()
+def grade_submission(submission_id):
+    """Grade a submission with score, feedback, and rubric data"""
+    current_user_id = get_jwt_identity()
+    grader = User.query.get(current_user_id)
+    submission = AssignmentSubmission.query.get_or_404(submission_id)
+    
+    if grader.role == 'student':
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    data = request.get_json()
+    score = data.get('score')
+    feedback = data.get('feedback')
+    rubric_scores = data.get('rubric_scores') # Expecting dict
+    
+    grade = AssignmentGrade.query.filter_by(submission_id=submission_id).first()
+    if not grade:
+        grade = AssignmentGrade(submission_id=submission_id)
+        db.session.add(grade)
+        
+    grade.score = score
+    grade.feedback = feedback
+    grade.rubric_scores = json.dumps(rubric_scores) if rubric_scores else None
+    grade.graded_by = grader.id
+    grade.graded_at = datetime.utcnow()
+    
+    db.session.commit()
+    
+    # Notifications & Distribution
+    from app import socketio
+    
+    # 1. Notify individual/group
+    msg_content = f"### Grade Published: {submission.assignment.title}\nScore: **{score}%**\nFeedback: {feedback}"
+    
+    from app.models import Notification
+    
+    # Notify all group members if group submission
+    target_user_ids = []
+    if submission.group_id:
+        target_user_ids = [m.user_id for m in submission.group.members]
+        room = f"asg_group_{submission.group_id}"
+    else:
+        target_user_ids = [submission.user_id]
+        room = f"user_{submission.user_id}"
+        
+    for uid in target_user_ids:
+        notif = Notification(
+            user_id=uid,
+            type='grade',
+            title=f"Grade Released: {submission.assignment.title}",
+            content=f"Your submission has been graded. Final Score: {score}%",
+            related_id=submission.id
+        )
+        db.session.add(notif)
+        
+    # Broadcast to relevant private rooms
+    socketio.emit('grade_update', {
+        "assignment_id": submission.assignment_id,
+        "submission_id": submission.id,
+        "grade": grade.to_dict()
+    }, room=room)
+    
+    # 2. Optionally post to course channel if requested
+    if data.get('publish_to_channel'):
+        from app.models import GroupMessage, Channel
+        
+        # Determine the target name (Group or Individual)
+        target_name = submission.group.name if submission.group_id else submission.user.username
+        
+        msg_text = f"🛡️ **ASCENDANCY UPDATE**: Mission results for **{target_name}** have been finalized.\n\n"
+        msg_text += f"**Mission**: {submission.assignment.title}\n"
+        msg_text += f"**Evaluation**: {score}% / 100%\n"
+        msg_text += f"**Analysis**: {feedback[:100]}..." if feedback else ""
+        
+        # Post to assignment's associated channel
+        if submission.assignment.channel_id:
+            channel_msg = GroupMessage(
+                channel_id=submission.assignment.channel_id,
+                user_id=grader.id,
+                content=msg_text,
+                message_type='system'
+            )
+            db.session.add(channel_msg)
+            socketio.emit('new_message', channel_msg.to_dict(), room=f"channel_{submission.assignment.channel_id}")
+            
+    db.session.commit()
+    return jsonify(grade.to_dict()), 200

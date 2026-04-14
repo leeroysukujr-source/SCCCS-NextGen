@@ -9,6 +9,7 @@ import { WebsocketProvider } from 'y-websocket' // For future Segment 5
 import { FiMessageSquare, FiPrinter } from 'react-icons/fi'
 import './CollaborativeEditor.css'
 import DocumentComments from './DocumentComments'
+import { getApiUrl, getSocketUrl } from '../../utils/api'
 
 // Generates a random color for the cursor
 const getRandomColor = () => {
@@ -38,8 +39,9 @@ export default function CollaborativeEditor({
 
         const ydoc = new Y.Doc()
         // Connect to the collab server
+        const socketBase = getSocketUrl().replace(':5000', ':1234').replace('http', 'ws')
         const wsProvider = new WebsocketProvider(
-            'ws://localhost:1234',
+            import.meta.env.VITE_COLLAB_WS_URL || socketBase,
             `study-doc-${docId}`,
             ydoc
         )
@@ -146,13 +148,13 @@ export default function CollaborativeEditor({
                             List
                         </button>
                         <button
-                            onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/documents/${docId}/export?format=pdf`, '_blank')}
+                            onClick={() => window.open(`${getApiUrl()}/documents/${docId}/export?format=pdf`, '_blank')}
                             title="Download PDF"
                         >
                             <FiPrinter /> PDF
                         </button>
                         <button
-                            onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/documents/${docId}/export?format=docx`, '_blank')}
+                            onClick={() => window.open(`${getApiUrl()}/documents/${docId}/export?format=docx`, '_blank')}
                             title="Download DOCX"
                             style={{ fontSize: '0.8em', fontWeight: 'bold' }}
                         >

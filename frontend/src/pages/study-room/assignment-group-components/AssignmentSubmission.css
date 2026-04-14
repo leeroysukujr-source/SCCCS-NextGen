@@ -1,0 +1,264 @@
+.assignment-submission-container {
+    padding: 1.5rem;
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
+
+/* Status Card */
+.submission-status-card {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.status-badge.submitted {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.status-badge.late {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.submitted-at {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+/* Grade Report */
+.grade-report {
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 20px;
+    padding: 2rem;
+}
+
+.grade-header {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.score-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(#3b82f6 0%, #3b82f6 var(--score-percent), transparent var(--score-percent));
+    background: rgba(59, 130, 246, 0.2);
+    border: 4px solid #3b82f6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.score-circle .score {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: #fff;
+}
+
+.score-circle .label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: #94a3b8;
+}
+
+.feedback-section h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: #fff;
+}
+
+.feedback-section p {
+    color: #94a3b8;
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+.rubric-summary h4 {
+    font-size: 0.8rem;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+.rubric-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.rubric-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+}
+
+.crit-name { color: #94a3b8; }
+.crit-val { color: #3b82f6; font-weight: 700; }
+
+.awaiting-grade {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 1rem;
+    border-radius: 12px;
+}
+
+.submitted-content h3 {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.sub-content-preview {
+    background: rgba(15, 23, 42, 0.4);
+    padding: 1.5rem;
+    border-radius: 12px;
+    color: #cbd5e1;
+    margin-bottom: 1.5rem;
+}
+
+.sub-files-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.sub-file-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+/* Form Styles */
+.submission-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.form-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-section textarea {
+    width: 100%;
+    min-height: 150px;
+    background: rgba(2, 4, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.25rem;
+    color: white;
+    font-size: 1rem;
+    resize: vertical;
+}
+
+.file-uplink-zone {
+    margin-bottom: 1rem;
+}
+
+.upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border: 1px dashed rgba(59, 130, 246, 0.4);
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.upload-btn:hover {
+    background: rgba(59, 130, 246, 0.15);
+}
+
+.queued-files {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.queued-file {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(15, 23, 42, 0.8);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+}
+
+.queued-file .name { flex: 1; font-size: 0.9rem; }
+.queued-file button { 
+    background: transparent; 
+    border: none; 
+    color: #ef4444; 
+    cursor: pointer;
+}
+
+.final-submit-btn {
+    padding: 1rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.final-submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.submission-loading {
+    padding: 3rem;
+    text-align: center;
+    color: #3b82f6;
+    font-weight: 600;
+}

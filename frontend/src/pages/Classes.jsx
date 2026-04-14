@@ -40,12 +40,7 @@ export default function Classes() {
 
       // Check for network errors
       if (error.code === 'ERR_NETWORK' || error.code === 'ECONNREFUSED' || error.message?.includes('Network Error')) {
-        errorMessage = 'Cannot connect to the server. Please make sure the backend server is running on port 5000.\n\n' +
-          'To start the backend server:\n' +
-          '1. Open a terminal\n' +
-          '2. Navigate to the backend folder\n' +
-          '3. Run: python run.py\n\n' +
-          'The server should start on http://localhost:5000'
+        errorMessage = 'Cannot connect to the server. Please verify your internet connection or try again later.'
       } else if (error.response?.data?.error) {
         errorMessage = error.response.data.error
       } else if (error.response?.status === 403) {

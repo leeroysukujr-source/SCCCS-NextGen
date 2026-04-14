@@ -21,6 +21,7 @@ import './AssignmentGroupRoom.css'
 import { Track } from 'livekit-client'
 
 const Whiteboard = React.lazy(() => import('../video-buddy/Whiteboard'))
+import AssignmentAssets from './assignment-group-components/AssignmentAssets'
 
 export default function StudyGroupDetail() {
     const { groupId } = useParams()
@@ -129,7 +130,7 @@ export default function StudyGroupDetail() {
                         </div>
                     )}
                     {activeTab === 'files' && (
-                        <GroupFiles group={group} />
+                        <AssignmentAssets groupId={group.id} />
                     )}
                     {activeTab === 'members' && (
                         <GroupMembers group={group} />
@@ -311,22 +312,6 @@ function GroupCollaborativeNotes({ group }) {
     )
 }
 
-function GroupFiles({ group }) {
-    return (
-        <div className="flex flex-col items-center justify-center h-full p-20 text-center space-y-6 opacity-30 select-none">
-            <div className="w-32 h-32 rounded-[2rem] bg-slate-800 flex items-center justify-center text-4xl">
-                <FiFolder />
-            </div>
-            <div>
-                <h3 className="text-xl font-black uppercase tracking-widest text-white mb-2">Asset Vault</h3>
-                <p className="text-sm max-w-sm mx-auto">Upload architectural diagrams, resource documents, or binary data to share with other nodes.</p>
-            </div>
-            <button className="btn btn-secondary px-8 border-white/10 bg-white/5">
-                Initialize Upload
-            </button>
-        </div>
-    )
-}
 
 function GroupMembers({ group }) {
     const { data: members } = useQuery({ queryKey: ['group-members', group.id], queryFn: () => groupsAPI.getMembers(group.id) })

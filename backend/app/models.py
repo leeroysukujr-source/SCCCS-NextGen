@@ -921,6 +921,7 @@ class File(db.Model):
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('assignment_groups.id'))
     assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'))
+    submission_id = db.Column(db.Integer, db.ForeignKey('assignment_submissions.id'), nullable=True)
     workspace_id = db.Column(db.Integer, db.ForeignKey('workspaces.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
@@ -940,6 +941,7 @@ class File(db.Model):
             'lesson_id': self.lesson_id,
             'group_id': self.group_id,
             'assignment_id': self.assignment_id,
+            'submission_id': self.submission_id,
             'workspace_id': self.workspace_id,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
@@ -1374,7 +1376,7 @@ class Assignment(db.Model):
     #   "allow_student_rooms": true,
     #   "group_creation_mode": "manual" | "random" | "self_select"
     # }
-    settings = db.Column(db.Text) 
+    rubric = db.Column(db.Text) # JSON template for rubric: [ { name: "Accuracy", max: 10 }, ... ]
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
@@ -1400,6 +1402,7 @@ class Assignment(db.Model):
             'creator_name': self.creator.username if self.creator else None,
             'due_date': self.due_date.isoformat() if self.due_date else None,
             'settings': settings_dict,
+            'rubric': json.loads(self.rubric) if self.rubric else [],
             'created_at': self.created_at.isoformat()
         }
 
@@ -1531,6 +1534,72 @@ class AssignmentGroupMessage(db.Model):
             'content': self.content,
             'message_type': self.message_type,
             'created_at': self.created_at.isoformat()
+        }
+
+class AssignmentSubmission(db.Model):
+    __tablename__ = 'assignment_submissions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    group_id = db.Column(db.Integer, db.ForeignKey('assignment_groups.id'), nullable=True)
+    
+    content = db.Column(db.Text) # Text submission or comments
+    status = db.Column(db.String(20), default='submitted') # draft, submitted, late
+    submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    assignment = db.relationship('Assignment', backref=db.backref('submissions', cascade='all, delete-orphan'))
+    user = db.relationship('User', backref=db.backref('submissions', cascade='all, delete-orphan'))
+    group = db.relationship('AssignmentGroup', backref=db.backref('submissions', cascade='all, delete-orphan'))
+    files = db.relationship('File', backref='submission', lazy='dynamic')
+    grade = db.relationship('AssignmentGrade', backref='submission', uselist=False, cascade='all, delete-orphan')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'assignment_id': self.assignment_id,
+            'user_id': self.user_id,
+            'user_name': self.user.username if self.user else 'Unknown',
+            'group_id': self.group_id,
+            'group_name': self.group.name if self.group else None,
+            'content': self.content,
+            'status': self.status,
+            'submitted_at': self.submitted_at.isoformat() if self.submitted_at else None,
+            'grade': self.grade.to_dict() if self.grade else None,
+            'files': [f.to_dict() for f in self.files.all()]
+        }
+
+class AssignmentGrade(db.Model):
+    __tablename__ = 'assignment_grades'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    submission_id = db.Column(db.Integer, db.ForeignKey('assignment_submissions.id'), unique=True, nullable=False)
+    score = db.Column(db.Float, nullable=False)
+    feedback = db.Column(db.Text)
+    rubric_scores = db.Column(db.Text) # JSON string: { "criterion1": 5, "criterion2": 4 }
+    
+    graded_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    graded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    grader = db.relationship('User', backref='grades_given')
+
+    def to_dict(self):
+        rubric_data = {}
+        if self.rubric_scores:
+            try: rubric_data = json.loads(self.rubric_scores)
+            except: pass
+            
+        return {
+            'id': self.id,
+            'submission_id': self.submission_id,
+            'score': self.score,
+            'feedback': self.feedback,
+            'rubric_scores': rubric_data,
+            'graded_by': self.graded_by,
+            'grader_name': self.grader.username if self.grader else 'Unknown',
+            'graded_at': self.graded_at.isoformat() if self.graded_at else None
         }
 
 

@@ -15,6 +15,7 @@ import GoalsWidget from '../../features/study-room-docs/GoalsWidget'
 import './StudyRoomLive.css'
 import { FiEdit2, FiClock, FiGrid, FiArrowRight, FiChevronLeft, FiAlertTriangle, FiFileText } from 'react-icons/fi'
 import { features } from '../../config/features'
+import { getApiUrl } from '../../utils/api'
 
 export default function StudyRoomLive() {
     const { roomId } = useParams()
@@ -77,7 +78,7 @@ export default function StudyRoomLive() {
             try {
                 // Determine a clean display name
                 const username = user.username || `User-${user.id}`
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+                const apiUrl = getApiUrl()
 
                 // Use a consistent, sanitized room ID
                 const liveKitRoomName = roomId.replace(/[^a-zA-Z0-9-_]/g, '_')
