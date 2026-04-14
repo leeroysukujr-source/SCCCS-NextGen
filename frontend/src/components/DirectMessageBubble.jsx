@@ -209,11 +209,11 @@ const DirectMessageBubble = ({
 
                                         if (isImage) {
                                             return (
-                                                <div key={file.id} className="attachment-media" style={{ borderRadius: '12px', overflow: 'hidden', maxWidth: '300px' }}>
+                                                <div key={file.id} className="attachment-media" style={{ borderRadius: '12px', overflow: 'hidden', width: 'fit-content', maxWidth: '100%', minWidth: '150px' }}>
                                                     <img
                                                         src={fileUrl}
                                                         alt={file.original_filename}
-                                                        style={{ width: '100%', height: 'auto', display: 'block', cursor: 'pointer' }}
+                                                        style={{ width: '100%', height: 'auto', maxHeight: '400px', objectFit: 'contain', display: 'block', cursor: 'pointer' }}
                                                         onClick={() => window.open(fileUrl, '_blank')}
                                                     />
                                                 </div>
@@ -222,11 +222,11 @@ const DirectMessageBubble = ({
 
                                         if (isVideo) {
                                             return (
-                                                <div key={file.id} className="attachment-media" style={{ borderRadius: '12px', overflow: 'hidden', maxWidth: '300px' }}>
+                                                <div key={file.id} className="attachment-media" style={{ borderRadius: '12px', overflow: 'hidden', width: 'fit-content', maxWidth: '100%', minWidth: '150px' }}>
                                                     <video
                                                         src={fileUrl}
                                                         controls
-                                                        style={{ width: '100%', height: 'auto', display: 'block' }}
+                                                        style={{ width: '100%', height: 'auto', maxHeight: '400px', display: 'block' }}
                                                     />
                                                 </div>
                                             )
@@ -239,8 +239,9 @@ const DirectMessageBubble = ({
                                                     background: isOwn ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)',
                                                     borderRadius: '12px',
                                                     overflow: 'hidden',
-                                                    minWidth: '240px',
-                                                    maxWidth: '100%',
+                                                    width: '100%',
+                                                    minWidth: 'auto',
+                                                    maxWidth: '320px',
                                                     boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
                                                     cursor: 'pointer'
                                                 }}>

@@ -182,6 +182,11 @@
     background: rgba(99, 102, 241, 0.1);
 }
 
+.message-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
 /* Conversations List */
 .conversations-list {
     flex: 1;
@@ -519,6 +524,7 @@
     position: relative;
     word-break: break-word;
     overflow-wrap: break-word;
+    white-space: pre-wrap;
 }
 
 .message-bubble.own {
@@ -859,12 +865,29 @@
     }
 
     /* Bubbles Mobile */
+    .message-bubble {
+        max-width: 95% !important;
+        padding: 10px 14px !important;
+        font-size: 0.9rem !important;
+    }
+
     .message-wrapper {
-        max-width: 90% !important;
+        max-width: 100% !important;
+        padding-right: 0 !important;
     }
 
     .dm-messages {
-        padding: 16px !important;
+        padding: 12px 8px !important;
+        gap: 6px !important;
+    }
+
+    .message-row {
+        margin-bottom: 4px !important;
+    }
+
+    .attachment-file-card {
+        min-width: 100% !important;
+        max-width: 100% !important;
     }
 }
 

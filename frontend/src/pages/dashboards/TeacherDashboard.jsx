@@ -50,6 +50,15 @@ export default function TeacherDashboard() {
     }
   })
 
+  const { data: assignments = [] } = useQuery({
+    queryKey: ['assignments'],
+    queryFn: async () => {
+      const res = await apiClient.get('/assignments')
+      return res.data
+    },
+    retry: 1
+  })
+
   const { data: classes = [], error: classesError } = useQuery({
     queryKey: ['classes'],
     queryFn: classesAPI.getClasses,
@@ -74,6 +83,8 @@ export default function TeacherDashboard() {
       new Date(r.scheduled_at) > new Date()
     ).length,
     activeMeetings: rooms.filter(r => r.is_active).length,
+    pendingSubmissions: assignments.reduce((sum, a) => sum + (a.pending_count || 0), 0),
+    totalSubmissions: assignments.reduce((sum, a) => sum + (a.submission_count || 0), 0)
   }
 
   const upcomingMeetings = rooms
@@ -222,7 +233,7 @@ export default function TeacherDashboard() {
             actions={[
               { title: 'Start Class', subtitle: 'Begin instant class session', icon: <FiVideo size={18} />, onClick: () => setShowInstantMeetingModal(true) },
               { title: 'Create Class', subtitle: 'Add new course', icon: <FiPlus size={18} />, onClick: () => navigate('/classes') },
-              { title: 'Grading Hub', subtitle: 'Mark assignments', icon: <FiCheckCircle size={18} />, onClick: () => navigate('/classes') },
+              { title: 'Grading Hub', subtitle: `${stats.pendingSubmissions} pending reports`, icon: <FiCheckCircle size={18} />, onClick: () => navigate('/grading-hub') },
               { title: 'Schedule', subtitle: 'Plan class meeting', icon: <FiCalendar size={18} />, onClick: () => setShowScheduleModal(true) },
               { title: 'Upload Materials', subtitle: 'Add course notes', icon: <FiUpload size={18} />, onClick: () => navigate('/classes') }
             ]}
@@ -251,8 +262,8 @@ export default function TeacherDashboard() {
             stats={[
               { value: stats.myClasses, label: 'My Classes', icon: <FiBook />, trend: 'Active' },
               { value: stats.totalStudents, label: 'Total Students', icon: <FiUsers />, trend: 'Enrolled' },
-              { value: stats.totalLessons, label: 'Lessons Created', icon: <FiFileText />, trend: 'Published' },
-              { value: stats.upcomingMeetings, label: 'Upcoming', icon: <FiVideo />, trend: 'Scheduled' }
+              { value: stats.pendingSubmissions, label: 'Pending Grades', icon: <FiZap />, trend: 'Needs Action' },
+              { value: stats.totalSubmissions, label: 'Submissions', icon: <FiCheckCircle />, trend: 'Collected' }
             ]}
           />
 

@@ -1383,6 +1383,12 @@ class Assignment(db.Model):
             try: settings_dict = json.loads(self.settings)
             except: pass
             
+        # Add submission statistics
+        sub_count = AssignmentSubmission.query.filter_by(assignment_id=self.id).count()
+        graded_count = db.session.query(AssignmentSubmission).join(AssignmentGrade).filter(
+            AssignmentSubmission.assignment_id == self.id
+        ).count()
+            
         return {
             'id': self.id,
             'title': self.title,
@@ -1395,7 +1401,10 @@ class Assignment(db.Model):
             'due_date': self.due_date.isoformat() if self.due_date else None,
             'settings': settings_dict,
             'rubric': json.loads(self.rubric) if self.rubric else [],
-            'created_at': self.created_at.isoformat()
+            'created_at': self.created_at.isoformat(),
+            'submission_count': sub_count,
+            'graded_count': graded_count,
+            'pending_count': sub_count - graded_count
         }
 
 class AssignmentGroup(db.Model):
