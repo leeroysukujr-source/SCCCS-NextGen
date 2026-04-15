@@ -64,31 +64,43 @@ def create_app(config_class=Config):
     from app.utils.firebase_auth import init_firebase
     init_firebase()
     
-    # CORS configuration
-    cors_origins = app.config.get('CORS_ORIGINS', ['*'])
-    if isinstance(cors_origins, str):
-        if cors_origins == '*':
-            cors_origins = '*'
-        else:
-            cors_origins = cors_origins.split(',')
+    # CORS configuration - Senior Deployment Hardening
+    raw_origins = app.config.get('CORS_ORIGINS', ['*'])
+    if isinstance(raw_origins, str):
+        raw_origins = [o.strip() for o in raw_origins.split(',')]
     
-    # Ensure production Vercel domain is always trusted if we have a list
-    if isinstance(cors_origins, list):
-        if 'https://scccs-next-gen-nine.vercel.app' not in cors_origins:
-            cors_origins.append('https://scccs-next-gen-nine.vercel.app')
-        if 'https://scccs-nextgen-q2ll.onrender.com' not in cors_origins:
-            cors_origins.append('https://scccs-nextgen-q2ll.onrender.com')
+    # Clean and Explicit Origins (supports_credentials=True requires EXPLICIT origins, not *)
+    cors_origins = []
+    for origin in raw_origins:
+        if origin and origin != '*':
+            cors_origins.append(origin)
+            
+    # Always include production clusters
+    production_domains = [
+        'https://scccs-next-gen-nine.vercel.app',
+        'https://scccs-next-gen.vercel.app',
+        'https://scccs-nextgen-q2ll.onrender.com'
+    ]
+    for domain in production_domains:
+        if domain not in cors_origins:
+            cors_origins.append(domain)
     
+    # If no specific origins defined after cleanup, fallback to * (but disable credentials security)
+    final_origins = cors_origins if cors_origins else "*"
+    allow_credentials = True if cors_origins else False
+
     # Maximum Robustness CORS
     CORS(app, 
-         resources={r"/api/*": {"origins": cors_origins}}, 
-         supports_credentials=True,
-         allow_headers=["Content-Type", "Authorization", "X-Workspace-ID", "X-Platform-ID", "Request-Id", "bypass-tunnel-reminder", "Upgrade-Insecure-Requests"],
+         resources={r"/api/*": {"origins": final_origins}}, 
+         supports_credentials=allow_credentials,
+         allow_headers=["Content-Type", "Authorization", "X-Workspace-ID", "X-Platform-ID", "X-Requested-With", "Accept", "Origin", "Upgrade-Insecure-Requests"],
          expose_headers=["Content-Type", "Authorization"],
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"])
 
-    # Remove the manual handle_preflight and after_request CORS logic 
-    # to avoid duplicate headers and conflicts with Flask-CORS.
+    # Global OPTIONS handler to prevent preflight 403s before middleware
+    @app.route('/api/<path:path>', methods=['OPTIONS'])
+    def handle_options(path):
+        return '', 204
     
     
     # Initialize SocketIO with its own CORS for WebSocket connections
@@ -100,14 +112,14 @@ def create_app(config_class=Config):
     preferred_async = app.config.get('SOCKETIO_ASYNC_MODE') or os.environ.get('SOCKETIO_ASYNC_MODE')
     async_mode = _choose_async_mode(preferred_async)
     init_kwargs = dict(
-        cors_allowed_origins="*",
+        cors_allowed_origins=final_origins, # Match HTTP CORS exactly
         logger=False,
         engineio_logger=False,
         message_queue=message_queue if message_queue else None,
         async_mode=async_mode,
         ping_interval=20,
-        ping_timeout=120, # Increased for high-latency Render environments
-        transports=['websocket', 'polling'] # Force transport awareness
+        ping_timeout=120,
+        transports=['websocket', 'polling']
     )
     if async_mode == "threading":
         # Werkzeug cannot serve real WebSockets; disable upgrades to avoid 500s.
@@ -180,6 +192,19 @@ def create_app(config_class=Config):
     from app.middleware.security import security_headers, waf_middleware
     app.before_request(waf_middleware)
     app.after_request(security_headers)
+    
+    # Senior DevOps Strategy: Ensure CORS headers are ALWAYS present, even on errors
+    @app.after_request
+    def add_cors_headers(response):
+        # Already handled by Flask-CORS for success, but we force it for safety on early returns/errors
+        origin = request.headers.get('Origin')
+        if origin and (final_origins == "*" or origin in (cors_origins if isinstance(cors_origins, list) else [])):
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            # We don't overwrite if already there to avoid duplicates, but ensure they exist
+            if 'Access-Control-Allow-Methods' not in response.headers:
+                response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
+        return response
     # ---------------------------------------------
     
     # Register blueprints
