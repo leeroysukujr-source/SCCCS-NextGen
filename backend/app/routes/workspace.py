@@ -427,13 +427,18 @@ def upload_workspace_logo(ws_id):
         s3_bucket = 'platform-assets'
         
         if s3_endpoint and 'localhost' not in s3_endpoint:
-            current_app.logger.info(f"☁️  Workspace Branding: Uploading to MinIO/S3 [{s3_bucket}]")
-            ensure_bucket(s3_bucket)
-            
-            file.seek(0)
-            if upload_fileobj(file, f"workspaces/{final_filename}", bucket=s3_bucket):
-                logo_url = get_public_url(f"workspaces/{final_filename}", bucket=s3_bucket)
-                current_app.logger.info(f"✅ Workspace {ws_id} cloud logo: {logo_url}")
+            try:
+                current_app.logger.info(f"☁️  Workspace Branding: Attempting MinIO/S3 sync [{s3_bucket}]")
+                ensure_bucket(s3_bucket)
+                
+                file.seek(0)
+                if upload_fileobj(file, f"workspaces/{final_filename}", bucket=s3_bucket):
+                    logo_url = get_public_url(f"workspaces/{final_filename}", bucket=s3_bucket)
+                    current_app.logger.info(f"✅ Workspace {ws_id} cloud logo: {logo_url}")
+            except Exception as s3_err:
+                current_app.logger.warning(f"⚠️  Workspace cloud storage failed: {str(s3_err)}")
+                logo_url = None
+
 
         if not logo_url:
             # 4. Local Fallback (Priority 2: Absolute Persistence in static folder)

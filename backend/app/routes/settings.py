@@ -115,14 +115,19 @@ def upload_system_logo():
         logo_url = None
         
         if s3_endpoint and 'localhost' not in s3_endpoint:
-            current_app.logger.info(f"☁️  MinIO/S3 Configured. Initializing bucket: {s3_bucket}")
-            ensure_bucket(s3_bucket)
-            
-            # Reset file pointer and upload
-            file.seek(0)
-            if upload_fileobj(file, f"system/{final_filename}", bucket=s3_bucket):
-                logo_url = get_public_url(f"system/{final_filename}", bucket=s3_bucket)
-                current_app.logger.info(f"✅ Cloud upload success: {logo_url}")
+            try:
+                current_app.logger.info(f"☁️  MinIO/S3 Configured. Attempting cloud sync: {s3_bucket}")
+                ensure_bucket(s3_bucket)
+                
+                # Reset file pointer and upload
+                file.seek(0)
+                if upload_fileobj(file, f"system/{final_filename}", bucket=s3_bucket):
+                    logo_url = get_public_url(f"system/{final_filename}", bucket=s3_bucket)
+                    current_app.logger.info(f"✅ Cloud upload success: {logo_url}")
+            except Exception as s3_err:
+                current_app.logger.warning(f"⚠️  Cloud storage unreachable, falling back: {str(s3_err)}")
+                logo_url = None # Force local fallback
+
 
         if not logo_url:
             # 4. Local Fallback (Precision Storage)
