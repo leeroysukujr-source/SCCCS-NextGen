@@ -7,6 +7,7 @@ import {
     FiX, FiMaximize2, FiZoomIn, FiZoomOut
 } from 'react-icons/fi'
 import { useNotify } from '../components/NotificationProvider'
+import { useAuthStore } from '../store/authStore'
 import apiClient from '../api/client'
 import './AssignmentGrading.css'
 
@@ -14,6 +15,7 @@ export default function AssignmentGrading() {
     const { assignmentId } = useParams()
     const navigate = useNavigate()
     const notify = useNotify()
+    const { token } = useAuthStore()
     
     const [assignment, setAssignment] = useState(null)
     const [submissions, setSubmissions] = useState([])
@@ -294,7 +296,7 @@ export default function AssignmentGrading() {
                             </div>
                         </div>
                         <div className="preview-body">
-                            {!localStorage.getItem('token') ? (
+                            {!token ? (
                                 <div className="no-preview">
                                     <FiAlertCircle size={48} />
                                     <h3>Authorization Required</h3>
@@ -302,13 +304,13 @@ export default function AssignmentGrading() {
                                 </div>
                             ) : ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(previewFile.original_filename?.split('.').pop()?.toLowerCase()) ? (
                                 <img 
-                                    src={`${apiClient.defaults.baseURL}/files/${previewFile.id}?token=${localStorage.getItem('token')}`} 
+                                    src={`${apiClient.defaults.baseURL}/files/${previewFile.id}?token=${token}`} 
                                     alt={previewFile.original_filename}
                                     className="preview-image"
                                 />
                             ) : previewFile.original_filename?.toLowerCase().endsWith('.pdf') ? (
                                 <iframe 
-                                    src={`${apiClient.defaults.baseURL}/files/${previewFile.id}?token=${localStorage.getItem('token')}#toolbar=0`} 
+                                    src={`${apiClient.defaults.baseURL}/files/${previewFile.id}?token=${token}#toolbar=0`} 
                                     className="preview-pdf"
                                     title="PDF Preview"
                                 />
