@@ -33,31 +33,41 @@ export default function AssignmentSubmission({ assignmentId, groupId }) {
 
     const handleFileUpload = async (e) => {
         const selectedFiles = Array.from(e.target.files)
+        if (selectedFiles.length === 0) return;
+        
+        console.log(`[Uplink] Preparing to ingest ${selectedFiles.length} files...`);
         setUploading(true)
         
         try {
-            const uploadedFileIds = []
+            const newUploadedFiles = []
             for (const file of selectedFiles) {
                 const formData = new FormData()
                 formData.append('file', file)
                 formData.append('assignment_id', assignmentId)
                 if (groupId) formData.append('group_id', groupId)
                 
+                console.log(`[Uplink] Uploading: ${file.name}`);
                 const res = await apiClient.post('/files/upload', formData)
-                uploadedFileIds.push(res.data.id)
+                
+                if (res.data && res.data.id) {
+                    newUploadedFiles.push({
+                        id: res.data.id,
+                        name: file.name,
+                        size: file.size
+                    })
+                }
             }
             
-            setFiles([...files, ...selectedFiles.map((f, i) => ({ 
-                id: uploadedFileIds[i], 
-                name: f.name,
-                size: f.size
-            }))])
-            
-            notify('success', `Uploaded ${selectedFiles.length} files`)
+            setFiles(prev => [...prev, ...newUploadedFiles]);
+            console.log(`[Uplink] Upload sequence complete. Total files in queue: ${files.length + newUploadedFiles.length}`);
+            notify('success', `Uploaded ${newUploadedFiles.length} files`)
         } catch (err) {
-            notify('error', 'File upload failed')
+            console.error('[Uplink] Upload critical failure:', err);
+            notify('error', 'File upload failed. Integrity check failed.')
         } finally {
             setUploading(false)
+            // Clear input
+            e.target.value = '';
         }
     }
 
@@ -66,15 +76,18 @@ export default function AssignmentSubmission({ assignmentId, groupId }) {
     }
 
     const handleSubmit = async () => {
+        console.log('[Uplink] Initiating vault submission...', { assignmentId, groupId, fileCount: files.length });
         try {
-            const res = await apiClient.post(`/assignments/${assignmentId}/submit`, {
+            const res = await apiClient.post(`/assignments/${Number(assignmentId)}/submit`, {
                 content,
                 file_ids: files.map(f => f.id),
-                group_id: groupId
+                group_id: groupId ? Number(groupId) : null
             })
             setSubmission(res.data)
             notify('success', 'Mission Accomplished: Assignment Submitted')
+            console.log('[Uplink] Submission verified by backend.');
         } catch (err) {
+            console.error('[Uplink] Submission failure:', err);
             notify('error', 'Submission failed. Check your uplink.')
         }
     }
@@ -130,8 +143,15 @@ export default function AssignmentSubmission({ assignmentId, groupId }) {
                     )}
                     
                     <div className="submitted-content">
-                        <h3>Your Submission</h3>
-                        <p className="sub-content-preview">{submission.content}</p>
+                        <div className="content-header-flex">
+                            <h3>Your Submission</h3>
+                            {!submission.grade && (
+                                <button className="resubmit-btn" onClick={() => setSubmission(null)}>
+                                    Update Submission
+                                </button>
+                            )}
+                        </div>
+                        <p className="sub-content-preview">{submission.content || "No textual analysis provided."}</p>
                         <div className="sub-files-list">
                             {submission.files?.map(f => (
                                 <div key={f.id} className="sub-file-item">
@@ -139,6 +159,9 @@ export default function AssignmentSubmission({ assignmentId, groupId }) {
                                     <span>{f.original_filename}</span>
                                 </div>
                             ))}
+                            {(!submission.files || submission.files.length === 0) && (
+                                <span className="no-files-tag">No attached assets</span>
+                            )}
                         </div>
                     </div>
                 </div>

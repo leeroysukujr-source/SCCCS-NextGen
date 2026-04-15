@@ -35,7 +35,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@files_bp.route('/upload', methods=['POST'])
+@files_bp.route('/upload', methods=['POST', 'OPTIONS'])
+@cross_origin()
 @jwt_required()
 def upload_file():
     try:
@@ -169,6 +170,7 @@ def upload_file():
             message_id=request.form.get('message_id', type=int),
             lesson_id=lesson_id,
             group_id=request.form.get('group_id', type=int),
+            assignment_id=request.form.get('assignment_id', type=int),
             workspace_id=user.workspace_id if user.workspace_id else None
         )
         

@@ -8,7 +8,8 @@ import {
   FiFileText, FiInfo, FiCheck, FiX, FiShield
 } from 'react-icons/fi'
 import { useNotify } from '../../components/NotificationProvider'
-import './SystemSettings.css' // We will create this
+import LogoUpload from '../../components/LogoUpload'
+import './SystemSettings.css' 
 
 export default function SystemSettings() {
   const { user } = useAuthStore()

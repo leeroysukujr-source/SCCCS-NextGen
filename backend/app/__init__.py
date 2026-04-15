@@ -72,6 +72,13 @@ def create_app(config_class=Config):
         else:
             cors_origins = cors_origins.split(',')
     
+    # Ensure production Vercel domain is always trusted if we have a list
+    if isinstance(cors_origins, list):
+        if 'https://scccs-next-gen-nine.vercel.app' not in cors_origins:
+            cors_origins.append('https://scccs-next-gen-nine.vercel.app')
+        if 'https://scccs-nextgen-q2ll.onrender.com' not in cors_origins:
+            cors_origins.append('https://scccs-nextgen-q2ll.onrender.com')
+    
     # Maximum Robustness CORS
     CORS(app, 
          resources={r"/api/*": {"origins": cors_origins}}, 
@@ -99,14 +106,15 @@ def create_app(config_class=Config):
         message_queue=message_queue if message_queue else None,
         async_mode=async_mode,
         ping_interval=20,
-        ping_timeout=30,
+        ping_timeout=120, # Increased for high-latency Render environments
+        transports=['websocket', 'polling'] # Force transport awareness
     )
     if async_mode == "threading":
         # Werkzeug cannot serve real WebSockets; disable upgrades to avoid 500s.
         init_kwargs.update({
             "allow_upgrades": False,
-            "ping_interval": 15,
-            "ping_timeout": 25,
+            "ping_interval": 25,
+            "ping_timeout": 60,
         })
         app.logger.warning(
             "Socket.IO running in threading mode; websocket upgrades disabled. "

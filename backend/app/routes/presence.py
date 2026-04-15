@@ -18,7 +18,8 @@ from app import socketio
 import threading
 from flask import current_app
 
-@presence_bp.route('/update', methods=['POST'])
+@presence_bp.route('/update', methods=['POST', 'OPTIONS'])
+@cross_origin()
 @jwt_required()
 def update_presence():
     """Update user presence - Asynchronous and strictly non-blocking"""

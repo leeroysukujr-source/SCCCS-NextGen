@@ -138,12 +138,21 @@ class SettingsService:
         return results
 
     def get_system_settings(self, public_only=False):
-        """Get all system settings, optionally filtered to public ones"""
+        """Get all system settings, optionally filtered to public ones. Falls back to DEFAULTS if empty."""
         from app.models import SystemSetting
         query = SystemSetting.query
         if public_only:
             query = query.filter_by(is_public=True)
         settings = query.all()
+        
+        # Self-Healing: If database is empty, return defaults for critical keys
+        if not settings and public_only:
+            return [
+                {'key': 'MAINTENANCE_MODE', 'value': False, 'category': 'system', 'is_public': True},
+                {'key': 'APP_NAME', 'value': 'SCCCS', 'category': 'general', 'is_public': True},
+                {'key': 'PRIMARY_COLOR', 'value': '#3b82f6', 'category': 'ui_ux', 'is_public': True}
+            ]
+            
         return [s.to_dict() for s in settings]
 
     # --- System Settings (Global) ---

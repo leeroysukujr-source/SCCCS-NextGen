@@ -422,36 +422,13 @@ def upload_workspace_logo(ws_id):
     logo_url = None
 
     try:
-        # 3. Data Layer Sync (Priority 1: Cloud Storage)
-        s3_endpoint = current_app.config.get('S3_ENDPOINT')
-        s3_bucket = 'platform-assets'
+        from app.utils.uploads import save_logo
         
-        if s3_endpoint and 'localhost' not in s3_endpoint:
-            try:
-                current_app.logger.info(f"☁️  Workspace Branding: Attempting MinIO/S3 sync [{s3_bucket}]")
-                ensure_bucket(s3_bucket)
-                
-                file.seek(0)
-                if upload_fileobj(file, f"workspaces/{final_filename}", bucket=s3_bucket):
-                    logo_url = get_public_url(f"workspaces/{final_filename}", bucket=s3_bucket)
-                    current_app.logger.info(f"✅ Workspace {ws_id} cloud logo: {logo_url}")
-            except Exception as s3_err:
-                current_app.logger.warning(f"⚠️  Workspace cloud storage failed: {str(s3_err)}")
-                logo_url = None
-
-
+        # Centralized logo saving handles S3 vs local fallback cleanly
+        logo_url = save_logo(file, folder='workspaces')
+        
         if not logo_url:
-            # 4. Local Fallback (Priority 2: Absolute Persistence in static folder)
-            current_app.logger.info(f"💾 Workspace {ws_id}: Falling back to local static storage")
-            static_upload_path = os.path.join(current_app.root_path, 'static', 'uploads', 'workspaces')
-            os.makedirs(static_upload_path, exist_ok=True)
-            
-            target_path = os.path.join(static_upload_path, final_filename)
-            file.seek(0)
-            file.save(target_path)
-            
-            # Predictable routing: /api/static/uploads/workspaces/...
-            logo_url = f"/api/static/uploads/workspaces/{final_filename}"
+            return jsonify({'error': 'Failed to save workspace logo. Check system permissions.'}), 500
         
         # 5. Database Commit
         workspace.logo_url = logo_url

@@ -104,11 +104,9 @@ def save_logo(file, folder='logos'):
                 if os.path.exists(target_path):
                     logger.info(f"SUCCESS: Saved logo to {target_path}")
                     
-                    # Construct URL based on where it was saved
+                    # Construct URL based on where it was saved (must match files_bp prefix /api/files)
                     if 'static' in upload_path:
-                        return f"/static/uploads/{folder}/{unique_filename}"
-                    elif '/tmp' in upload_path:
-                        return f"/api/files/serve/{folder}/{unique_filename}"
+                        return f"/api/files/static/uploads/{folder}/{unique_filename}"
                     else:
                         return f"/api/files/serve/{folder}/{unique_filename}"
             except Exception as e:

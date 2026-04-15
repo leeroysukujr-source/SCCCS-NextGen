@@ -106,43 +106,14 @@ def upload_system_logo():
         return jsonify({'error': 'Unsupported file type. Please use PNG, JPG, or SVG.'}), 400
 
     try:
-        # 3. Data Layer Sync (Senior DevOps Priority: S3/MinIO)
-        from app.utils.storage import upload_fileobj, get_public_url, ensure_bucket
+        from app.utils.uploads import save_logo
         
-        s3_endpoint = current_app.config.get('S3_ENDPOINT')
-        s3_bucket = 'platform-assets' # Senior DevOps Requirement
+        # Centralized logo saving handles S3 vs local fallback cleanly
+        logo_url = save_logo(file, folder='system')
         
-        # Use predictable identification to prevent URI bloat
-        final_filename = f"logo.{ext}"
-        logo_url = None
-        
-        if s3_endpoint and 'localhost' not in s3_endpoint:
-            try:
-                current_app.logger.info(f"☁️  MinIO/S3 Configured. Attempting cloud sync: {s3_bucket}")
-                ensure_bucket(s3_bucket)
-                
-                # Reset file pointer and upload
-                file.seek(0)
-                if upload_fileobj(file, f"system/{final_filename}", bucket=s3_bucket):
-                    logo_url = get_public_url(f"system/{final_filename}", bucket=s3_bucket)
-                    current_app.logger.info(f"✅ Cloud upload success: {logo_url}")
-            except Exception as s3_err:
-                current_app.logger.warning(f"⚠️  Cloud storage unreachable, falling back: {str(s3_err)}")
-                logo_url = None # Force local fallback
-
-
         if not logo_url:
-            # 4. Local Fallback (Precision Storage)
-            current_app.logger.info("💾 Falling back to local static storage")
-            static_upload_path = os.path.join(current_app.root_path, 'static', 'uploads')
-            os.makedirs(static_upload_path, exist_ok=True)
+            return jsonify({'error': 'Failed to save branding asset. Check system permissions.'}), 500
             
-            target_path = os.path.join(static_upload_path, final_filename)
-            file.seek(0)
-            file.save(target_path)
-            
-            logo_url = f"/api/static/uploads/{final_filename}"
-        
         # 5. Global Configuration Synchronization
         settings_service.set_system_setting(
             key='SYSTEM_LOGO_URL', 
@@ -156,11 +127,6 @@ def upload_system_logo():
             'message': 'System logo updated successfully',
             'logo_url': logo_url
         }), 200
-
-        
     except Exception as e:
         current_app.logger.error(f"❌ Branding update failure: {str(e)}")
         return jsonify({'error': f"Storage operation failed: {str(e)}"}), 500
-
-
-

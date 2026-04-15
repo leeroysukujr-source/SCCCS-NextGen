@@ -136,8 +136,39 @@
 .submitted-content h3 {
     font-size: 0.9rem;
     color: #64748b;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
     text-transform: uppercase;
+}
+
+.content-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.resubmit-btn {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.resubmit-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.no-files-tag {
+    color: #475569;
+    font-style: italic;
+    font-size: 0.85rem;
 }
 
 .sub-content-preview {

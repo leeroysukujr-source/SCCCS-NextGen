@@ -83,7 +83,6 @@ if (typeof globalThis.__SCCCS_API_CLIENT__ === 'undefined') {
   globalThis.__SCCCS_API_CLIENT__ = axios.create({
     baseURL: API_URL,
     headers: {
-      'Content-Type': 'application/json',
       'bypass-tunnel-reminder': 'true',
     },
     timeout: 30000,

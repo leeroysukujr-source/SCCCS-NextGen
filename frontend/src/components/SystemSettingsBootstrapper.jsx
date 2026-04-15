@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSettingsStore } from '../store/settingsStore';
 import { useAuthStore } from '../store/authStore';
+import { initSocket } from '../api/socket';
 import { FiRefreshCcw, FiLogOut, FiTool } from 'react-icons/fi';
 
 export default function SystemSettingsBootstrapper() {
@@ -9,7 +10,11 @@ export default function SystemSettingsBootstrapper() {
     const [isMaintenance, setIsMaintenance] = useState(false);
 
     useEffect(() => {
-        // Fetch initial public settings
+        // 1. Initialize public socket connection (Guest mode)
+        // This ensures the platform listens for 'system_setting_updated' even before login
+        initSocket();
+
+        // 2. Fetch initial public settings
         fetchSettings(true);
     }, [fetchSettings]);
 

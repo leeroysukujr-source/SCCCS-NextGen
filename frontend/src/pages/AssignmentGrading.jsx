@@ -170,10 +170,10 @@ export default function AssignmentGrading() {
                                                     </div>
                                                 </div>
                                                 <div className="asset-actions">
-                                                    <a href={apiClient.defaults.baseURL + `/files/${file.id}/download`} download className="icon-btn">
+                                                    <a href={`${apiClient.defaults.baseURL}/files/${file.id}?token=${localStorage.getItem('token')}&download=true`} download className="icon-btn">
                                                         <FiDownload />
                                                     </a>
-                                                    <button className="icon-btn" onClick={() => window.open(apiClient.defaults.baseURL + `/files/${file.id}/download`, '_blank')}>
+                                                    <button className="icon-btn" onClick={() => window.open(`${apiClient.defaults.baseURL}/files/${file.id}?token=${localStorage.getItem('token')}`, '_blank')}>
                                                         <FiExternalLink />
                                                     </button>
                                                 </div>

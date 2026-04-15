@@ -105,10 +105,10 @@ def register_socketio_events(socketio):
         
         # Validate token exists
         if not token:
-            # Log a debug line indicating a connection without token
-            log_debug('Socket.IO: connect attempt without token')
-            # Return False to reject connection; client will receive connect_error
-            return False
+            # ALLOW connection without token for public system updates (Maintenance Mode)
+            # These connections are "GUESTS" and won't be joined to user/workspace rooms.
+            log_debug('Socket.IO: [GUEST] connection established (no token)')
+            return True
         
         # Validate and decode token
         try:
