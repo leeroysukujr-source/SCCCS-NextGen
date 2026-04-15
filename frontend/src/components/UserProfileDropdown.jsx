@@ -13,7 +13,10 @@ const UserProfileDropdown = () => {
     const dropdownRef = useRef(null);
     const [theme, setTheme] = useTheme();
 
-    const toggleDropdown = () => setIsOpen(!isOpen);
+    const toggleDropdown = (e) => {
+        if (e) e.stopPropagation();
+        setIsOpen(!isOpen);
+    };
 
     const handleClickOutside = (event) => {
         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {

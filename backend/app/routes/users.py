@@ -11,6 +11,8 @@ import os
 import mimetypes
 import io
 import json
+import base64
+import imghdr
 from app.utils.audit import log_audit_event
 from openpyxl import Workbook
 from reportlab.lib.pagesizes import letter
@@ -94,68 +96,87 @@ def update_current_user():
 @jwt_required()
 def upload_avatar():
     """Upload profile picture for current user"""
-    current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
-    
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-    
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file provided'}), 400
-    
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No file selected'}), 400
-    
-    # Check if it's an image
-    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'}
-    if '.' not in file.filename:
-        return jsonify({'error': 'Invalid file type'}), 400
-    
-    ext = file.filename.rsplit('.', 1)[1].lower()
-    if ext not in allowed_extensions:
-        return jsonify({'error': 'Only image files are allowed (png, jpg, jpeg, gif, webp, svg)'}), 400
-    
-    # Generate unique filename
-    filename = secure_filename(file.filename)
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
-    unique_filename = f"{timestamp}{current_user_id}_{filename}"
-    
-    # Storage Logic
-    file_url = None
-    from app.utils.storage import upload_fileobj, get_public_url
-    from flask import current_app
-    
-    # Cloud Storage Path
-    if current_app.config.get('S3_ENDPOINT') and current_app.config.get('S3_BUCKET'):
-        # Upload to S3
-        file.seek(0)
-        key = f"avatars/{unique_filename}"
-        if upload_fileobj(file, key):
-            file_url = get_public_url(key)
-            
-    # Fallback to local
-    if not file_url:
-        # Create avatars directory if it doesn't exist
-        current_file_dir = os.path.dirname(os.path.abspath(__file__))
-        backend_dir = os.path.dirname(os.path.dirname(current_file_dir))
-        avatars_folder = os.path.join(backend_dir, 'uploads', 'avatars')
-        os.makedirs(avatars_folder, exist_ok=True)
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
         
-        file_path = os.path.join(avatars_folder, unique_filename)
-        file.seek(0)
-        file.save(file_path)
-        file_url = f"/api/files/avatar/{unique_filename}"
-    
-    # Update user's avatar URL
-    user.avatar_url = file_url
-    db.session.commit()
-    
-    return jsonify({
-        'message': 'Avatar uploaded successfully',
-        'avatar_url': file_url,
-        'user': user.to_dict()
-    }), 200
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        file_url = None
+        unique_filename = None
+        file_extension = None
+        file_content = None
+
+        # Check for FileStorage (multipart/form-data)
+        if 'file' in request.files:
+            file = request.files['file']
+            if file.filename != '':
+                filename = secure_filename(file.filename)
+                file_extension = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'jpg'
+                unique_filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S_')}{current_user_id}.{file_extension}"
+                file_content = file.read()
+        
+        # Check for base64 JSON payload
+        elif request.is_json:
+            data = request.get_json()
+            if 'image' in data or 'avatar' in data:
+                b64_data = data.get('image') or data.get('avatar')
+                if ',' in b64_data:
+                    b64_data = b64_data.split(',')[1]
+                
+                file_content = base64.b64decode(b64_data)
+                # Determine extension from content
+                file_extension = imghdr.what(None, h=file_content) or 'jpg'
+                unique_filename = f"b64_{datetime.now().strftime('%Y%m%d_%H%M%S_')}{current_user_id}.{file_extension}"
+
+        if not file_content:
+            return jsonify({'error': 'No image data provided. Support multipart/form-data or base64 JSON.'}), 400
+
+        # Storage Selection Logic
+        from app.utils.storage import upload_fileobj, get_public_url
+        from flask import current_app
+        
+        # Cloud Storage Path (S3)
+        if current_app.config.get('S3_ENDPOINT') and current_app.config.get('S3_BUCKET'):
+            key = f"avatars/{unique_filename}"
+            if upload_fileobj(io.BytesIO(file_content), key):
+                file_url = get_public_url(key)
+                
+        # Fallback to local
+        if not file_url:
+            # We target app/static/uploads/avatars relative to static_folder
+            static_folder = current_app.static_folder or os.path.join(current_app.root_path, 'static')
+            avatars_folder = os.path.join(static_folder, 'uploads', 'avatars')
+            os.makedirs(avatars_folder, exist_ok=True)
+            
+            file_path = os.path.join(avatars_folder, unique_filename)
+            with open(file_path, 'wb') as f:
+                f.write(file_content)
+            
+            file_url = f"/api/files/avatar/{unique_filename}"
+        
+        # Update user's avatar URL
+        user.avatar_url = file_url
+        db.session.commit()
+        
+        print(f"[Avatar Upload] Success for user {user.username}. URL: {file_url}")
+        
+        return jsonify({
+            'message': 'Avatar uploaded successfully',
+            'avatar_url': file_url,
+            'user': user.to_dict()
+        }), 200
+
+    except Exception as e:
+        import traceback
+        print(f"[Avatar Upload ERROR] Unexpected failure: {str(e)}")
+        print(traceback.format_exc())
+        return jsonify({
+            'error': 'An unexpected error occurred during avatar upload',
+            'details': str(e),
+            'success': False
+        }), 500
 
 # Route removed and moved to top for reliability
 

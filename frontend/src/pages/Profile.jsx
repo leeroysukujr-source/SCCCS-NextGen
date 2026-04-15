@@ -10,7 +10,7 @@ import './Profile.css'
 import { useConfirm, useNotify } from '../components/NotificationProvider'
 
 export default function Profile() {
-  const { user: currentUser, updateUser } = useAuthStore()
+  const { user: currentUser, updateUser, refreshUser } = useAuthStore()
   const confirm = useConfirm()
   const notify = useNotify()
   const { userId } = useParams()
@@ -54,13 +54,13 @@ export default function Profile() {
 
   const uploadAvatarMutation = useMutation({
     mutationFn: authAPI.uploadAvatar,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('Avatar upload success:', data)
-      // If uploading for current user, update store
+      // If uploading for current user, re-fetch to ensure store is fresh and hydration is correct
       if (!viewingOther) {
-        updateUser(data.user)
+        await refreshUser()
       }
-      // Use the avatar_url from the response, not the data URL
+      // Use the avatar_url from the response, not the data URL for permanent preview
       setPreviewUrl(data.avatar_url || data.user?.avatar_url)
       setUploading(false)
       notify('success', 'Profile picture updated successfully!')
