@@ -448,6 +448,7 @@
 .action-large {
   background: var(--gradient-primary);
   color: white;
+}
 
 .action-large:hover {
   transform: translateY(-2px);
