@@ -1,11 +1,22 @@
 .assignment-overview {
-    padding: clamp(0.75rem, 3vw, 2rem);
-    height: 100%;
-    overflow-y: auto;
+    padding: clamp(1rem, 4vw, 2rem);
+    height: auto; /* Allow content to dictate height */
+    min-height: 100%;
+    overflow-y: visible; /* Let the parent handle scrolling */
     overflow-x: hidden;
     color: #fff;
     width: 100%;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+@media (max-width: 900px) {
+    .assignment-overview {
+        padding-top: 1.5rem; /* Add extra breathing room from stacked header */
+        gap: 1.5rem;
+    }
 }
 
 .overview-header {
