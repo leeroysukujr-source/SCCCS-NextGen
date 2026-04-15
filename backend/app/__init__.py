@@ -117,8 +117,8 @@ def create_app(config_class=Config):
         engineio_logger=False,
         message_queue=message_queue if message_queue else None,
         async_mode=async_mode,
-        ping_interval=20,
-        ping_timeout=120,
+        ping_interval=25, # Standard Render Stability
+        ping_timeout=60,  # Standard Render Stability
         transports=['websocket', 'polling']
     )
     if async_mode == "threading":
@@ -201,7 +201,8 @@ def create_app(config_class=Config):
         if origin and (final_origins == "*" or origin in (cors_origins if isinstance(cors_origins, list) else [])):
             response.headers['Access-Control-Allow-Origin'] = origin
             response.headers['Access-Control-Allow-Credentials'] = 'true'
-            # We don't overwrite if already there to avoid duplicates, but ensure they exist
+            # Critically allow Authorization for preflights
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Workspace-ID, X-Platform-ID, X-Requested-With, Accept, Origin, Upgrade-Insecure-Requests'
             if 'Access-Control-Allow-Methods' not in response.headers:
                 response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
         return response
