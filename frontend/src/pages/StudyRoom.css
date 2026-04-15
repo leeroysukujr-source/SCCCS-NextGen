@@ -1,6 +1,8 @@
 .study-room-container {
-    padding: 2rem;
-    max-width: 1200px;
+    padding: 1.5rem;
+    max-width: min(1200px, 100vw);
+    width: 100%;
+    box-sizing: border-box;
     margin: 0 auto;
     font-family: var(--font-body, "Inter", sans-serif);
     color: var(--text-primary);
@@ -12,12 +14,13 @@
 }
 
 .study-room-header h1 {
-    font-size: 2.5rem;
+    font-size: clamp(1.75rem, 6vw, 3rem);
     font-weight: 700;
     margin-bottom: 0.5rem;
     background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    line-height: 1.2;
 }
 
 .study-room-header p {
@@ -502,6 +505,16 @@
     border-radius: 16px;
     border: 1px solid var(--border-light);
     flex-shrink: 0;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .group-detail-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1.25rem;
+    }
 }
 
 .group-title-block {
@@ -558,7 +571,12 @@
     grid-template-columns: 280px 1fr;
     gap: 1.5rem;
     align-items: start;
-    /* Removed fixed height and overflow to allow page scroll */
+}
+
+@media (max-width: 1024px) {
+    .group-detail-layout {
+        grid-template-columns: 1fr;
+    }
 }
 
 .group-sidebar {
@@ -617,6 +635,14 @@
     height: 75vh;
     /* Fixed height for content area */
     min-height: 500px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .group-content-area {
+        height: 60vh;
+        min-height: 400px;
+    }
 }
 
 /* Discussion Feed */

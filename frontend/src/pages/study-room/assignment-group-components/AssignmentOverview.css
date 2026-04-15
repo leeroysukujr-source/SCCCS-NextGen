@@ -12,14 +12,16 @@
 .welcome-banner {
     background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 2.5rem;
-    border-radius: 32px;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border-radius: 28px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     backdrop-filter: blur(20px);
     position: relative;
     overflow: hidden;
+    gap: 1.5rem;
+    flex-wrap: wrap;
 }
 
 .welcome-banner::after {
@@ -53,11 +55,12 @@
 }
 
 .banner-content h2 {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
     font-weight: 900;
     margin: 0;
     letter-spacing: -0.03em;
     text-transform: uppercase;
+    line-height: 1.1;
 }
 
 .banner-content p {
@@ -103,9 +106,9 @@
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-bottom: 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
 }
 
 .glass-card {
@@ -177,6 +180,12 @@
     display: grid;
     grid-template-columns: 1.8fr 1.2fr;
     gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+    .main-overview-content {
+        grid-template-columns: 1fr;
+    }
 }
 
 .section-header {
