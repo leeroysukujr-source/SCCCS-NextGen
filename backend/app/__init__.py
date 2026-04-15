@@ -230,8 +230,6 @@ def create_app(config_class=Config):
     from app.routes.settings import settings_bp
     app.register_blueprint(settings_bp, url_prefix='/api/settings')
 
-    from app.routes.system_settings import system_settings_bp
-    app.register_blueprint(system_settings_bp, url_prefix='/api/settings/system')
 
     from app.services.settings_service import settings_service
     settings_service.init_app(app)

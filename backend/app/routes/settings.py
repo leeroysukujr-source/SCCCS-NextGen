@@ -79,3 +79,30 @@ def update_institutional_setting(workspace_id):
         return jsonify({'error': str(e)}), 403
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@settings_bp.route('/system/logo', methods=['POST'])
+@jwt_required()
+@platform_super_admin_required
+def upload_system_logo():
+    """Upload or update system logo (platform super admin only)"""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+        
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+        
+    from app.utils.uploads import save_logo
+    # Use save_logo which handles S3 storage if configured
+    logo_url = save_logo(file, folder='system')
+    
+    if not logo_url:
+        return jsonify({'error': 'Failed to save logo'}), 500
+        
+    # Update System Setting
+    settings_service.set_system_setting('SYSTEM_LOGO_URL', logo_url, category='ui_ux', is_public=True)
+    
+    return jsonify({
+        'message': 'System logo updated',
+        'logo_url': logo_url
+    }), 200

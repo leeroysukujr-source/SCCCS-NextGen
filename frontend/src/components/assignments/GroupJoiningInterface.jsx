@@ -9,7 +9,9 @@ const GroupJoiningInterface = ({ assignment }) => {
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
     const [joining, setJoining] = useState(false);
+    const [mode, setMode] = useState('selection'); // selection, group, individual
     const notify = useNotify();
+    const navigate = useNavigate();
 
     const fetchGroups = async () => {
         try {
@@ -26,6 +28,12 @@ const GroupJoiningInterface = ({ assignment }) => {
         fetchGroups();
     }, [assignment.id]);
 
+    useEffect(() => {
+        if (loading) return; // Wait for initial fetch
+        const userGroup = groups.find(g => g.is_member);
+        if (userGroup) setMode('group');
+    }, [loading, groups]);
+
     const handleJoin = async (groupId) => {
         setJoining(true);
         try {
@@ -39,17 +47,11 @@ const GroupJoiningInterface = ({ assignment }) => {
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-slate-400">Loading groups...</div>;
-
-    const [mode, setMode] = useState('selection'); // selection, group, individual
-    const navigate = useNavigate();
     const userGroup = groups.find(g => g.is_member);
 
-    useEffect(() => {
-        if (userGroup) setMode('group');
-    }, [userGroup]);
-
-    if (loading) return <div className="p-8 text-center text-slate-400">Loading units...</div>;
+    if (loading) {
+        return <div className="p-8 text-center text-slate-400">Loading groups...</div>;
+    }
 
     return (
         <div className="space-y-6">
