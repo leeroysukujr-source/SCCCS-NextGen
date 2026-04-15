@@ -989,7 +989,7 @@ def get_my_submission(assignment_id):
         submission = AssignmentSubmission.query.filter_by(assignment_id=assignment_id, user_id=user.id, group_id=None).first()
         
     if not submission:
-        return jsonify({"message": "No submission found"}), 404
+        return jsonify(None), 200
         
     return jsonify(submission.to_dict())
 
