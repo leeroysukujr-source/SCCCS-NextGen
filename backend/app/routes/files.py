@@ -221,6 +221,32 @@ def get_system_file(filename):
         
     return send_from_directory(system_folder, filename)
 
+@files_bp.route('/static/<path:filepath>', methods=['GET', 'OPTIONS'])
+@cross_origin()
+def serve_static_assets(filepath):
+    """
+    Precision Static Asset Mirror (Senior DevOps Requirement)
+    Serves assets from the 'app/static' directory under the API prefix.
+    This ensures that branding assets (logos, etc.) saved locally in the static folder
+    are absolute and accessible even when served through an API proxy.
+    """
+    from flask import send_from_directory, current_app
+    
+    # Target the 'static' folder inside the 'app' directory
+    static_folder = os.path.join(current_app.root_path, 'static')
+    
+    # Integrity Check: Ensure we don't accidentally serve sensitive files
+    if '..' in filepath or filepath.startswith('/'):
+        return jsonify({'error': 'Security restriction: Invalid path traversal'}), 403
+
+    full_path = os.path.join(static_folder, filepath)
+    
+    if not os.path.exists(full_path):
+        current_app.logger.warning(f"⚠️ Static asset missing: {filepath} at {full_path}")
+        return jsonify({'error': 'Asset not found', 'requested': filepath}), 404
+        
+    return send_from_directory(static_folder, filepath)
+
 @files_bp.route('/serve/<path:filepath>', methods=['GET'])
 @cross_origin()
 def get_uploaded_file(filepath):
@@ -232,24 +258,28 @@ def get_uploaded_file(filepath):
     uploads_folder = os.path.join(backend_dir, 'uploads')
     
     # Secure the filepath to prevent path traversal
-    # Note: flask's send_from_directory handles some of this
     try:
+        # Priority 1: Main uploads folder
         if os.path.exists(os.path.join(uploads_folder, filepath)):
             return send_from_directory(uploads_folder, filepath)
             
-        # Try internal app uploads folder
-        app_uploads = os.path.join(current_app.root_path, 'uploads')
-        if os.path.exists(os.path.join(app_uploads, filepath)):
-            return send_from_directory(app_uploads, filepath)
+        # Priority 2: App-level static folder fallback (for unified serving)
+        app_static = os.path.join(current_app.root_path, 'static', 'uploads')
+        if os.path.exists(os.path.join(app_static, filepath)):
+            return send_from_directory(app_static, filepath)
 
-        # Last resort fallback: Check /tmp/scccs-uploads
+        # Priority 3: Last resort fallback: Check /tmp/scccs-uploads
         tmp_folder = '/tmp/scccs-uploads'
         if os.path.exists(os.path.join(tmp_folder, filepath)):
             return send_from_directory(tmp_folder, filepath)
             
-        return jsonify({'error': 'File not found', 'checked': [uploads_folder, app_uploads, tmp_folder]}), 404
+        return jsonify({
+            'error': 'File not found', 
+            'checked': [uploads_folder, app_static, tmp_folder]
+        }), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 
 @files_bp.route('/<int:file_id>', methods=['GET'])

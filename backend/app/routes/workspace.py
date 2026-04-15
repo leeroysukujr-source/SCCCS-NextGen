@@ -393,35 +393,82 @@ def update_workspace_config(ws_id):
 @jwt_required()
 @workspace_access_required
 def upload_workspace_logo(ws_id):
-    """Upload logo for a specific workspace"""
+    """Administrative endpoint to update workspace branding with absolute persistence (Senior DevOps Path)"""
+    import os
+    from flask import current_app
+    from werkzeug.utils import secure_filename
+    from app.utils.storage import upload_fileobj, get_public_url, ensure_bucket
+    
     workspace = Workspace.query.get(ws_id)
     if not workspace:
         return jsonify({'error': 'Workspace not found'}), 404
         
+    # 1. Integrity Check
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
         
     file = request.files['file']
-    from app.utils.uploads import save_logo
-    logo_url = save_logo(file, folder=f'logos/workspace_{ws_id}')
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    # 2. Strict Validation & Normalization
+    filename = secure_filename(file.filename)
+    ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'png'
     
-    if logo_url:
+    if ext not in ['png', 'jpg', 'jpeg', 'svg']:
+        return jsonify({'error': 'Unsupported file type. Please use PNG, JPG, or SVG.'}), 400
+
+    final_filename = f"workspace_{ws_id}_logo.{ext}"
+    logo_url = None
+
+    try:
+        # 3. Data Layer Sync (Priority 1: Cloud Storage)
+        s3_endpoint = current_app.config.get('S3_ENDPOINT')
+        s3_bucket = 'platform-assets'
+        
+        if s3_endpoint and 'localhost' not in s3_endpoint:
+            current_app.logger.info(f"☁️  Workspace Branding: Uploading to MinIO/S3 [{s3_bucket}]")
+            ensure_bucket(s3_bucket)
+            
+            file.seek(0)
+            if upload_fileobj(file, f"workspaces/{final_filename}", bucket=s3_bucket):
+                logo_url = get_public_url(f"workspaces/{final_filename}", bucket=s3_bucket)
+                current_app.logger.info(f"✅ Workspace {ws_id} cloud logo: {logo_url}")
+
+        if not logo_url:
+            # 4. Local Fallback (Priority 2: Absolute Persistence in static folder)
+            current_app.logger.info(f"💾 Workspace {ws_id}: Falling back to local static storage")
+            static_upload_path = os.path.join(current_app.root_path, 'static', 'uploads', 'workspaces')
+            os.makedirs(static_upload_path, exist_ok=True)
+            
+            target_path = os.path.join(static_upload_path, final_filename)
+            file.seek(0)
+            file.save(target_path)
+            
+            # Predictable routing: /api/static/uploads/workspaces/...
+            logo_url = f"/api/static/uploads/workspaces/{final_filename}"
+        
+        # 5. Database Commit
         workspace.logo_url = logo_url
         db.session.commit()
         
-        # Notify users in this workspace about branding update
+        # 6. Real-time Notification
         socketio.emit('workspace_branding_updated', {
             'workspace_id': ws_id,
             'logo_url': logo_url
         }, room=f'workspace_{ws_id}')
         
         return jsonify({
-            'message': 'Logo uploaded successfully',
+            'success': True,
+            'message': 'Workspace logo updated successfully',
             'logo_url': logo_url,
             'workspace': workspace.to_dict()
         }), 200
-    
-    return jsonify({'error': 'Invalid file type'}), 400
+        
+    except Exception as e:
+        current_app.logger.error(f"❌ Workspace logo failure: {str(e)}")
+        return jsonify({'error': f"Storage operation failed: {str(e)}"}), 500
+
 @workspace_bp.route('/<int:ws_id>/stats', methods=['GET'])
 @jwt_required()
 @workspace_access_required
