@@ -29,11 +29,14 @@ export default function Dashboard() {
     queryKey: ['current-user', token],
     queryFn: async () => {
       if (!token) return null
+      // Log for audit
+      console.log('[Dashboard] Refreshing user profile to ensure session integrity...')
       const data = await authAPI.getCurrentUser()
       return data
     },
-    enabled: !!token && hasHydrated,
-    staleTime: 60 * 1000,
+    // Only fetch if we don't have a user or if the user data is extremely old
+    enabled: !!token && hasHydrated && !user, 
+    staleTime: 5 * 60 * 1000, // 5 minutes of cache validity
     refetchOnWindowFocus: false,
     retry: 1,
     onSuccess: (data) => {

@@ -8,11 +8,10 @@ import { roomsAPI } from '../../api/rooms'
 import { channelsAPI } from '../../api/channels'
 import { classesAPI } from '../../api/classes'
 import {
-  FiVideo, FiPlus, FiCalendar, FiSearch, FiUsers,
-  FiMessageSquare, FiBook, FiTrendingUp, FiClock,
-  FiArrowRight, FiAward, FiFileText, FiCheckCircle, FiActivity,
+  FiVideo, FiPlus, FiBook, FiClock,
+  FiArrowRight, FiAward, FiCheckCircle,
   FiCode, FiLayers, FiCpu, FiGlobe, FiZap, FiTarget, FiPieChart, FiShield,
-  FiUser
+  FiUser, FiUsers, FiMessageSquare
 } from 'react-icons/fi'
 import '../Dashboard.css'
 import QuickAccess from '../../components/QuickAccess'
@@ -40,8 +39,8 @@ export default function StudentDashboard() {
     queryKey: ['channels'],
     queryFn: channelsAPI.getChannels,
     retry: 1,
-    refetchInterval: 30000,
-    refetchIntervalInBackground: true,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
     onError: (error) => {
       console.error('Error fetching channels:', error)
     }
@@ -51,8 +50,8 @@ export default function StudentDashboard() {
     queryKey: ['classes'],
     queryFn: classesAPI.getClasses,
     retry: 1,
-    refetchInterval: 30000,
-    refetchIntervalInBackground: true,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
     onError: (error) => {
       console.error('Error fetching classes:', error)
     }

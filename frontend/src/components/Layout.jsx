@@ -4,9 +4,9 @@ import { Outlet, Link, useNavigate, useLocation, NavLink } from 'react-router-do
 import { useAuthStore } from '../store/authStore'
 import { getApiBaseUrl, getFullImageUrl } from '../utils/api'
 import {
-  FiHome, FiVideo, FiMessageSquare, FiMessageCircle, FiBook, FiUser, FiLogOut, FiArrowRight, FiChevronLeft,
-  FiUsers, FiSettings, FiSearch, FiTrendingUp, FiAlertCircle, FiMonitor, FiLayers, FiMail,
-  FiShield, FiBarChart2, FiDatabase, FiSun, FiMoon, FiGrid, FiBookOpen, FiActivity, FiCpu, FiBriefcase
+  FiVideo, FiMessageSquare, FiMessageCircle, FiUser, FiLogOut, FiArrowRight, FiChevronLeft,
+  FiUsers, FiSettings, FiSearch, FiAlertCircle,
+  FiShield, FiGrid, FiBookOpen, FiActivity, FiBriefcase
 } from 'react-icons/fi'
 import SearchBar from './SearchBar'
 import './Layout.css'
@@ -60,9 +60,10 @@ export default function Layout() {
   }
 
 
-  // Use system logo for sidebar (workspace logo shown in dashboard header)
-  const systemLogo = getSettingValue('INSTITUTION_LOGO') || getSettingValue('SYSTEM_LOGO_URL')
-  const displayLogo = systemLogo
+  // Branding: Platform Logo (Always in Sidebar) and Workspace Logo (Contextual in Header)
+  const platformLogo = getSettingValue('SYSTEM_LOGO_URL') || getSettingValue('INSTITUTION_LOGO')
+  const workspaceLogo = user?.workspace_logo
+  const workspaceName = user?.workspace_name
 
   useEffect(() => {
     if (user?.role) {
@@ -145,10 +146,19 @@ export default function Layout() {
           )}
 
           <div className="page-context">
-            <span className="context-label">Current View</span>
-            <h2 className="context-title">
-              {location.pathname.split('/').filter(Boolean).pop()?.replace(/-/g, ' ') || 'Dashboard'}
-            </h2>
+            {workspaceLogo && (
+              <img 
+                src={getFullImageUrl(workspaceLogo)} 
+                alt={workspaceName} 
+                className="header-workspace-logo" 
+              />
+            )}
+            <div className="context-text">
+              <span className="context-label">{workspaceName || 'Global View'}</span>
+              <h2 className="context-title">
+                {location.pathname.split('/').filter(Boolean).pop()?.replace(/-/g, ' ') || 'Dashboard'}
+              </h2>
+            </div>
           </div>
         </div>
 
@@ -196,11 +206,11 @@ export default function Layout() {
         <div className="sidebar-header">
           <Link to="/dashboard" className="logo-link">
             <div className="branding-container">
-              {displayLogo ? (
+              {platformLogo ? (
                 <div className="flex items-center gap-3">
                   <img
-                    src={getFullImageUrl(displayLogo)}
-                    alt="Logo"
+                    src={getFullImageUrl(platformLogo)}
+                    alt="Platform Logo"
                     className="h-12 w-auto object-contain max-w-[120px]"
                   />
                   <div className="logo-text-wrapper overflow-hidden">

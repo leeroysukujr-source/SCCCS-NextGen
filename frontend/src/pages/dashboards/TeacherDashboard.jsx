@@ -3,15 +3,16 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '../../store/authStore'
 import { getFullImageUrl } from '../../utils/api'
+import apiClient from '../../api/client'
 import { roomsAPI } from '../../api/rooms'
 import { channelsAPI } from '../../api/channels'
 import { classesAPI } from '../../api/classes'
 import { useNotify } from '../../components/NotificationProvider'
 import {
-  FiVideo, FiPlus, FiCalendar, FiMonitor, FiSearch, FiUsers,
-  FiMessageSquare, FiBook, FiTrendingUp, FiActivity, FiClock,
-  FiArrowRight, FiFileText, FiAward, FiUpload, FiEdit, FiBarChart,
-  FiSettings, FiFile, FiDownload, FiCheckCircle, FiCode, FiLayers,
+  FiVideo, FiPlus, FiCalendar, FiUsers,
+  FiMessageSquare, FiBook, FiClock,
+  FiArrowRight, FiFileText, FiAward, FiUpload,
+  FiCheckCircle, FiCode, FiLayers,
   FiCpu, FiGlobe, FiZap, FiTarget, FiPieChart, FiShield, FiUser
 } from 'react-icons/fi'
 import CreateMeetingModal from '../../components/CreateMeetingModal'
@@ -32,8 +33,8 @@ export default function TeacherDashboard() {
     queryKey: ['rooms'],
     queryFn: roomsAPI.getRooms,
     retry: 1,
-    refetchInterval: 30000,
-    refetchIntervalInBackground: true,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
     onError: (error) => {
       console.error('Error fetching rooms:', error)
     }
@@ -43,8 +44,8 @@ export default function TeacherDashboard() {
     queryKey: ['channels'],
     queryFn: channelsAPI.getChannels,
     retry: 1,
-    refetchInterval: 30000,
-    refetchIntervalInBackground: true,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
     onError: (error) => {
       console.error('Error fetching channels:', error)
     }

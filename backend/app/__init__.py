@@ -97,10 +97,9 @@ def create_app(config_class=Config):
          expose_headers=["Content-Type", "Authorization"],
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"])
 
-    # Global OPTIONS handler to prevent preflight 403s before middleware
-    @app.route('/api/<path:path>', methods=['OPTIONS'])
-    def handle_options(path):
-        return '', 204
+    # CORS configuration - Senior Deployment Hardening
+    # Flask-CORS handles OPTIONS preflight automatically for blueprints.
+    # We allow the specific Vercel production domains and wildcard headers for proxy flexibility.
     
     
     # Initialize SocketIO with its own CORS for WebSocket connections

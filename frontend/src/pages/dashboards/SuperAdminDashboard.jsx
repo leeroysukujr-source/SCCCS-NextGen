@@ -1,32 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
-    FiUsers as Users,
-    FiUserPlus as UserPlus,
-    FiShield as Shield,
-    FiActivity as Activity,
-    FiSettings as Settings,
-    FiSearch as Search,
-    FiMoreVertical as MoreVertical,
-    FiEdit as Edit,
-    FiTrash2 as Trash2,
-    FiCheckCircle as CheckCircle,
-    FiXCircle as XCircle,
-    FiAlertTriangle as AlertTriangle,
-    FiMonitor as Monitor,
-    FiBox as Box,
-    FiPlus as Plus,
-    FiBriefcase as Briefcase,
-    FiLogIn as LogIn
-} from 'react-icons/fi';
-import { getFullImageUrl } from '../../utils/api';
-import apiClient from '../../api/client';
-import { useNotify, useConfirm } from '../../components/NotificationProvider';
-import SettingsDashboard from './SettingsDashboard';
-import LogoUpload from '../../components/LogoUpload';
-import UserListModal from '../../components/UserListModal';
-import { superAdminAPI } from '../../api/superAdmin';
-import { useAuthStore } from '../../store/authStore';
+  FiUsers as Users,
+  FiUserPlus as UserPlus,
+  FiShield as Shield,
+  FiActivity as Activity,
+  FiSettings as Settings,
+  FiSearch as Search,
+  FiMoreVertical as MoreVertical,
+  FiEdit as Edit,
+  FiTrash2 as Trash2,
+  FiCheckCircle as CheckCircle,
+  FiXCircle as XCircle,
+  FiAlertTriangle as AlertTriangle,
+  FiMonitor as Monitor,
+  FiBox as Box,
+  FiPlus as Plus,
+  FiBriefcase as Briefcase,
+  FiLogIn as LogIn
+} from 'react-icons/fi'
+import { getFullImageUrl } from '../../utils/api'
+import apiClient from '../../api/client'
+import { useNotify, useConfirm } from '../../components/NotificationProvider'
+import SettingsDashboard from './SettingsDashboard'
+import LogoUpload from '../../components/LogoUpload'
+import UserListModal from '../../components/UserListModal'
+import { superAdminAPI } from '../../api/superAdmin'
+import { useAuthStore } from '../../store/authStore'
 
 const SuperAdminDashboard = () => {
     const { updateUser } = useAuthStore();
@@ -114,6 +114,8 @@ const SuperAdminDashboard = () => {
     const [logs, setLogs] = useState([]);
     const [logsLoading, setLogsLoading] = useState(false);
     const [stats, setStats] = useState({
+        refetchInterval: 60000,
+        refetchIntervalInBackground: false,
         total_admins: 0,
         total_teachers: 0,
         total_students: 0,

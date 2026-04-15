@@ -6,21 +6,21 @@ let socketInstance = null
 const eventQueue = []
 
 export const initSocket = (token = null) => {
-    // If socket exists, check if we need to upgrade from guest to authenticated
-    if (socketInstance) {
-        const authObj = socketInstance.auth || {};
-        const existingToken = authObj.token || authObj.auth;
-        
-        // Upgrade: If we now have a token but the existing socket is a guest
-        if (token && !existingToken) {
-            console.log('[Socket] Upgrading GUEST connection to AUTHENTICATED');
-            socketInstance.auth = { token };
-            socketInstance.disconnect().connect();
-        } else if (socketInstance.disconnected) {
-            socketInstance.connect();
-        }
-        return socketInstance;
+  // If socket exists, check if we need to upgrade from guest to authenticated
+  if (socketInstance) {
+    const authObj = socketInstance.auth || {}
+    const existingToken = authObj.token || authObj.auth
+    
+    // Upgrade: If we now have a token but the existing socket is a guest
+    if (token && !existingToken) {
+      console.log('[Socket] Upgrading GUEST connection to AUTHENTICATED')
+      socketInstance.auth = { token }
+      socketInstance.disconnect().connect()
+    } else if (socketInstance.disconnected) {
+      socketInstance.connect()
     }
+    return socketInstance
+  }
 
     const socketUrl = getSocketUrl()
     socketInstance = createSocket(socketUrl, token)

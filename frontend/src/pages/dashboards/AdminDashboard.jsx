@@ -11,9 +11,9 @@ import { directMessagesAPI } from '../../api/directMessages'
 import { getFullImageUrl } from '../../utils/api'
 import { feedbackAPI } from '../../api/feedback'
 import {
-  FiVideo, FiPlus, FiCalendar, FiMonitor, FiSearch, FiUsers,
-  FiMessageSquare, FiMessageCircle, FiBook, FiTrendingUp, FiActivity, FiSettings,
-  FiClock, FiArrowRight, FiCopy, FiCheck, FiMail, FiCode, FiLayers,
+  FiVideo, FiPlus, FiCalendar, FiSearch, FiUsers,
+  FiMessageCircle, FiBook, FiSettings,
+  FiClock, FiArrowRight, FiMail, FiCode, FiLayers,
   FiCpu, FiGlobe, FiZap, FiTarget, FiPieChart, FiShield, FiUser, FiAlertCircle
 } from 'react-icons/fi'
 import CreateMeetingModal from '../../components/CreateMeetingModal'
@@ -52,8 +52,8 @@ export default function AdminDashboard() {
     queryKey: ['channels'],
     queryFn: channelsAPI.getChannels,
     retry: 1,
-    refetchInterval: 30000,
-    refetchIntervalInBackground: true,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
     onError: (error) => {
       console.error('Error fetching channels:', error)
     }
@@ -63,8 +63,8 @@ export default function AdminDashboard() {
     queryKey: ['classes'],
     queryFn: classesAPI.getClasses,
     retry: 1,
-    refetchInterval: 30000,
-    refetchIntervalInBackground: true,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
     onError: (error) => {
       console.error('Error fetching classes:', error)
     }

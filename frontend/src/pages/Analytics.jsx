@@ -1,26 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '../store/authStore'
-import { FiTrendingUp, FiUsers, FiMessageSquare, FiFile, FiActivity } from 'react-icons/fi'
+import { FiUsers, FiMessageSquare, FiFile, FiActivity } from 'react-icons/fi'
+import apiClient from '../api/client'
 import './Analytics.css'
 
 const analyticsAPI = {
   getUserEngagement: async () => {
-    const response = await fetch('/api/analytics/user/engagement', {
-      headers: {
-        'Authorization': `Bearer ${useAuthStore.getState().token}`
-      }
-    })
-    if (!response.ok) throw new Error('Failed to fetch analytics')
-    return response.json()
+    const response = await apiClient.get('/analytics/user/engagement')
+    return response.data
   },
   getSystemOverview: async () => {
-    const response = await fetch('/api/analytics/system/overview', {
-      headers: {
-        'Authorization': `Bearer ${useAuthStore.getState().token}`
-      }
-    })
-    if (!response.ok) throw new Error('Failed to fetch system overview')
-    return response.json()
+    const response = await apiClient.get('/analytics/system/overview')
+    return response.data
   }
 }
 
