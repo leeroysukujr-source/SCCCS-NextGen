@@ -41,7 +41,22 @@ def create_app(config_class=Config):
     # Initialize extensions
     db.init_app(app)
     
-        
+    # --- Infrastructure Integrity Check ---
+    # Ensure local static directory exists for branding assets
+    with app.app_context():
+        try:
+            # We target the 'app/static/uploads' directory relative to root_path
+            upload_path = os.path.join(app.root_path, 'static', 'uploads')
+            if not os.path.exists(upload_path):
+                app.logger.info(f"🏗️  Initializing branding infrastructure at {upload_path}")
+                os.makedirs(upload_path, exist_ok=True)
+            
+            # Ensure a 'system' subfolder for organizational clarity
+            system_path = os.path.join(upload_path, 'system')
+            os.makedirs(system_path, exist_ok=True)
+        except Exception as e:
+            app.logger.error(f"⚠️  Failed to initialize branding directories: {str(e)}")
+    # --------------------------------------
     jwt.init_app(app)
     mail.init_app(app)
     

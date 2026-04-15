@@ -84,113 +84,76 @@ def update_institutional_setting(workspace_id):
 @jwt_required()
 @platform_super_admin_required
 def upload_system_logo():
-    """Upload or update system logo (platform super admin only)"""
+    """Administrative endpoint to update the global system branding (Senior DevOps Optimized)"""
+    import os
+    from flask import current_app
+    from werkzeug.utils import secure_filename
+    
+    # 1. Integrity Check: Ensure file exists in request
     if 'file' not in request.files:
-        return jsonify({'error': 'No file provided'}), 400
-        
+        return jsonify({'error': 'No file part'}), 400
+    
     file = request.files['file']
     if file.filename == '':
-        return jsonify({'error': 'No file selected'}), 400
-        
-    from app.utils.uploads import save_logo
-    # Use save_logo which handles S3 storage if configured
-    logo_url = save_logo(file, folder='system')
+        return jsonify({'error': 'No selected file'}), 400
     
-    if not logo_url:
-        return jsonify({'error': 'Failed to save logo'}), 500
-        
-    # Update System Setting
-    settings_service.set_system_setting('SYSTEM_LOGO_URL', logo_url, category='ui_ux', is_public=True)
+    # 2. Senior Validation Chain
+    filename = secure_filename(file.filename)
+    ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
     
-    return jsonify({
-        'message': 'System logo updated',
-        'logo_url': logo_url
-    }), 200
+    # Strict Type Validation
+    if ext not in ['png', 'jpg', 'jpeg', 'svg']:
+        return jsonify({'error': 'Unsupported file type. Please use PNG, JPG, or SVG.'}), 400
 
-@settings_bp.route('/diag/upload-test', methods=['GET'])
-def diag_upload_test():
-    """Diagnostic endpoint to test file system permissions and paths"""
-    import os
-    from flask import current_app
-    from app.utils.uploads import save_logo
-    
-    results = {
-        'cwd': os.getcwd(),
-        'root_path': current_app.root_path,
-        'backend_dir': os.path.dirname(current_app.root_path),
-        'upload_folder': current_app.config.get('UPLOAD_FOLDER'),
-        'env': {k: '***' if 'KEY' in k or 'SECRET' in k or 'PASS' in k else v for k, v in os.environ.items() if 'S3' in k or 'PORT' in k or 'RENDER' in k},
-        'write_test': {}
-    }
-    
-    # Test path calculation
-    backend_dir = os.path.dirname(current_app.root_path)
-    upload_base = current_app.config.get('UPLOAD_FOLDER', 'uploads')
-    if not os.path.isabs(upload_base):
-        upload_path = os.path.join(backend_dir, upload_base, 'diag')
-    else:
-        upload_path = os.path.join(upload_base, 'diag')
-    
-    results['calculated_upload_path'] = upload_path
-    
     try:
-        os.makedirs(upload_path, exist_ok=True)
-        test_file = os.path.join(upload_path, 'test.txt')
-        with open(test_file, 'w') as f:
-            f.write('test')
-        results['write_test']['primary'] = {'success': True, 'path': test_file}
-    except Exception as e:
-        results['write_test']['primary'] = {'success': False, 'error': str(e)}
+        # 3. Data Layer Sync (Senior DevOps Priority: S3/MinIO)
+        from app.utils.storage import upload_fileobj, get_public_url, ensure_bucket
         
-    # Check if system_settings table exists
-    try:
-        from app.models import SystemSetting
-        count = SystemSetting.query.count()
-        results['db_test'] = {'success': True, 'system_settings_count': count}
-    except Exception as e:
-        results['db_test'] = {'success': False, 'error': str(e)}
+        s3_endpoint = current_app.config.get('S3_ENDPOINT')
+        s3_bucket = 'platform-assets' # Senior DevOps Requirement
         
-    return jsonify(results), 200
-
-@settings_bp.route('/diag/save-logo-debug', methods=['GET'])
-def diag_save_logo_debug():
-    """Hyper-detailed debug of the save_logo function"""
-    import os
-    from io import BytesIO
-    from flask import current_app
-    from app.utils.uploads import save_logo
-    
-    class DummyFile:
-        def __init__(self):
-            self.filename = 'test_debug.png'
-            self.stream = BytesIO(b"fake image content")
-        def save(self, path):
-            with open(path, 'wb') as f:
-                f.write(self.stream.getvalue())
-        def seek(self, pos):
-            self.stream.seek(pos)
+        logo_url = None
+        
+        if s3_endpoint and 'localhost' not in s3_endpoint:
+            current_app.logger.info(f"☁️  MinIO/S3 Configured. Initializing bucket: {s3_bucket}")
+            ensure_bucket(s3_bucket)
             
-    dummy = DummyFile()
-    
-    debug_log = []
-    def log(msg):
-        debug_log.append(msg)
-        print(f"DEBUG_LOGO: {msg}")
+            # Reset file pointer and upload
+            file.seek(0)
+            if upload_fileobj(file, f"system/{final_filename}", bucket=s3_bucket):
+                logo_url = get_public_url(f"system/{final_filename}", bucket=s3_bucket)
+                current_app.logger.info(f"✅ Cloud upload success: {logo_url}")
 
-    log("Starting save_logo debug")
-    try:
-        url = save_logo(dummy, folder='debug_test')
-        if url:
-            return jsonify({'success': True, 'url': url, 'log': debug_log}), 200
-        else:
-            return jsonify({'success': False, 'error': 'save_logo returned None', 'log': debug_log}), 500
-    except Exception as e:
-        import traceback
+        if not logo_url:
+            # 4. Local Fallback (Precision Storage)
+            current_app.logger.info("💾 Falling back to local static storage")
+            static_upload_path = os.path.join(current_app.root_path, 'static', 'uploads')
+            os.makedirs(static_upload_path, exist_ok=True)
+            
+            target_path = os.path.join(static_upload_path, final_filename)
+            file.seek(0)
+            file.save(target_path)
+            
+            logo_url = f"/api/static/uploads/{final_filename}"
+        
+        # 5. Global Configuration Synchronization
+        settings_service.set_system_setting(
+            key='SYSTEM_LOGO_URL', 
+            value=logo_url, 
+            category='ui_ux', 
+            is_public=True
+        )
+        
         return jsonify({
-            'success': False, 
-            'error': str(e), 
-            'traceback': traceback.format_exc(),
-            'log': debug_log
-        }), 500
+            'success': True,
+            'message': 'System logo updated successfully',
+            'logo_url': logo_url
+        }), 200
+
+        
+    except Exception as e:
+        current_app.logger.error(f"❌ Branding update failure: {str(e)}")
+        return jsonify({'error': f"Storage operation failed: {str(e)}"}), 500
+
 
 
