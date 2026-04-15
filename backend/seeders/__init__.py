@@ -76,14 +76,14 @@ def run_all_seeders(app=None):
                     description=data['desc'],
                     is_overridable=data.get('overridable', False)
                 )
+                setting.set_value(data['value'])
                 db.session.add(setting)
             else:
                 setting.category = data['category']
                 setting.value_type = data['type']
                 setting.description = data['desc']
                 setting.is_overridable = data.get('overridable', setting.is_overridable)
-            
-            setting.set_value(data['value'])
+                # DO NOT overwrite setting.set_value here to preserve user changes
             
         db.session.commit()
         print("\n--- SEEDING COMPLETE: SUPERADMIN GOVERNANCE RESTORED ---")

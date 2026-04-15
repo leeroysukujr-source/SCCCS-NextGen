@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { FiUpload, FiX, FiCheck, FiImage, FiSave } from 'react-icons/fi';
+import { FiUpload, FiX, FiCheck, FiImage, FiSave, FiInfo } from 'react-icons/fi';
 import apiClient from '../api/client';
 import { getFullImageUrl } from '../utils/api';
 
