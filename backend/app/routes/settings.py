@@ -106,3 +106,49 @@ def upload_system_logo():
         'message': 'System logo updated',
         'logo_url': logo_url
     }), 200
+
+@settings_bp.route('/diag/upload-test', methods=['GET'])
+def diag_upload_test():
+    """Diagnostic endpoint to test file system permissions and paths"""
+    import os
+    from flask import current_app
+    from app.utils.uploads import save_logo
+    
+    results = {
+        'cwd': os.getcwd(),
+        'root_path': current_app.root_path,
+        'backend_dir': os.path.dirname(current_app.root_path),
+        'upload_folder': current_app.config.get('UPLOAD_FOLDER'),
+        'env': {k: '***' if 'KEY' in k or 'SECRET' in k or 'PASS' in k else v for k, v in os.environ.items() if 'S3' in k or 'PORT' in k or 'RENDER' in k},
+        'write_test': {}
+    }
+    
+    # Test path calculation
+    backend_dir = os.path.dirname(current_app.root_path)
+    upload_base = current_app.config.get('UPLOAD_FOLDER', 'uploads')
+    if not os.path.isabs(upload_base):
+        upload_path = os.path.join(backend_dir, upload_base, 'diag')
+    else:
+        upload_path = os.path.join(upload_base, 'diag')
+    
+    results['calculated_upload_path'] = upload_path
+    
+    try:
+        os.makedirs(upload_path, exist_ok=True)
+        test_file = os.path.join(upload_path, 'test.txt')
+        with open(test_file, 'w') as f:
+            f.write('test')
+        results['write_test']['primary'] = {'success': True, 'path': test_file}
+    except Exception as e:
+        results['write_test']['primary'] = {'success': False, 'error': str(e)}
+        
+    # Check if system_settings table exists
+    try:
+        from app.models import SystemSetting
+        count = SystemSetting.query.count()
+        results['db_test'] = {'success': True, 'system_settings_count': count}
+    except Exception as e:
+        results['db_test'] = {'success': False, 'error': str(e)}
+        
+    return jsonify(results), 200
+
