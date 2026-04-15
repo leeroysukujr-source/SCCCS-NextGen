@@ -54,6 +54,7 @@ class SettingsService:
     def set_setting(self, workspace_id, key, value, user_id=None, is_super_admin=False):
         """Update a setting for a workspace. Enforces overridable schema."""
         from app.models import SystemSetting
+        from app import socketio
         
         # Check if the setting exists in system and is overridable
         sys_setting = SystemSetting.query.filter_by(key=key).first()
@@ -70,6 +71,16 @@ class SettingsService:
         setting.updated_by = user_id
         db.session.commit()
         
+        # Real-time synchronization
+        try:
+            socketio.emit('institutional_setting_updated', {
+                'workspace_id': workspace_id,
+                'key': key,
+                'value': value
+            }, namespace='/')
+        except:
+            pass
+
         # Invalidate request cache if present
         if hasattr(g, 'workspace_settings_cache'):
             cache_key = f"{workspace_id}:{key}"
@@ -136,11 +147,13 @@ class SettingsService:
         return [s.to_dict() for s in settings]
 
     # --- System Settings (Global) ---
-
+    
     def set_system_setting(self, key, value, category='general', value_type='string', 
                            description=None, is_public=False, admin_only=True, is_overridable=False):
         """Set or update a system setting"""
         from app.models import SystemSetting
+        from app import socketio
+
         setting = SystemSetting.query.filter_by(key=key).first()
         
         if not setting:
@@ -157,6 +170,17 @@ class SettingsService:
         setting.is_overridable = is_overridable
         
         db.session.commit()
+
+        # Global Real-time synchronization
+        try:
+            socketio.emit('system_setting_updated', {
+                'key': key,
+                'value': setting.get_value()
+            }, namespace='/')
+        except:
+            pass
+
         return setting
 
 settings_service = SettingsService()
+

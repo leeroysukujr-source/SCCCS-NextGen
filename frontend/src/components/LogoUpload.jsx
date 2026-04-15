@@ -1,25 +1,38 @@
-import React, { useState } from 'react';
-import { FiUpload, FiX, FiCheck, FiImage } from 'react-icons/fi';
+import React, { useState, useRef } from 'react';
+import { FiUpload, FiX, FiCheck, FiImage, FiSave } from 'react-icons/fi';
 import apiClient from '../api/client';
-import { getApiBaseUrl, getFullImageUrl } from '../utils/api';
+import { getFullImageUrl } from '../utils/api';
 
 const LogoUpload = ({ initialLogo, uploadUrl, onUploadSuccess, label = "Upload Logo" }) => {
     const [preview, setPreview] = useState(initialLogo);
+    const [selectedFile, setSelectedFile] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState(null);
+    const fileInputRef = useRef(null);
 
-    const handleFileChange = async (e) => {
+    const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+            setError('File too large (Max 2MB)');
+            return;
+        }
+
+        setSelectedFile(file);
+        setError(null);
 
         // Preview
         const reader = new FileReader();
         reader.onloadend = () => setPreview(reader.result);
         reader.readAsDataURL(file);
+    };
 
-        // Upload
+    const handleUpload = async () => {
+        if (!selectedFile) return;
+
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', selectedFile);
 
         setUploading(true);
         setError(null);
@@ -28,22 +41,41 @@ const LogoUpload = ({ initialLogo, uploadUrl, onUploadSuccess, label = "Upload L
             const response = await apiClient.post(uploadUrl, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            if (onUploadSuccess) onUploadSuccess(response.data.logo_url);
+            
+            if (onUploadSuccess) {
+                onUploadSuccess(response.data.logo_url);
+            }
+            setSelectedFile(null); // Clear selected state after success
+            
+            // Re-sync preview with server response URL to ensure consistency
+            if (response.data.logo_url) {
+                setPreview(response.data.logo_url);
+            }
         } catch (err) {
             console.error('Logo upload failed:', err);
-            setError('Upload failed. Please try again.');
+            setError(err.response?.data?.error || 'Upload failed. Please try again.');
         } finally {
             setUploading(false);
         }
+    };
+
+    const cancelSelection = () => {
+        setSelectedFile(null);
+        setPreview(initialLogo);
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     return (
         <div className="space-y-3">
             <label className="text-sm font-bold text-slate-300">{label}</label>
             <div className="flex items-center gap-6">
-                <div className="relative w-24 h-24 bg-slate-900 rounded-2xl border-2 border-dashed border-slate-700 flex items-center justify-center overflow-hidden transition-all hover:border-indigo-400 group">
+                <div className="relative w-28 h-28 bg-slate-900 rounded-2xl border-2 border-dashed border-slate-700 flex items-center justify-center overflow-hidden transition-all hover:border-indigo-400 group shadow-xl">
                     {preview ? (
-                        <img src={getFullImageUrl(preview)} alt="Logo Preview" className="w-full h-full object-contain p-2" />
+                        <img 
+                            src={getFullImageUrl(preview)} 
+                            alt="Logo Preview" 
+                            className="w-full h-full object-contain p-2" 
+                        />
                     ) : (
                         <FiImage className="text-slate-600 text-2xl group-hover:scale-110 transition-transform group-hover:text-slate-400" />
                     )}
@@ -55,14 +87,52 @@ const LogoUpload = ({ initialLogo, uploadUrl, onUploadSuccess, label = "Upload L
                     )}
                 </div>
 
-                <div className="flex-1 space-y-2">
-                    <label className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-xl cursor-pointer hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-900/20">
-                        <FiUpload />
-                        {uploading ? 'Uploading...' : 'Choose File'}
-                        <input type="file" className="hidden" onChange={handleFileChange} accept="image/*" disabled={uploading} />
-                    </label>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">PNG, JPG, SVG (Max 2MB)</p>
-                    {error && <p className="text-xs text-red-400 flex items-center gap-1 font-bold"><FiX /> {error}</p>}
+                <div className="flex-1 space-y-4">
+                    <div className="flex gap-2">
+                        {!selectedFile ? (
+                            <label className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl cursor-pointer hover:bg-indigo-700 transition-all shadow-lg active:scale-95">
+                                <FiUpload />
+                                Choose New Logo
+                                <input 
+                                    ref={fileInputRef}
+                                    type="file" 
+                                    className="hidden" 
+                                    onChange={handleFileChange} 
+                                    accept="image/*" 
+                                    disabled={uploading} 
+                                />
+                            </label>
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <button 
+                                    onClick={handleUpload}
+                                    disabled={uploading}
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                                >
+                                    <FiSave />
+                                    {uploading ? 'Saving Branding...' : 'Save & Apply to Platform'}
+                                </button>
+                                <button 
+                                    onClick={cancelSelection}
+                                    disabled={uploading}
+                                    className="p-2.5 bg-slate-800 text-slate-400 rounded-xl hover:bg-slate-700 transition-colors"
+                                    title="Cancel"
+                                >
+                                    <FiX />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                    
+                    <div>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Recommended: 512×512px SVG or PNG</p>
+                        {error && <p className="text-xs text-red-400 mt-2 flex items-center gap-1 font-bold animate-pulse"><FiX /> {error}</p>}
+                        {selectedFile && !uploading && (
+                            <p className="text-xs text-amber-400 mt-1 font-medium flex items-center gap-1">
+                                <FiInfo size={12} /> Click Save to change logo globally
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
@@ -70,3 +140,4 @@ const LogoUpload = ({ initialLogo, uploadUrl, onUploadSuccess, label = "Upload L
 };
 
 export default LogoUpload;
+

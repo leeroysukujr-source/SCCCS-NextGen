@@ -54,7 +54,7 @@ export default function SystemSettings() {
         await updateSetting(key, value)
         await fetchSettings() // Refresh to get effective
       }
-      notify('success', 'Setting saved')
+      notify('success', 'Platform updated in real-time')
     } catch (err) {
       notify('error', 'Failed to save setting')
       console.error(err)
@@ -89,93 +89,83 @@ export default function SystemSettings() {
           <FiBriefcase className="card-icon text-blue-500" />
           <div>
             <h3>Organization Identity</h3>
-            <p>How this workspace appears to users.</p>
+            <p>Define how your institution is identified.</p>
           </div>
         </div>
         <div className="card-body">
           <div className="form-group">
-            <label>Organization Name</label>
+            <label>Legal Organization Name</label>
             <input
               value={workspace?.name || ''}
               onChange={(e) => handleUpdateIdentity('name', e.target.value)}
               className="settings-input"
+              placeholder="e.g. SCCCS Academy"
             />
           </div>
           <div className="form-group">
-            <label>Description</label>
+            <label>Institutional Description</label>
             <textarea
               value={workspace?.description || ''}
               onChange={(e) => handleUpdateIdentity('description', e.target.value)}
               className="settings-input"
               rows={3}
+              placeholder="Provide a brief overview of your organization..."
             />
           </div>
-        </div>
-      </div>
-
-      <div className="settings-card">
-        <div className="card-header">
-          <FiGlobe className="card-icon text-indigo-500" />
-          <div>
-            <h3>Platform Branding</h3>
-            <p>Customize the look and feel.</p>
-          </div>
-        </div>
-        <div className="card-body">
-          <SettingItem
-            setting={getS('APP_NAME')}
-            label="Application Name"
-            onSave={handleUpdateSetting}
-          />
-          <SettingItem
-            setting={getS('theme_primary_color')}
-            label="Primary Brand Color"
-            type="color"
-            onSave={handleUpdateSetting}
-          />
         </div>
       </div>
     </div>
   )
 
-  const renderFeaturesTab = () => (
+  const renderUIUXTab = () => (
     <div className="settings-tab-content fade-in">
-      <div className="feature-grid">
-        <FeatureToggle
-          setting={getS('feature_chat_enabled')}
-          label="Chat & Messaging"
-          icon={<FiMessageSquare />}
-          description="Real-time messaging, channels, and group chats."
-          onSave={handleUpdateSetting}
-        />
-        <FeatureToggle
-          setting={getS('feature_video_meet_enabled')}
-          label="Video Meetings"
-          icon={<FiVideo />}
-          description="Live video classes and conferences via LiveKit."
-          onSave={handleUpdateSetting}
-        />
-        <FeatureToggle
-          setting={getS('feature_drive_enabled')}
-          label="Cloud Drive"
-          icon={<FiHardDrive />}
-          description="File storage, sharing, and folder management."
-          onSave={handleUpdateSetting}
-        />
-        <FeatureToggle
-          setting={getS('feature_assignments_enabled')}
-          label="Assignments"
-          icon={<FiFileText />}
-          description="Assignment creation, submission, and grading workflow."
-          onSave={handleUpdateSetting}
-        />
-        <FeatureToggle
-          setting={getS('feature_ai_assistant_enabled')}
-          label="AI Assistant"
-          icon={<FiCpu />}
-          description="LLM-powered chatbot and content generation features."
-          onSave={handleUpdateSetting}
-        />
+      <div className="settings-card bg-slate-900/40 border-slate-800">
+        <div className="card-header border-b border-slate-800/50 pb-4 mb-6">
+          <FiImage className="card-icon text-indigo-400" />
+          <div>
+            <h3>Global System Branding</h3>
+            <p>Customize the visual identity of the entire platform.</p>
+          </div>
+        </div>
+        
+        <div className="card-body space-y-8">
+          {/* Logo Upload with the NEW Save Button logic */}
+          <div className="branding-section">
+             <LogoUpload 
+                label="Master Platform Logo"
+                initialLogo={getS('SYSTEM_LOGO_URL')?.value || getS('branding_logo_url')?.value}
+                uploadUrl={isSuperAdmin ? '/settings/system/logo' : `/superadmin/workspaces/${workspace?.id}/logo`}
+                onUploadSuccess={(url) => {
+                   notify('success', 'Branding asset deployed globally');
+                   // Real-time update happens via Socket.io automatically now!
+                }}
+             />
+          </div>
+
+          <div className="divider border-slate-800"></div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <SettingItem
+               setting={getS('APP_NAME')}
+               label="Display Name"
+               onSave={handleUpdateSetting}
+            />
+            <SettingItem
+               setting={getS('PRIMARY_COLOR') || getS('theme_primary_color')}
+               label="Brand Primary Color"
+               type="color"
+               onSave={handleUpdateSetting}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <SettingItem
+               setting={getS('THEME_DEFAULT')}
+               label="Default Interface Skin"
+               onSave={handleUpdateSetting}
+            />
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -192,6 +182,11 @@ export default function SystemSettings() {
         </div>
         <div className="card-body">
           <SettingSwitch
+            setting={getS('MAINTENANCE_MODE')}
+            label="System Maintenance Mode"
+            onSave={handleUpdateSetting}
+          />
+          <SettingSwitch
             setting={getS('allow_public_registration')}
             label="Allow Public Registration"
             onSave={handleUpdateSetting}
@@ -202,7 +197,7 @@ export default function SystemSettings() {
             onSave={handleUpdateSetting}
           />
 
-          <div className="divider my-4"></div>
+          <div className="divider my-4 border-slate-800"></div>
 
           <SettingItem
             setting={getS('max_upload_size_mb')}
@@ -224,6 +219,50 @@ export default function SystemSettings() {
     </div>
   )
 
+  const renderFeaturesTab = () => (
+    <div className="settings-tab-content fade-in">
+      <div className="feature-grid">
+        <FeatureToggle
+          setting={getS('feature_chat_enabled')}
+          label="Chat & Messaging"
+          icon={<FiMessageSquare />}
+          description="Real-time messaging, channels, and group chats."
+          onSave={handleUpdateSetting}
+        />
+        <FeatureToggle
+          setting={getS('feature_video_meet_enabled')}
+          label="Video Meetings"
+          icon={<FiVideo />}
+          description="Live video classes and conferences."
+          onSave={handleUpdateSetting}
+        />
+        <FeatureToggle
+          setting={getS('feature_drive_enabled')}
+          label="Cloud Drive"
+          icon={<FiHardDrive />}
+          description="File storage, sharing, and folder management."
+          onSave={handleUpdateSetting}
+        />
+        <FeatureToggle
+          setting={getS('feature_assignments_enabled')}
+          label="Assignments"
+          icon={<FiFileText />}
+          description="Assignment creation, submission, and grading."
+          onSave={handleUpdateSetting}
+        />
+        {isSuperAdmin && (
+           <FeatureToggle
+             setting={getS('feature_ai_assistant_enabled')}
+             label="AI Assistant"
+             icon={<FiCpu />}
+             description="LLM-powered chatbot and content generation."
+             onSave={handleUpdateSetting}
+           />
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <div className="settings-page-premier">
       <header className="settings-header">
@@ -231,8 +270,8 @@ export default function SystemSettings() {
           <FiSettings size={28} />
         </div>
         <div>
-          <h1>{isSuperAdmin ? 'Global Control Center' : 'Workspace Settings'}</h1>
-          <p>{isSuperAdmin ? 'Manage platform-wide configurations' : `Manage settings for ${workspace?.name || 'your workspace'}`}</p>
+          <h1>{isSuperAdmin ? 'Global Control Plane' : 'Workspace Engine'}</h1>
+          <p>{isSuperAdmin ? 'Orchestrate platform-wide logic & branding' : `Operational settings for ${workspace?.name || 'your workspace'}`}</p>
         </div>
       </header>
 
@@ -246,34 +285,40 @@ export default function SystemSettings() {
               <FiBriefcase /> General
             </button>
             <button
-              className={`nav-item ${activeTab === 'features' ? 'active' : ''}`}
-              onClick={() => setActiveTab('features')}
-            >
-              <FiToggleRight /> Features & Modules
-            </button>
-            <button
               className={`nav-item ${activeTab === 'security' ? 'active' : ''}`}
               onClick={() => setActiveTab('security')}
             >
-              <FiLock /> Security & Limits
+              <FiLock /> Security
             </button>
-            {/* Add more tabs as needed */}
+            <button
+              className={`nav-item ${activeTab === 'uiux' ? 'active' : ''}`}
+              onClick={() => setActiveTab('uiux')}
+            >
+              <FiImage /> UI / UX
+            </button>
+            <button
+              className={`nav-item ${activeTab === 'features' ? 'active' : ''}`}
+              onClick={() => setActiveTab('features')}
+            >
+              <FiToggleRight /> Modules
+            </button>
           </nav>
 
-          <div className="sidebar-info-box">
+          <div className="sidebar-info-box border-slate-800">
             <FiInfo size={16} />
             <p>
               {isSuperAdmin
-                ? "Changes here affect the Default System Settings."
-                : "Settings marked with 'Override' are specific to this workspace."}
+                ? "Changes take effect in real-time across the entire network."
+                : "Institutional overrides take precedence over global defaults."}
             </p>
           </div>
         </aside>
 
         <main className="settings-main">
           {activeTab === 'general' && renderGeneralTab()}
-          {activeTab === 'features' && renderFeaturesTab()}
           {activeTab === 'security' && renderSecurityTab()}
+          {activeTab === 'uiux' && renderUIUXTab()}
+          {activeTab === 'features' && renderFeaturesTab()}
         </main>
       </div>
     </div>
