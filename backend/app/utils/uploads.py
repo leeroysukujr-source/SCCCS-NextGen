@@ -34,8 +34,6 @@ def save_logo(file, folder='logos'):
         logger.info(f"Attempting to save logo: {unique_filename} to folder: {folder}")
         
         # Check if S3 is configured
-        from app.utils.storage import upload_fileobj, get_public_url
-        
         s3_endpoint = current_app.config.get('S3_ENDPOINT')
         s3_bucket = current_app.config.get('S3_BUCKET')
         
@@ -59,24 +57,31 @@ def save_logo(file, folder='logos'):
         logger.info("Falling back to local storage for logo")
         
         # 1. Define candidate directories
-        backend_root = os.path.dirname(current_app.root_path)
-        candidates = [
-            # Standard uploads folder (configurable)
-            os.path.join(backend_root, current_app.config.get('UPLOAD_FOLDER', 'uploads'), folder),
-            # Internal app uploads folder
-            os.path.join(current_app.root_path, 'uploads', folder),
-            # Static folder (reliable for serving)
-            os.path.join(current_app.root_path, 'static', 'uploads', folder),
-            # Backend root (last resort for project dirs)
-            os.path.join(backend_root, 'uploads_alt', folder),
-            # System temp (guaranteed writable but ephemeral)
-            os.path.join('/tmp', 'scccs-uploads', folder)
-        ]
+        bases = []
+        try:
+            bases.append(os.path.dirname(current_app.root_path))
+        except:
+            pass
+        bases.append(os.getcwd())
+        bases.append('/app')
+        
+        candidates = []
+        for base in bases:
+            candidates.append(os.path.join(base, current_app.config.get('UPLOAD_FOLDER', 'uploads'), folder))
+            candidates.append(os.path.join(base, 'uploads', folder))
+            candidates.append(os.path.join(base, 'app', 'static', 'uploads', folder))
+            
+        # Deduplicate and add absolute paths
+        candidates = list(dict.fromkeys(candidates))
+        candidates.append(os.path.join('/tmp', 'scccs-uploads', folder))
         
         for upload_path in candidates:
-            logger.info(f"Trying upload path: {upload_path}")
+            logger.info(f"Targeting upload path candidate: {upload_path}")
             try:
-                os.makedirs(upload_path, exist_ok=True)
+                # Ensure the directory exists
+                if not os.path.exists(upload_path):
+                    os.makedirs(upload_path, exist_ok=True)
+                
                 target_path = os.path.join(upload_path, unique_filename)
                 
                 # Reset file for new attempt
