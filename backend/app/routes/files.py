@@ -233,7 +233,24 @@ def get_uploaded_file(filepath):
     
     # Secure the filepath to prevent path traversal
     # Note: flask's send_from_directory handles some of this
-    return send_from_directory(uploads_folder, filepath)
+    try:
+        if os.path.exists(os.path.join(uploads_folder, filepath)):
+            return send_from_directory(uploads_folder, filepath)
+            
+        # Try internal app uploads folder
+        app_uploads = os.path.join(current_app.root_path, 'uploads')
+        if os.path.exists(os.path.join(app_uploads, filepath)):
+            return send_from_directory(app_uploads, filepath)
+
+        # Last resort fallback: Check /tmp/scccs-uploads
+        tmp_folder = '/tmp/scccs-uploads'
+        if os.path.exists(os.path.join(tmp_folder, filepath)):
+            return send_from_directory(tmp_folder, filepath)
+            
+        return jsonify({'error': 'File not found', 'checked': [uploads_folder, app_uploads, tmp_folder]}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @files_bp.route('/<int:file_id>', methods=['GET'])
 def get_file(file_id):
