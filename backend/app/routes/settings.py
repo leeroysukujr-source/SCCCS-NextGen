@@ -152,3 +152,45 @@ def diag_upload_test():
         
     return jsonify(results), 200
 
+@settings_bp.route('/diag/save-logo-debug', methods=['GET'])
+def diag_save_logo_debug():
+    """Hyper-detailed debug of the save_logo function"""
+    import os
+    from io import BytesIO
+    from flask import current_app
+    from app.utils.uploads import save_logo
+    
+    class DummyFile:
+        def __init__(self):
+            self.filename = 'test_debug.png'
+            self.stream = BytesIO(b"fake image content")
+        def save(self, path):
+            with open(path, 'wb') as f:
+                f.write(self.stream.getvalue())
+        def seek(self, pos):
+            self.stream.seek(pos)
+            
+    dummy = DummyFile()
+    
+    debug_log = []
+    def log(msg):
+        debug_log.append(msg)
+        print(f"DEBUG_LOGO: {msg}")
+
+    log("Starting save_logo debug")
+    try:
+        url = save_logo(dummy, folder='debug_test')
+        if url:
+            return jsonify({'success': True, 'url': url, 'log': debug_log}), 200
+        else:
+            return jsonify({'success': False, 'error': 'save_logo returned None', 'log': debug_log}), 500
+    except Exception as e:
+        import traceback
+        return jsonify({
+            'success': False, 
+            'error': str(e), 
+            'traceback': traceback.format_exc(),
+            'log': debug_log
+        }), 500
+
+
