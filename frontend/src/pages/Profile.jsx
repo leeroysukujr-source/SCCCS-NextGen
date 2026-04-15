@@ -56,12 +56,19 @@ export default function Profile() {
     mutationFn: authAPI.uploadAvatar,
     onSuccess: async (data) => {
       console.log('Avatar upload success:', data)
-      // If uploading for current user, re-fetch to ensure store is fresh and hydration is correct
+      
+      const serverUrl = data.avatar_url || data.user?.avatar_url;
+      // Add timestamp to bypass browser cache
+      const cacheBustedUrl = serverUrl ? `${serverUrl}${serverUrl.includes('?') ? '&' : '?'}t=${new Date().getTime()}` : null;
+
       if (!viewingOther) {
-        await refreshUser()
+        // Authoritatively update the store with the fresh URL immediately
+        updateUser({ avatar_url: cacheBustedUrl });
+        // Background refresh to keep other user properties in sync
+        refreshUser();
       }
-      // Use the avatar_url from the response, not the data URL for permanent preview
-      setPreviewUrl(data.avatar_url || data.user?.avatar_url)
+      
+      setPreviewUrl(cacheBustedUrl)
       setUploading(false)
       notify('success', 'Profile picture updated successfully!')
     },

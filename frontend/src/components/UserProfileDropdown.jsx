@@ -57,15 +57,16 @@ const UserProfileDropdown = () => {
                             alt={user.username} 
                             className="avatar-img"
                             onError={(e) => {
-                                e.target.onerror = null;
+                                // Fallback to initials if image fails
                                 e.target.style.display = 'none';
+                                const initialsElement = e.target.nextSibling;
+                                if (initialsElement) initialsElement.style.display = 'flex';
                             }}
                         />
-                    ) : (
-                        <div className="avatar-initials-circle">
-                           {getInitials()}
-                        </div>
-                    )}
+                    ) : null}
+                    <div className="avatar-initials-circle" style={{ display: user.avatar_url ? 'none' : 'flex' }}>
+                       {getInitials()}
+                    </div>
                 </div>
                 <div className="user-label-desktop">
                     <span className="user-display-name">{user.first_name || user.username}</span>
@@ -78,10 +79,20 @@ const UserProfileDropdown = () => {
                     <div className="dropdown-profile-header">
                         <div className="header-avatar">
                              {user.avatar_url ? (
-                                <img src={getFullImageUrl(user.avatar_url)} alt="Avatar" />
-                             ) : (
-                                <div className="avatar-initials-large">{getInitials()}</div>
-                             )}
+                                <img 
+                                    src={getFullImageUrl(user.avatar_url)} 
+                                    alt="Avatar" 
+                                    onError={(e) => {
+                                        // Fallback to initials if image fails
+                                        e.target.style.display = 'none';
+                                        const initialsElement = e.target.nextSibling;
+                                        if (initialsElement) initialsElement.style.display = 'flex';
+                                    }}
+                                />
+                             ) : null}
+                             <div className="avatar-initials-large" style={{ display: user.avatar_url ? 'none' : 'flex' }}>
+                                 {getInitials()}
+                             </div>
                         </div>
                         <div className="header-info">
                             <h3 className="full-name">{user.first_name} {user.last_name}</h3>
