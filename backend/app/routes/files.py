@@ -193,19 +193,13 @@ from flask_cors import cross_origin
 @cross_origin()
 def get_avatar(filename):
     """Serve avatar images - PUBLIC ACCESS"""
-    from flask import send_from_directory
+    from flask import send_from_directory, current_app
     
-    # Robustly find the uploads/avatars directory relative to this file
-    # This file is in app/routes/files.py
-    # We want backend/uploads/avatars
-    current_file_dir = os.path.dirname(os.path.abspath(__file__))
-    backend_dir = os.path.dirname(os.path.dirname(current_file_dir))
-    avatars_folder = os.path.join(backend_dir, 'uploads', 'avatars')
+    # We target the 'uploads/avatars' directory within the absolute static_folder
+    avatars_folder = os.path.join(current_app.static_folder, 'uploads', 'avatars')
     
-    file_path = os.path.join(avatars_folder, filename)
-    
-    if not os.path.exists(file_path):
-        return jsonify({'error': 'Avatar not found', 'path_checked': avatars_folder}), 404
+    if not os.path.exists(os.path.join(avatars_folder, filename)):
+        return jsonify({'error': 'Avatar not found'}), 404
         
     return send_from_directory(avatars_folder, filename)
 

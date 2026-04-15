@@ -145,16 +145,18 @@ def upload_avatar():
                 
         # Fallback to local
         if not file_url:
-            # We target app/static/uploads/avatars relative to static_folder
-            static_folder = current_app.static_folder or os.path.join(current_app.root_path, 'static')
-            avatars_folder = os.path.join(static_folder, 'uploads', 'avatars')
+            # We target the absolute static_folder defined in create_app
+            avatars_folder = os.path.join(current_app.static_folder, 'uploads', 'avatars')
             os.makedirs(avatars_folder, exist_ok=True)
             
             file_path = os.path.join(avatars_folder, unique_filename)
             with open(file_path, 'wb') as f:
                 f.write(file_content)
             
-            file_url = f"/api/files/avatar/{unique_filename}"
+            # Save as absolute URL for maximum compatibility (as requested)
+            # request.host_url returns 'https://domain.com/'
+            host = request.host_url.rstrip('/')
+            file_url = f"{host}/api/files/avatar/{unique_filename}"
         
         # Update user's avatar URL
         user.avatar_url = file_url

@@ -35,7 +35,10 @@ def _choose_async_mode(preferred: str | None = None) -> str:
     return "threading"
 
 def create_app(config_class=Config):
-    app = Flask(__name__)
+    # Standardize static_folder to an absolute path for consistent asset serving in production
+    import os
+    abs_static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+    app = Flask(__name__, static_folder=abs_static_path)
     app.config.from_object(config_class)
     
     # Initialize extensions
