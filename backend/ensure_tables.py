@@ -159,9 +159,33 @@ def iron_sync():
                 print("   Forced system_settings creation attempt finished.")
 
 
+            # 6. DATA CORRECTION (Fix common mis-typed settings)
+            print("6. Correcting setting types and values...")
+            with engine.connect() as conn:
+                # Ensure MAINTENANCE_MODE is a boolean and false by default if newly fixed
+                # This prevents the 'truthy string' bug in React
+                conn.execute(text("""
+                    UPDATE system_settings 
+                    SET value_type = 'boolean', value = 'false' 
+                    WHERE key = 'MAINTENANCE_MODE' AND (value_type != 'boolean' OR value IS NULL);
+                """))
+                
+                # Ensure other common settings have correct types
+                type_fixes = {
+                    'BRAND_COLOR_PRIMARY': 'string',
+                    'APP_NAME': 'string',
+                    'SYSTEM_LOGO_URL': 'string',
+                    'MAX_PARTICIPANTS': 'number'
+                }
+                for key, vtype in type_fixes.items():
+                    conn.execute(text(f"UPDATE system_settings SET value_type = '{vtype}' WHERE key = '{key}' AND value_type != '{vtype}'"))
+                
+                conn.execute(text("COMMIT"))
+
             print("="*70)
             print("=== SUCCESS: THE DATABASE IS NOW STABILIZED ===")
             print("="*70 + "\n")
+
             return True
             
         except Exception as e:
