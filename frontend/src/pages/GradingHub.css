@@ -14,13 +14,14 @@
 }
 
 .header-content h1 {
-    font-size: 2.5rem;
+    font-size: clamp(1.75rem, 5vw, 3rem);
     font-weight: 800;
     margin-bottom: 0.5rem;
     background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    line-height: 1.1;
 }
 
 .header-content p {
@@ -294,23 +295,48 @@
 }
 
 @media (max-width: 768px) {
+    .grading-hub-page {
+        padding: 1rem;
+    }
+
     .hub-header {
         flex-direction: column;
         align-items: flex-start;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
     }
     
     .hub-stats {
         width: 100%;
         overflow-x: auto;
-        padding-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    .hub-stats::-webkit-scrollbar {
+        display: none;
     }
     
     .hub-controls {
         flex-direction: column;
         align-items: stretch;
+        gap: 1rem;
     }
     
     .filter-tabs {
         overflow-x: auto;
+        padding: 0.25rem;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .filter-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .filter-tab {
+        white-space: nowrap;
+        padding: 0.5rem 1rem;
     }
 }

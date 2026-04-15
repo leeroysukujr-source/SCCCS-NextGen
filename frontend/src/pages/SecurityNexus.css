@@ -14,7 +14,7 @@
 }
 
 .security-title {
-  font-size: 3rem;
+  font-size: clamp(2rem, 8vw, 3.5rem);
   font-weight: 800;
   letter-spacing: -0.04em;
   margin-bottom: 0.5rem;
@@ -22,6 +22,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  line-height: 1.1;
 }
 
 .security-subtitle {
@@ -108,13 +109,14 @@
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   font-family: var(--font-mono);
-  font-size: 1.1rem;
+  font-size: clamp(0.7rem, 2vw, 1.1rem);
   letter-spacing: 0.1em;
   color: var(--primary-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 2rem;
+  word-break: break-all;
 }
 
 .verification-input-group {
@@ -130,10 +132,11 @@
   padding: 1rem;
   border-radius: 12px;
   color: #fff;
-  font-size: 1.25rem;
-  letter-spacing: 0.5em;
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  letter-spacing: clamp(0.2em, 3vw, 0.6em);
   text-align: center;
   transition: all 0.3s ease;
+  min-width: 0;
 }
 
 .verification-input:focus {
@@ -244,8 +247,16 @@
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1100px) {
+  .security-container {
+    padding: 1.5rem;
+  }
+
   .nexus-security-grid {
     grid-template-columns: 1fr;
+  }
+
+  .security-title {
+    text-align: center;
   }
 }
