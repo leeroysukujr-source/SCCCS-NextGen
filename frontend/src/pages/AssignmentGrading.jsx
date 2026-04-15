@@ -294,7 +294,13 @@ export default function AssignmentGrading() {
                             </div>
                         </div>
                         <div className="preview-body">
-                            {['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(previewFile.original_filename?.split('.').pop()?.toLowerCase()) ? (
+                            {!localStorage.getItem('token') ? (
+                                <div className="no-preview">
+                                    <FiAlertCircle size={48} />
+                                    <h3>Authorization Required</h3>
+                                    <p>Your session has expired or the token is missing. Please re-authenticate to view student assets.</p>
+                                </div>
+                            ) : ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(previewFile.original_filename?.split('.').pop()?.toLowerCase()) ? (
                                 <img 
                                     src={`${apiClient.defaults.baseURL}/files/${previewFile.id}?token=${localStorage.getItem('token')}`} 
                                     alt={previewFile.original_filename}

@@ -8,8 +8,9 @@ def security_headers(response):
     """
     # Prevent MIME-sniffing
     response.headers['X-Content-Type-Options'] = 'nosniff'
-    # Protect against Clickjacking
-    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    # Protect against Clickjacking - Relaxed for cross-origin previews
+    # response.headers['X-Frame-Options'] = 'SAMEORIGIN' 
+    
     # XSS Protection (legacy but good to have)
     response.headers['X-XSS-Protection'] = '1; mode=block'
     # Strict Transport Security (HSTS) - 1 year
@@ -17,10 +18,18 @@ def security_headers(response):
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     # Referrer Policy to limit information leakage
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    # Content Security Policy (CSP) - Basic baseline
-    # Note: A real strict CSP usually requires extensive tuning. This is a safe baseline.
+    # Content Security Policy (CSP) - Enhanced for Previews
     # Relaxed for development to allow http/ws connections to localhost
-    response.headers['Content-Security-Policy'] = "default-src 'self' https: http: wss: ws:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; font-src 'self' data: https:; connect-src 'self' https: wss: http: ws:;"
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self' https: http: wss: ws:; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https: http:; "
+        "font-src 'self' data: https:; "
+        "connect-src 'self' https: wss: http: ws:; "
+        "frame-ancestors 'self' https://scccs-next-gen-nine.vercel.app https://scccs-next-gen.vercel.app; "
+        "frame-src 'self' https:;"
+    )
     
     # Allow Firebase Auth popups (Cross-Origin-Opener-Policy)
     # Firebase is most compatible with 'unsafe-none' or 'same-origin-allow-popups'
