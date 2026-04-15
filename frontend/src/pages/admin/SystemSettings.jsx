@@ -84,6 +84,31 @@ export default function SystemSettings() {
   // Tab Content Renderers
   const renderGeneralTab = () => (
     <div className="settings-tab-content fade-in">
+      <div className="settings-card border-amber-900/30 bg-amber-950/10">
+        <div className="card-header border-b border-amber-900/30 pb-4 mb-4">
+          <FiShield className="card-icon text-amber-500" />
+          <div>
+            <h3>System Operational Status</h3>
+            <p>Restrict platform access during maintenance windows.</p>
+          </div>
+        </div>
+        <div className="card-body">
+           <div className="flex items-center justify-between bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+             <div className="space-y-1">
+               <span className="text-sm font-bold text-slate-200">MAINTENANCE MODE</span>
+               <p className="text-xs text-slate-400">When active, only Super Admins can access the platform.</p>
+             </div>
+             <div className="switch-wrapper scale-125 origin-right">
+                <SettingSwitch
+                  setting={getS('MAINTENANCE_MODE')}
+                  label=""
+                  onSave={handleUpdateSetting}
+                />
+             </div>
+           </div>
+        </div>
+      </div>
+
       <div className="settings-card">
         <div className="card-header">
           <FiBriefcase className="card-icon text-blue-500" />
@@ -181,11 +206,6 @@ export default function SystemSettings() {
           </div>
         </div>
         <div className="card-body">
-          <SettingSwitch
-            setting={getS('MAINTENANCE_MODE')}
-            label="System Maintenance Mode"
-            onSave={handleUpdateSetting}
-          />
           <SettingSwitch
             setting={getS('allow_public_registration')}
             label="Allow Public Registration"
