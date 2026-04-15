@@ -7,23 +7,32 @@ from flask import current_app
 logger = logging.getLogger(__name__)
 
 def get_s3_client():
-    endpoint = current_app.config.get('S3_ENDPOINT')
-    if endpoint:
-        endpoint = endpoint.rstrip('/')
+    try:
+        endpoint = current_app.config.get('S3_ENDPOINT')
+        if endpoint:
+            endpoint = endpoint.rstrip('/')
+            
+        access_key = current_app.config.get('S3_ACCESS_KEY')
+        secret_key = current_app.config.get('S3_SECRET_KEY')
+        region = current_app.config.get('S3_REGION')
         
-    access_key = current_app.config.get('S3_ACCESS_KEY')
-    secret_key = current_app.config.get('S3_SECRET_KEY')
-    region = current_app.config.get('S3_REGION')
-    # Use unsigned or specific config if needed
-    session = boto3.session.Session()
-    s3 = session.client(
-        's3',
-        endpoint_url=endpoint,
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-        region_name=region
-    )
-    return s3
+        # If no endpoint, we can't do S3
+        if not endpoint:
+            return None
+
+        session = boto3.session.Session()
+        s3 = session.client(
+            's3',
+            endpoint_url=endpoint,
+            aws_access_key_id=access_key,
+            aws_secret_access_key=secret_key,
+            region_name=region
+        )
+        return s3
+    except Exception as e:
+        logger.error(f"Failed to initialize S3 client: {e}")
+        return None
+
 
 
 def ensure_bucket(bucket_name=None):
@@ -44,12 +53,17 @@ def ensure_bucket(bucket_name=None):
 def upload_fileobj(fileobj, key, bucket=None, extra_args=None):
     bucket = bucket or current_app.config.get('S3_BUCKET')
     s3 = get_s3_client()
+    if not s3:
+        logger.warning("Skipping S3 upload: client not initialized")
+        return False
+        
     try:
         s3.upload_fileobj(fileobj, bucket, key, ExtraArgs=extra_args or {})
         return True
     except Exception as e:
         logger.exception('S3 upload failed: %s', str(e))
         return False
+
 
 
 def generate_presigned_url(key, bucket=None, expires_in=3600):
