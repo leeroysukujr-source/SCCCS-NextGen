@@ -285,7 +285,8 @@ def get_uploaded_file(filepath):
 
 
 
-@files_bp.route('/<int:file_id>', methods=['GET'])
+@files_bp.route('/<int:file_id>', methods=['GET', 'OPTIONS'])
+@cross_origin()
 def get_file(file_id):
     # Support token in query params for media elements (audio/video/img)
     token = request.args.get('token')

@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { 
     FiArrowLeft, FiFileText, FiCheckCircle, FiAlertCircle, 
     FiDownload, FiExternalLink, FiMessageSquare, FiSave,
-    FiUser, FiUsers, FiClock, FiActivity, FiSearch, FiFilter
+    FiUser, FiUsers, FiClock, FiActivity, FiSearch, FiFilter,
+    FiX, FiMaximize2, FiZoomIn, FiZoomOut
 } from 'react-icons/fi'
 import { useNotify } from '../components/NotificationProvider'
 import apiClient from '../api/client'
@@ -25,6 +26,7 @@ export default function AssignmentGrading() {
     const [score, setScore] = useState('')
     const [feedback, setFeedback] = useState('')
     const [rubricScores, setRubricScores] = useState({})
+    const [previewFile, setPreviewFile] = useState(null)
 
     useEffect(() => {
         fetchData()
@@ -161,7 +163,7 @@ export default function AssignmentGrading() {
                                     <h3>Attached Assets</h3>
                                     <div className="assets-grid">
                                         {selectedSubmission.files.map(file => (
-                                            <div key={file.id} className="asset-card">
+                                            <div key={file.id} className="asset-card" onClick={() => setPreviewFile(file)}>
                                                 <div className="asset-main">
                                                     <FiFileText className="file-icon" />
                                                     <div className="file-details">
@@ -170,11 +172,22 @@ export default function AssignmentGrading() {
                                                     </div>
                                                 </div>
                                                 <div className="asset-actions">
-                                                    <a href={`${apiClient.defaults.baseURL}/files/${file.id}?token=${localStorage.getItem('token')}&download=true`} download className="icon-btn">
+                                                    <a 
+                                                        href={`${apiClient.defaults.baseURL}/files/${file.id}?token=${localStorage.getItem('token')}&download=true`} 
+                                                        download 
+                                                        className="icon-btn"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
                                                         <FiDownload />
                                                     </a>
-                                                    <button className="icon-btn" onClick={() => window.open(`${apiClient.defaults.baseURL}/files/${file.id}?token=${localStorage.getItem('token')}`, '_blank')}>
-                                                        <FiExternalLink />
+                                                    <button 
+                                                        className="icon-btn" 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setPreviewFile(file);
+                                                        }}
+                                                    >
+                                                        <FiMaximize2 />
                                                     </button>
                                                 </div>
                                             </div>
@@ -257,6 +270,60 @@ export default function AssignmentGrading() {
                     )}
                 </section>
             </main>
+
+            {/* Premium File Preview Modal */}
+            {previewFile && (
+                <div className="file-preview-overlay" onClick={() => setPreviewFile(null)}>
+                    <div className="preview-container" onClick={(e) => e.stopPropagation()}>
+                        <div className="preview-toolbar">
+                            <div className="file-info">
+                                <FiFileText />
+                                <span>{previewFile.original_filename}</span>
+                            </div>
+                            <div className="toolbar-actions">
+                                <a 
+                                    href={`${apiClient.defaults.baseURL}/files/${previewFile.id}?token=${localStorage.getItem('token')}&download=true`} 
+                                    download 
+                                    className="toolbar-btn"
+                                >
+                                    <FiDownload /> Download
+                                </a>
+                                <button className="close-btn" onClick={() => setPreviewFile(null)}>
+                                    <FiX />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="preview-body">
+                            {['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(previewFile.original_filename?.split('.').pop()?.toLowerCase()) ? (
+                                <img 
+                                    src={`${apiClient.defaults.baseURL}/files/${previewFile.id}?token=${localStorage.getItem('token')}`} 
+                                    alt={previewFile.original_filename}
+                                    className="preview-image"
+                                />
+                            ) : previewFile.original_filename?.toLowerCase().endsWith('.pdf') ? (
+                                <iframe 
+                                    src={`${apiClient.defaults.baseURL}/files/${previewFile.id}?token=${localStorage.getItem('token')}#toolbar=0`} 
+                                    className="preview-pdf"
+                                    title="PDF Preview"
+                                />
+                            ) : (
+                                <div className="no-preview">
+                                    <FiAlertCircle size={48} />
+                                    <h3>Advanced Preview Unavailable</h3>
+                                    <p>Native browser rendering for this file type is restricted. Please use the download link for manual analysis.</p>
+                                    <a 
+                                        href={`${apiClient.defaults.baseURL}/files/${previewFile.id}?token=${localStorage.getItem('token')}&download=true`} 
+                                        download 
+                                        className="fallback-download"
+                                    >
+                                        <FiDownload /> Download File
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
