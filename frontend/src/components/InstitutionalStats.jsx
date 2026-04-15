@@ -30,7 +30,7 @@ const InstitutionalStats = ({ workspaceId }) => {
                 <FiShield className="text-indigo-500" />
                 Institutional Oversight
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-y-6 gap-x-4">
                 {statItems.map((item, idx) => (
                     <div key={idx} className="flex flex-col">
                         <div className="flex items-center gap-2 mb-1">

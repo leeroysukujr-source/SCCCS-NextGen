@@ -2,15 +2,32 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 2rem;
-    overflow: hidden;
+    padding: clamp(1rem, 4vw, 2rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .tasks-header-premium {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .tasks-header-premium {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .add-task-nexus-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .header-intel {
@@ -20,7 +37,7 @@
 }
 
 .header-intel h2 {
-    font-size: 1.75rem;
+    font-size: clamp(1.25rem, 5vw, 1.75rem);
     font-weight: 950;
     color: #fff;
     letter-spacing: -0.02em;
@@ -74,14 +91,14 @@
 }
 
 .kanban-sector {
-    min-width: 320px;
+    min-width: min(90vw, 320px);
     flex: 1;
     background: rgba(15, 23, 42, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 24px;
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
-    padding: 1.25rem;
+    padding: 1rem;
 }
 
 .sector-header {
