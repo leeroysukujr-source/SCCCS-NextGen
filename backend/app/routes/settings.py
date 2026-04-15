@@ -112,6 +112,8 @@ def upload_system_logo():
         s3_endpoint = current_app.config.get('S3_ENDPOINT')
         s3_bucket = 'platform-assets' # Senior DevOps Requirement
         
+        # Use predictable identification to prevent URI bloat
+        final_filename = f"logo.{ext}"
         logo_url = None
         
         if s3_endpoint and 'localhost' not in s3_endpoint:
