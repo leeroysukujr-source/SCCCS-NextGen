@@ -160,7 +160,7 @@ export default function SystemSettings() {
              <LogoUpload 
                 label="Master Platform Logo"
                 initialLogo={getS('SYSTEM_LOGO_URL')?.value || getS('branding_logo_url')?.value}
-                uploadUrl={isSuperAdmin ? '/settings/system/logo' : `/superadmin/workspaces/${workspace?.id}/logo`}
+                uploadUrl={isSuperAdmin ? '/settings/system/logo' : `/workspaces/${workspace?.id}/logo`}
                 onUploadSuccess={(url) => {
                    notify('success', 'Branding asset deployed globally');
                    // Real-time update happens via Socket.io automatically now!

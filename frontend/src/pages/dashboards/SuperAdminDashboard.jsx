@@ -306,7 +306,7 @@ const SuperAdminDashboard = () => {
             if (wsForm.logoFile && wsId) {
                 const formData = new FormData();
                 formData.append('file', wsForm.logoFile);
-                await apiClient.post(`/superadmin/workspaces/${wsId}/logo`, formData, {
+                await apiClient.post(`/workspaces/${wsId}/logo`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 notify('Logo uploaded successfully', 'success');

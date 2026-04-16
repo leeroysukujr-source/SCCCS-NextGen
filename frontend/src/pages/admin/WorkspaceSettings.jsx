@@ -104,7 +104,7 @@ const WorkspaceSettings = () => {
                                 <div className="w-full">
                                     <LogoUpload
                                         initialLogo={settings.find(s => s.key === 'INSTITUTION_LOGO')?.value}
-                                        uploadUrl={`workspace/${user?.workspace_id}/logo`}
+                                        uploadUrl={`/workspaces/${user?.workspace_id}/logo`}
                                         onUploadSuccess={handleLogoUpload}
                                         label=""
                                     />
