@@ -40,8 +40,10 @@ def jurisdiction_check():
         if not user:
             return None # User context lost, let JWT session handling deal with it
             
-        # Super admins are exempt from jurisdictional lockdown
-        if user.role == 'super_admin' or user.platform_role == 'SUPER_ADMIN':
+        # Standardize User Structure for Jurisdiction Checks
+        # Tier 1 (SuperAdmin): Global bypass for all endpoints.
+        is_super = user.role == 'super_admin' or user.platform_role == 'SUPER_ADMIN' or getattr(user, 'is_superadmin', False)
+        if is_super:
             return None
 
         # 4. Check incoming workspace context
@@ -49,10 +51,12 @@ def jurisdiction_check():
         
         if req_workspace_id:
             try:
+                # Tier 2 (Workspace Admin): Must match the workspace_id of the resource they are accessing
                 if int(req_workspace_id) != user.workspace_id:
                     return jsonify({
-                        "error": "Jurisdiction Breach Detected",
-                        "details": "Workspace mismatch. Access denied to unauthorized tenant data."
+                        "error": "Jurisdictional Isolation Breach",
+                        "details": "Jurisdiction Denied: You do not have permission to access data outside your assigned workspace.",
+                        "success": False
                     }), 403
             except (ValueError, TypeError):
                 return jsonify({"error": "Invalid workspace context"}), 400

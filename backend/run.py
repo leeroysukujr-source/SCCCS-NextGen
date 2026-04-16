@@ -1,9 +1,31 @@
 import os
+import stat
 import eventlet
 
 # DNS lookup time out fix for Render/Redis
 # We disable greendns entirely at the environment level before patching
 os.environ["EVENTLET_NO_GREENDNS"] = "yes"
+
+# Recursive Directory & Permission Initialization
+# Instruction: On every startup, the system must forcefully create and set permissions for the upload directories.
+UPLOAD_DIRS = [
+    'backend/static/uploads/avatars',
+    'backend/static/uploads/system',
+    'backend/static/uploads/workspaces'
+]
+for directory in UPLOAD_DIRS:
+    try:
+        # Determine paths relative to the project root (parent of 'backend' folder)
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        abs_path = os.path.join(project_root, directory)
+        
+        if not os.path.exists(abs_path):
+            os.makedirs(abs_path, exist_ok=True)
+        # Set directory to 755 (Read/Write/Execute for owner, Read/Execute for others)
+        os.chmod(abs_path, 0o755)
+        print(f"[run.py] Initialized directory: {directory}")
+    except Exception as e:
+        print(f"[run.py] Failed to initialize directory {directory}: {e}")
 
 # We explicitly patch modules instead of 'all=True' to avoid TypeError in some Eventlet versions
 eventlet.monkey_patch(os=True, select=True, socket=True, thread=True, time=True)

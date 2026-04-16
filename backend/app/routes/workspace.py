@@ -411,13 +411,19 @@ def upload_workspace_logo(ws_id):
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
 
-    # 2. Strict Validation & Normalization
+    # 2. Strict Validation & Normalization (RCE Prevention)
+    file_content = file.read()
+    import imghdr
+    img_type = imghdr.what(None, h=file_content)
+    if not img_type:
+        return jsonify({'error': 'Invalid image format. RCE Prevention: Only image/ files are allowed.', 'success': False}), 400
+    
+    # Reset file pointer after reading for save_logo
+    file.seek(0)
+    
     filename = secure_filename(file.filename)
     ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'png'
     
-    if ext not in ['png', 'jpg', 'jpeg', 'svg']:
-        return jsonify({'error': 'Unsupported file type. Please use PNG, JPG, or SVG.'}), 400
-
     final_filename = f"workspace_{ws_id}_logo.{ext}"
     logo_url = None
 
@@ -428,7 +434,7 @@ def upload_workspace_logo(ws_id):
         logo_url = save_logo(file, folder='workspaces', filename=f'logo_ws_{ws_id}.png')
         
         if not logo_url:
-            return jsonify({'error': 'Failed to save workspace logo. Check system permissions.'}), 500
+            return jsonify({'error': 'Failed to save workspace logo. Check system permissions.', 'success': False}), 500
         
         # 5. Database Commit
         workspace.logo_url = logo_url
@@ -444,6 +450,7 @@ def upload_workspace_logo(ws_id):
             'success': True,
             'message': 'Workspace logo updated successfully',
             'logo_url': logo_url,
+            'full_url': logo_url,
             'workspace': workspace.to_dict()
         }), 200
         

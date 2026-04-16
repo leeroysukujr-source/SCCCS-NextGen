@@ -73,17 +73,29 @@ def upload_system_logo():
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
         
+    # Security Enforcement: Strict image/* Content-Type checking to prevent RCE
+    file_content = file.read()
+    import imghdr
+    img_type = imghdr.what(None, h=file_content)
+    if not img_type:
+        return jsonify({'error': 'Invalid image format. RCE Prevention: Only image/ files are allowed.', 'success': False}), 400
+    
+    # Reset file pointer after reading for save_logo
+    file.seek(0)
+    
     from app.utils.uploads import save_logo
     # Use save_logo which handles S3 storage if configured
     logo_url = save_logo(file, folder='system')
     
     if not logo_url:
-        return jsonify({'error': 'Failed to save logo'}), 500
+        return jsonify({'error': 'Failed to save logo', 'success': False}), 500
         
     # Update System Setting
     settings_service.set_system_setting('SYSTEM_LOGO_URL', logo_url, category='ui_ux', is_public=True)
     
     return jsonify({
+        'success': True,
         'message': 'System logo updated',
-        'logo_url': logo_url
+        'logo_url': logo_url,
+        'full_url': logo_url
     }), 200

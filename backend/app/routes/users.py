@@ -133,6 +133,12 @@ def upload_avatar():
         if not file_content:
             return jsonify({'error': 'No image data provided. Support multipart/form-data or base64 JSON.'}), 400
 
+        # Security Enforcement: Strict image/* Content-Type checking to prevent RCE
+        import imghdr
+        img_type = imghdr.what(None, h=file_content)
+        if not img_type:
+            return jsonify({'error': 'Invalid image format. RCE Prevention: Only image/ files are allowed.', 'success': False}), 400
+
         # Storage Selection Logic
         from app.utils.storage import upload_fileobj, get_public_url
         from flask import current_app
@@ -154,7 +160,6 @@ def upload_avatar():
                 f.write(file_content)
             
             # Save as absolute URL for maximum compatibility (as requested)
-            # request.host_url returns 'https://domain.com/'
             host = request.host_url.rstrip('/')
             file_url = f"{host}/api/files/avatar/{unique_filename}"
         
@@ -165,8 +170,10 @@ def upload_avatar():
         print(f"[Avatar Upload] Success for user {user.username}. URL: {file_url}")
         
         return jsonify({
+            'success': True,
             'message': 'Avatar uploaded successfully',
             'avatar_url': file_url,
+            'full_url': file_url, # Standardized key
             'user': user.to_dict()
         }), 200
 
