@@ -34,7 +34,11 @@ export const workspaceAPI = {
     uploadLogo: async (wsId, file) => {
         const formData = new FormData()
         formData.append('file', file)
-        const response = await client.post(`/superadmin/workspaces/${wsId}/logo`, formData, {
+        
+        // Instruction: Ensure the axios call is sending the file as multipart/form-data 
+        // and that the Authorization header is correctly attached (handled by client interceptor).
+        // Update URL to match workspaces_logo_bp registered at /api/workspaces
+        const response = await client.post(`/workspaces/${wsId}/logo`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
