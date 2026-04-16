@@ -84,18 +84,35 @@ def upload_system_logo():
     file.seek(0)
     
     from app.utils.uploads import save_logo
-    # Use save_logo which handles S3 storage if configured
-    logo_url = save_logo(file, folder='system')
+    from app.utils.cache import cache_manager
+    from app.models import SystemSetting
+    from app import db
+    
+    # 1. Save file to absolute fixed path: 'static/uploads/system/logo.png'
+    # This ensures the master brand is always served from a predictable location.
+    logo_url = save_logo(file, folder='system', filename='logo.png')
     
     if not logo_url:
         return jsonify({'error': 'Failed to save logo', 'success': False}), 500
         
-    # Update System Setting
-    settings_service.set_system_setting('SYSTEM_LOGO_URL', logo_url, category='ui_ux', is_public=True)
+    # 2. Update DB: Ensure SYSTEM_LOGO_URL is updated directly in the table
+    # Standardizing on key-based update to bypass any abstraction layers during critical branding changes.
+    SystemSetting.query.filter_by(key='SYSTEM_LOGO_URL').update({
+        'value': logo_url,
+        'category': 'ui_ux',
+        'is_public': True
+    })
+    db.session.commit()
+    
+    # 3. Clear Redis Cache: force-refresh the server-side cache for all sessions
+    # Instruction: Clear Redis Cache: redis_client.delete('public_settings')
+    cache_manager.delete('public_settings')
+    
+    print(f"[Master Brand] System logo updated and cache invalidated: {logo_url}")
     
     return jsonify({
         'success': True,
-        'message': 'System logo updated',
+        'message': 'Global System Logo updated and cache invalidated',
         'logo_url': logo_url,
         'full_url': logo_url
     }), 200

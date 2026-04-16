@@ -66,6 +66,7 @@ import SuperAdminLayout from './components/SuperAdminLayout'
 import SocketProvider from './contexts/SocketProvider'
 import ErrorBoundary from './components/ErrorBoundary'
 import SystemSettingsBootstrapper from './components/SystemSettingsBootstrapper'
+import { BrandingProvider } from './contexts/BrandingContext'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -134,7 +135,8 @@ function App() {
   return (
     <ErrorBoundary>
       <SystemSettingsBootstrapper />
-      <QueryClientProvider client={queryClient}>
+      <BrandingProvider>
+        <QueryClientProvider client={queryClient}>
         <Router
           future={{
             v7_startTransition: true,
@@ -480,7 +482,8 @@ function App() {
           </Routes>
         </Router>
       </QueryClientProvider>
-    </ErrorBoundary>
+    </BrandingProvider>
+  </ErrorBoundary>
   )
 }
 

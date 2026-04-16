@@ -1125,3 +1125,40 @@ def register_socketio_events(socketio):
             }, room=f'group_{group_id}')
         except Exception:
             pass
+
+    # --- Collaboration Listener (SmartDoc Synchronization) ---
+    # Instruction: Ensure you have a separate socketio or y-websocket instance 
+    # running on the /collab namespace to handle the SmartDoc synchronization.
+
+    @socketio.on('connect', namespace='/collab')
+    def handle_collab_connect(auth=None):
+        """Allow collaboration connection and join document-specific room"""
+        from flask import request
+        from app.utils.logger import log_info
+        
+        room = request.args.get('room')
+        if room:
+            join_room(room)
+            log_info(f"Collab: Socket {request.sid} joined document room: {room}")
+        return True
+
+    @socketio.on('message', namespace='/collab')
+    def handle_collab_message(data):
+        """
+        Binary Relay for Yjs/SmartDoc collaboration.
+        Accepts binary sync steps and broadcasts to all other collaborators in the room.
+        """
+        from flask import request
+        room = request.args.get('room')
+        
+        # Broadcast the binary data (data) as-is to ensure perfect synchronization
+        if room:
+            socketio.emit('message', data, room=room, namespace='/collab', include_self=False)
+        else:
+            # Fallback to global broadcast if room is not specified in handshake
+            socketio.emit('message', data, namespace='/collab', include_self=False)
+
+    @socketio.on('disconnect', namespace='/collab')
+    def handle_collab_disconnect():
+        """Clean up collab presence"""
+        pass

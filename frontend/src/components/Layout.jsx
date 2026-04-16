@@ -15,11 +15,13 @@ import PresenceManager from './PresenceManager'
 import UserProfileDropdown from './UserProfileDropdown'
 import { useSettingsStore } from '../store/settingsStore'
 import { useFeatureStore } from '../store/featureStore'
+import { useBranding } from '../contexts/BrandingContext'
 
 export default function Layout() {
   const { user, logout, refreshUser } = useAuthStore()
   const { getSettingValue } = useSettingsStore()
   const { fetchFeatures, isFeatureEnabled } = useFeatureStore()
+  const { getLogoUrl } = useBranding()
   const navigate = useNavigate()
   const location = useLocation()
   const [showSearch, setShowSearch] = useState(false)
@@ -60,9 +62,9 @@ export default function Layout() {
   }
 
 
-  // Branding: Platform Logo (Always in Sidebar) and Workspace Logo (Contextual in Header)
-  const platformLogo = getSettingValue('SYSTEM_LOGO_URL') || getSettingValue('INSTITUTION_LOGO')
-  const workspaceLogo = user?.workspace_logo
+  // Branding Observer Logic: Uses cache-busting provided by BrandingProvider
+  const platformLogo = getLogoUrl('system')
+  const workspaceLogo = getLogoUrl('workspace')
   const workspaceName = user?.workspace_name
 
   useEffect(() => {

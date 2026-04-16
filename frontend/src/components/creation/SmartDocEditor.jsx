@@ -167,8 +167,9 @@ const SmartDocEditor = ({ docId, onBack, onSuccess, onShare }) => {
         const roomName = docId && docId !== 'new' ? `doc-${docId}` : `doc-new-${Math.random().toString(36).substring(7)}`;
 
         // Resolve host
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const host = import.meta.env.VITE_COLLAB_URL || (window.location.hostname === 'localhost' ? 'ws://localhost:1234' : `${protocol}//${window.location.host}/collab`);
+        // Instruction: Update the Hocuspocus or y-websocket provider to point to your Render backend URL, not the Vercel URL.
+        const host = import.meta.env.VITE_COLLAB_URL || 
+                    (window.location.hostname === 'localhost' ? 'ws://localhost:1234' : 'wss://scccs-nextgen-q2ll.onrender.com/collab');
 
         const wsProvider = new WebsocketProvider(host, roomName, doc);
         const commentsArray = doc.getArray('comments');

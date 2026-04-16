@@ -206,6 +206,15 @@ def create_app(config_class=Config):
     app.before_request(waf_middleware)
     app.after_request(security_headers)
     
+    @app.after_request
+    def add_header(response):
+        """Instruction: Update the CORS policy and static file serving to allow .css and .js mime-types."""
+        if response.mimetype in ['text/css', 'application/javascript', 'text/javascript']:
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['X-Content-Type-Options'] = 'nosniff' # Ensure browser trusts the server's MIME type
+            response.headers['Cache-Control'] = 'public, max-age=31536000' # Optional: high cache for static assets
+        return response
+
     # Senior DevOps Strategy: Ensure CORS headers are ALWAYS present, even on errors
     @app.after_request
     def add_cors_headers(response):
@@ -246,8 +255,14 @@ def create_app(config_class=Config):
     from app.routes.gpa import gpa_bp
     from app.routes.reporting import reporting_bp
     
+    # New Branding Blueprints (Senior Architect Requirements)
+    from app.blueprints.admin.routes import admin_logo_bp
+    from app.blueprints.workspaces.routes import workspaces_logo_bp
+    
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(users_bp, url_prefix='/api/users')
+    app.register_blueprint(admin_logo_bp, url_prefix='/api/settings')
+    app.register_blueprint(workspaces_logo_bp, url_prefix='/api/workspaces')
     app.register_blueprint(user_create_bp, url_prefix='/api/users')
     app.register_blueprint(rooms_bp, url_prefix='/api/rooms')
     app.register_blueprint(channels_bp, url_prefix='/api/channels')
