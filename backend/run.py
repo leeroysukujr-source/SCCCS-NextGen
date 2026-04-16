@@ -19,11 +19,15 @@ for directory in UPLOAD_DIRS:
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         abs_path = os.path.join(project_root, directory)
         
+        # Use 0o777 for branding infrastructure to ensure write access across all layers
+        target_mode = 0o777 if 'system' in directory else 0o755
+        
         if not os.path.exists(abs_path):
-            os.makedirs(abs_path, exist_ok=True)
-        # Set directory to 755 (Read/Write/Execute for owner, Read/Execute for others)
-        os.chmod(abs_path, 0o755)
-        print(f"[run.py] Initialized directory: {directory}")
+            os.makedirs(abs_path, mode=target_mode, exist_ok=True)
+        
+        # Explicitly set permissions
+        os.chmod(abs_path, target_mode)
+        print(f"[run.py] Initialized directory {directory} with mode {oct(target_mode)}")
     except Exception as e:
         print(f"[run.py] Failed to initialize directory {directory}: {e}")
 
@@ -131,24 +135,54 @@ def ensure_livekit_running():
 ensure_livekit_running()
 
 from app import create_app, socketio
+from eventlet import websocket
+
+# Shared memory for document synchronization (Relay)
+document_rooms = {} 
+
+@websocket.WebSocketWSGI
+def collab_ws_handler(ws):
+    """Implement a raw WebSocket relay for Yjs/y-websocket."""
+    room_name = ws.environ.get('QUERY_STRING', '').split('room=')[-1].split('&')[0]
+    if not room_name: room_name = 'default'
+    if room_name not in document_rooms: document_rooms[room_name] = set()
+    document_rooms[room_name].add(ws)
+    try:
+        while True:
+            message = ws.wait()
+            if message is None: break
+            for client in list(document_rooms[room_name]):
+                if client != ws:
+                    try: client.send(message)
+                    except Exception: document_rooms[room_name].remove(client)
+    finally:
+        if ws in document_rooms[room_name]: document_rooms[room_name].remove(ws)
 
 app = create_app(Config)
 
-# Self-Bootstrapping Seeder: Restore SuperAdmin governance on every boot
+# Self-Bootstrapping Seeder
 try:
     from seeders import run_all_seeders
     run_all_seeders(app)
-except ImportError:
-    print("[run.py] Seeding skipped: 'seeders' package not found.")
 except Exception as e:
-    print(f"[run.py] Auto-seeding failed: {e}")
+    print(f"[run.py] Seeding status: {e}")
 
 if __name__ == '__main__':
-    print(f"[run.py] Selected async mode: {_used_async}")
-    socketio.run(
-        app,
-        host=Config.SERVER_HOST,
-        port=Config.SERVER_PORT,
-        debug=True,
-        allow_unsafe_werkzeug=True
-    )
+    import socketio as s_io # Avoid shadowing the global socketio
+    
+    # Correctly wrap the Flask app with the SocketIO middleware
+    # This ensures that /socket.io routes are handled by SocketIO
+    socketio_app = s_io.WSGIApp(socketio, app)
+
+    # Dispatcher to handle /collab for Yjs (raw WS) and everything else for Flask-SocketIO
+    def application(environ, start_response):
+        path = environ.get('PATH_INFO', '')
+        if path.startswith('/collab'):
+            return collab_ws_handler(environ, start_response)
+        return socketio_app(environ, start_response)
+
+    print(f"[run.py] Starting Unified Real-Time Server on {Config.SERVER_HOST}:{Config.SERVER_PORT}")
+    print(f"[run.py] - /socket.io -> Chat & Awareness (SocketIO)")
+    print(f"[run.py] - /collab    -> Document Synchronization (Yjs/Raw WS)")
+    
+    eventlet.wsgi.server(eventlet.listen((Config.SERVER_HOST, Config.SERVER_PORT)), application)

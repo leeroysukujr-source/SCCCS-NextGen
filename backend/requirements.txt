@@ -32,7 +32,8 @@ boto3==1.42.0
 minio==7.1.2
 hvac==2.4.0
 livekit-api==0.3.0
-
+y-py==0.6.2
+ypy-websocket==0.12.1
 agora-token-builder==1.0.0
 firebase-functions
 firebase-admin

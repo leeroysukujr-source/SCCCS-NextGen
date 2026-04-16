@@ -25,11 +25,15 @@ const PresentationBuilder = ({ docId, onBack, onSuccess, onShare }) => {
     // Yjs Collaboration
     const { ydoc, provider, yMap } = useMemo(() => {
         const doc = new Y.Doc();
-        const roomName = docId ? `pres-${docId}` : `pres-new-${user?.id}-${Date.now()}`;
-        const wsProvider = new WebsocketProvider('ws://localhost:1234', roomName, doc);
+        const roomName = docId && docId !== 'new' ? `pres-${docId}` : `pres-new-${Math.random().toString(36).substring(7)}`;
+
+        const host = import.meta.env.VITE_COLLAB_URL || 
+                    (window.location.hostname === 'localhost' ? 'ws://localhost:1234' : 'wss://scccs-nextgen-q2ll.onrender.com/collab');
+
+        const wsProvider = new WebsocketProvider(host, roomName, doc);
         const map = doc.getMap('pres-data');
         return { ydoc: doc, provider: wsProvider, yMap: map };
-    }, [docId, user?.id]);
+    }, [docId]);
 
     useEffect(() => {
         const observeHandler = () => {

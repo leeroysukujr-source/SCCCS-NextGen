@@ -41,11 +41,16 @@ const DataSheetEditor = ({ docId, onBack, onSuccess, onShare }) => {
     // Yjs Collaboration
     const { ydoc, provider, yArray } = useMemo(() => {
         const doc = new Y.Doc();
-        const roomName = docId ? `sheet-${docId}` : `sheet-new-${user?.id}-${Date.now()}`;
-        const wsProvider = new WebsocketProvider('ws://localhost:1234', roomName, doc);
+        const roomName = docId && docId !== 'new' ? `sheet-${docId}` : `sheet-new-${Math.random().toString(36).substring(7)}`;
+        
+        // Use consistent host resolution across the entire suite
+        const host = import.meta.env.VITE_COLLAB_URL || 
+                    (window.location.hostname === 'localhost' ? 'ws://localhost:1234' : 'wss://scccs-nextgen-q2ll.onrender.com/collab');
+
+        const wsProvider = new WebsocketProvider(host, roomName, doc);
         const array = doc.getArray('sheet-data');
         return { ydoc: doc, provider: wsProvider, yArray: array };
-    }, [docId, user?.id]);
+    }, [docId]);
 
     useEffect(() => {
         const observeHandler = () => {

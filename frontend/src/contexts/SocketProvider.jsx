@@ -6,14 +6,15 @@ import { initSocket } from '../api/socket'
 const SocketContext = createContext({ socket: null, status: 'disconnected', reconnect: () => { }, disconnect: () => { } })
 
 export function SocketProvider({ children }) {
-  const { token } = useAuthStore()
+  const { token, isAuthenticated, hasHydrated } = useAuthStore()
   const [socket, setSocket] = useState(null)
   const [status, setStatus] = useState('disconnected')
   const socketRef = useRef(null)
 
   useEffect(() => {
-    if (!token) {
-      // ensure socket cleaned up when no token
+    // Instruction: Delay the socket.connect() until isAuthenticated is true and hasHydrated is true.
+    if (!token || !isAuthenticated || !hasHydrated) {
+      // ensure socket cleaned up when no token or not yet ready
       if (socketRef.current) {
         try { socketRef.current.close() } catch (e) { }
         socketRef.current = null
@@ -72,7 +73,7 @@ export function SocketProvider({ children }) {
       setSocket(null)
       setStatus('disconnected')
     }
-  }, [token])
+  }, [token, isAuthenticated, hasHydrated])
 
   const reconnect = () => {
     if (socketRef.current && typeof socketRef.current.connect === 'function') {
