@@ -109,7 +109,7 @@ def upload_system_logo():
         from app.utils.uploads import save_logo
         
         # Centralized logo saving handles S3 vs local fallback cleanly
-        logo_url = save_logo(file, folder='system')
+        logo_url = save_logo(file, folder='system', filename='logo.png')
         
         if not logo_url:
             return jsonify({'error': 'Failed to save branding asset. Check system permissions.'}), 500

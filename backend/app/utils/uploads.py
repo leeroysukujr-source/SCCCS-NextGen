@@ -13,29 +13,33 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def save_logo(file, folder='logos'):
+def save_logo(file, folder='logos', filename=None):
     """
     Saves an uploaded logo file and returns the URL.
     Uses S3 cloud storage if configured, otherwise falls back to local storage.
+    If filename is provided, it uses that fixed name (Senior DevOps Persistence).
     """
     if not file:
         logger.error("save_logo called with None file object")
         return None
         
-    filename = getattr(file, 'filename', '')
-    if not filename:
+    input_filename = getattr(file, 'filename', '')
+    if not input_filename:
         logger.warning("save_logo called with file having no filename")
         return None
     
-    if not allowed_file(filename):
-        logger.warning(f"File type not allowed for {filename}")
+    if not allowed_file(input_filename):
+        logger.warning(f"File type not allowed for {input_filename}")
         return None
 
     try:
-        logger.debug(f"Starting logo save process for {filename}")
-        safe_filename = secure_filename(filename)
-        ext = safe_filename.rsplit('.', 1)[1].lower() if '.' in safe_filename else 'png'
-        unique_filename = f"{uuid.uuid4().hex}.{ext}"
+        logger.debug(f"Starting logo save process for {input_filename}")
+        safe_input_name = secure_filename(input_filename)
+        ext = safe_input_name.rsplit('.', 1)[1].lower() if '.' in safe_input_name else 'png'
+        
+        # Determine unique filename: Fixed name if provided, else random UUID
+        unique_filename = filename if filename else f"{uuid.uuid4().hex}.{ext}"
+        
         key = f"{folder}/{unique_filename}" if folder else unique_filename
         
         logger.info(f"Target key: {key}")
@@ -104,11 +108,16 @@ def save_logo(file, folder='logos'):
                 if os.path.exists(target_path):
                     logger.info(f"SUCCESS: Saved logo to {target_path}")
                     
-                    # Construct URL based on where it was saved (must match files_bp prefix /api/files)
+                    # Construct Absolute URL for maximum compatibility across proxies/layers
+                    from flask import request
+                    host = request.host_url.rstrip('/')
+                    
                     if 'static' in upload_path:
-                        return f"/api/files/static/uploads/{folder}/{unique_filename}"
+                        # Standard path: /api/files/static/uploads/folder/filename
+                        return f"{host}/api/files/static/uploads/{folder}/{unique_filename}"
                     else:
-                        return f"/api/files/serve/{folder}/{unique_filename}"
+                        # Fallback serve path
+                        return f"{host}/api/files/serve/{folder}/{unique_filename}"
             except Exception as e:
                 logger.warning(f"Candidate {upload_path} failed: {str(e)}")
                 continue

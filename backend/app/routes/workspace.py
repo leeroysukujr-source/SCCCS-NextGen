@@ -425,7 +425,7 @@ def upload_workspace_logo(ws_id):
         from app.utils.uploads import save_logo
         
         # Centralized logo saving handles S3 vs local fallback cleanly
-        logo_url = save_logo(file, folder='workspaces')
+        logo_url = save_logo(file, folder='workspaces', filename=f'logo_ws_{ws_id}.png')
         
         if not logo_url:
             return jsonify({'error': 'Failed to save workspace logo. Check system permissions.'}), 500

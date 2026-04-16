@@ -54,13 +54,19 @@ def create_app(config_class=Config):
                 app.logger.info(f"🏗️  Initializing branding infrastructure at {upload_path}")
                 os.makedirs(upload_path, exist_ok=True)
             
-            # Ensure subfolders for organizational clarity
-            directories = ['system', 'avatars']
+            # Ensure subfolders for organizational clarity (Security Mode 0o755)
+            directories = ['system', 'avatars', 'workspaces']
             for dir_name in directories:
                 path = os.path.join(upload_path, dir_name)
                 if not os.path.exists(path):
                     app.logger.info(f"🏗️  Initializing branding infrastructure at {path}")
-                    os.makedirs(path, exist_ok=True)
+                    os.makedirs(path, mode=0o755, exist_ok=True)
+                else:
+                    # Enforce permissions on existing directories
+                    try:
+                        os.chmod(path, 0o755)
+                    except Exception:
+                        pass
         except Exception as e:
             app.logger.error(f"⚠️  Failed to initialize branding directories: {str(e)}")
     # --------------------------------------

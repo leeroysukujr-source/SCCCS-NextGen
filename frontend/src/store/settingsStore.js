@@ -6,6 +6,7 @@ export const useSettingsStore = create((set, get) => ({
     settings: [],
     loading: false,
     error: null,
+    brandingVersion: Date.now(), // Stable version for cache busting
 
     fetchSettings: async (isPublicOnly = false) => {
         set({ loading: true, error: null })
@@ -110,16 +111,29 @@ export const useSettingsStore = create((set, get) => ({
     // Real-time update handler
     handleSettingUpdate: (update) => {
         const { key, value } = update
-        set((state) => ({
-            settings: state.settings.map((s) =>
-                s.key === key ? { ...s, value } : s
-            )
-        }))
+        set((state) => {
+            const isBranding = key.includes('LOGO') || key.includes('BRANDING')
+            return {
+                settings: state.settings.map((s) =>
+                    s.key === key ? { ...s, value } : s
+                ),
+                brandingVersion: isBranding ? Date.now() : state.brandingVersion
+            }
+        })
     },
 
     getSettingValue: (key, defaultValue = null) => {
-        const setting = get().settings.find((s) => s.key === key)
-        return setting ? setting.value : defaultValue
+        const state = get()
+        const setting = state.settings.find((s) => s.key === key)
+        if (!setting) return defaultValue
+        
+        const value = setting.value
+        // Add stable cache-buster to logo URLs
+        if (value && typeof value === 'string' && (key.includes('LOGO') || key.includes('BRANDING'))) {
+            return `${value}${value.includes('?') ? '&' : '?'}v=${state.brandingVersion}`
+        }
+        
+        return value
     }
 }))
 
