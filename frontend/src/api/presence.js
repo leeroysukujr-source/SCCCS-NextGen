@@ -2,9 +2,8 @@ import client from './client'
 
 export const presenceAPI = {
     updatePresence: async (data) => {
-        // Use a short 5s timeout so a slow DB never blocks the main thread
-        // Errors are swallowed upstream with .catch()
-        const response = await client.post('presence/update', data, { timeout: 5000 })
+        // Use a relaxed 15s timeout to handle Render cold starts/latency
+        const response = await client.post('presence/update', data, { timeout: 15000 })
         return response.data
     },
 

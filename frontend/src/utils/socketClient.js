@@ -2,8 +2,11 @@ import { io } from 'socket.io-client'
 
 export function createSocket(socketUrl, token) {
   if (!socketUrl) throw new Error('socketUrl required')
-  // Allow admin to force polling-only via localSystem settings (useful for proxy/debug)
-  let transports = ['websocket', 'polling']
+  
+  // Use polling first, then upgrade to websocket. 
+  // This is much more robust for Render/Proxies that might delay the initial WS handshake.
+  let transports = ['polling', 'websocket']
+  
   try {
     const sys = JSON.parse(localStorage.getItem('system_settings') || '{}')
     if (sys && sys.wsPollingOnly) transports = ['polling']
@@ -17,7 +20,7 @@ export function createSocket(socketUrl, token) {
     reconnectionDelay: 1000,
     reconnectionDelayMax: 10000,
     randomizationFactor: 0.5,
-    timeout: 20000,
+    timeout: 45000, // Increased to 45s to handle cold starts/network latency
     upgrade: true,
     forceNew: false,
   })

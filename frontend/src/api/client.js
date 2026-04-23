@@ -36,7 +36,7 @@ export const testBackendConnection = async () => {
   try {
     const testUrl = `${API_URL}/auth/test`
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 second timeout for test
 
     const res = await fetch(testUrl, {
       method: 'GET',
@@ -63,12 +63,6 @@ export const testBackendConnection = async () => {
     } else {
       console.error('[API Client] ❌ Backend connection test failed:', err)
     }
-    console.error('[API Client] Test URL was:', `${API_URL}/auth/test`)
-    const baseUrl = getApiBaseUrl()
-    console.error('[API Client] Please verify:')
-    console.error(`  1. Backend is running on ${baseUrl}`)
-    console.error('  2. Backend is accessible from this browser')
-    console.error('  3. No firewall is blocking the connection')
     return { success: false, error: err }
   }
 }
@@ -85,7 +79,7 @@ if (typeof globalThis.__SCCCS_API_CLIENT__ === 'undefined') {
     headers: {
       'bypass-tunnel-reminder': 'true',
     },
-    timeout: 30000,
+    timeout: 60000, // Increased to 60s to handle Render cold starts
   })
 
   // Ensure baseURL is set correctly and attempt to find working backend
@@ -123,20 +117,6 @@ if (typeof globalThis.__SCCCS_API_CLIENT__ === 'undefined') {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
       }
-      // Aggressively clean baseURL and url for safe joining
-      const base = config.baseURL || '';
-      const path = config.url || '';
-      const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
-      const cleanUrl = path.startsWith('/') ? path : `/${path}`;
-      const fullUrl = `${cleanBase}${cleanUrl}`;
-      
-      console.log(`[API Request] ${config.method?.toUpperCase()} ${fullUrl}`, {
-        baseURL: config.baseURL,
-        url: config.url,
-        fullUrl: fullUrl,
-        data: config.data,
-        headers: config.headers
-      })
       return config
     },
     (error) => {
@@ -148,39 +128,10 @@ if (typeof globalThis.__SCCCS_API_CLIENT__ === 'undefined') {
   // Response interceptor to handle errors
   globalThis.__SCCCS_API_CLIENT__.interceptors.response.use(
     (response) => {
-      console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, response.status, response.data)
       return response
     },
     (error) => {
-      const method = error.config?.method?.toUpperCase() || 'UNKNOWN'
-      const url = error.config?.url || 'UNKNOWN'
-      const status = error.response?.status
-      const errorData = error.response?.data || error.message
-
-      console.error('[API Response Error]', {
-        method,
-        url,
-        status,
-        statusText: error.response?.statusText,
-        error: errorData,
-        message: error.message,
-        code: error.code
-      })
-
-      if (error.response?.data) {
-        console.error('[API Response Error Data]', JSON.stringify(error.response.data, null, 2))
-      }
-
-      if (error.code === 'ERR_NETWORK' || error.code === 'ECONNREFUSED' || error.message?.includes('Network Error')) {
-        console.error('[Network Error Details]', {
-          baseURL: error.config?.baseURL,
-          fullURL: error.config ? `${error.config.baseURL}${error.config.url}` : 'N/A',
-          timeout: error.config?.timeout,
-          headers: error.config?.headers
-        })
-      }
-
-      if (error.response?.status === 401 && !window.location.pathname.includes('/login') && !window.location.pathname.includes('/signup')) {
+      if (error.response?.status === 401 && !window.location.pathname.includes('/login')) {
         useAuthStore.getState().logout()
         window.location.href = '/login'
       }
@@ -191,4 +142,3 @@ if (typeof globalThis.__SCCCS_API_CLIENT__ === 'undefined') {
 
 export const apiClient = globalThis.__SCCCS_API_CLIENT__
 export default globalThis.__SCCCS_API_CLIENT__
-
