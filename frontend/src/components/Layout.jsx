@@ -187,10 +187,6 @@ export default function Layout() {
             <FiSearch />
           </button>
           
-          <button className="theme-toggle-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
-
           <UserProfileDropdown user={user} onLogout={handleLogout} />
         </div>
       </header>
