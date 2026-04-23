@@ -355,22 +355,18 @@
     position: fixed;
     z-index: 2005;
     left: -100%;
-    top: 0;
-    height: 100%;
+    top: 60px; /* Below top-navbar */
+    height: calc(100% - 130px); /* Fill space between 60px top and 70px bottom */
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     transform: translateX(0);
+    background: var(--bg-glass-strong) !important;
+    backdrop-filter: blur(30px);
   }
 
   .chat-sidebar.open {
     left: 0;
     transform: translateX(0);
     box-shadow: 20px 0 60px rgba(0,0,0,0.7);
-  }
-
-  .user-search-dropdown {
-    right: 0.5rem;
-    left: 0.5rem;
-    min-width: auto;
   }
 }
 
@@ -537,10 +533,10 @@
 .channels-list {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 1.25rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .channel-item {
@@ -1103,9 +1099,10 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: var(--bg-primary);
-  min-width: 0;
+  background: var(--bg-app);
+  position: relative;
   overflow: hidden;
+  height: 100%; /* Important for internal flex children to expand */
 }
 
 /* Chat Header - Refurbished Premier */
@@ -1436,10 +1433,14 @@
 .messages-container {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   background: var(--bg-primary);
   position: relative;
   display: flex;
   flex-direction: column;
+  padding: 1rem 2rem;
+  scroll-behavior: smooth;
+  min-height: 0;
 }
 
 /* Subtle background pattern for premium feel */
@@ -3812,7 +3813,7 @@
   /* Chat Header Mobile Adjustments */
   .chat-header {
     padding: 0.75rem 1rem;
-    background: rgba(var(--bg-primary-rgb), 0.8) !important;
+    background: var(--bg-glass) !important;
     backdrop-filter: blur(20px) !important;
     border-bottom: 1px solid var(--border-light);
   }

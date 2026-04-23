@@ -94,8 +94,8 @@
   .dm-sidebar {
     position: fixed;
     left: 0;
-    top: 0;
-    height: 100%;
+    top: 60px;
+    height: calc(100% - 130px);
     width: 280px;
     transform: translateX(-100%);
     box-shadow: 20px 0 60px rgba(0,0,0,0.5);

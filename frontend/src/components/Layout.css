@@ -619,6 +619,16 @@
   width: calc(100% - 260px);
 }
 
+.content-container {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden; /* Prevent nested scrollbars, let children handle it */
+}
+
 /* Responsive Overrides */
 @media (max-width: 768px) {
   .top-navbar {
@@ -662,10 +672,8 @@
   }
 
   .content-container {
-    flex: 1;
-    min-height: 0;
-    width: 100%;
-    overflow-y: auto; /* Allow individual pages to scroll if they aren't full-height */
+    overflow-y: auto; /* Default scroll for standard pages */
+    height: 100%; /* Fill the padded main-content */
   }
 
   .mobile-overlay {
