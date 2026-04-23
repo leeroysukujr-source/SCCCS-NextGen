@@ -81,7 +81,7 @@ export default function Layout() {
       title: 'Main',
       items: [
         { path: '/dashboard', icon: <FiGrid />, text: 'Overview' },
-        { path: '/search', icon: <FiSearch />, text: 'Global Search', action: () => setShowSearch(true), feature: 'search' },
+        { path: '#', icon: <FiSearch />, text: 'Global Search', action: () => setShowSearch(true), feature: 'search' },
       ].filter(item => !item.feature || isFeatureEnabled(item.feature))
     },
     {
@@ -183,7 +183,9 @@ export default function Layout() {
         </div>
 
         <div className="top-navbar-right">
-          <SearchBar />
+          <button className="icon-btn search-trigger" onClick={() => setShowSearch(true)} title="Search Everywhere">
+            <FiSearch />
+          </button>
           
           <button className="theme-toggle-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
             {theme === 'dark' ? '☀️' : '🌙'}
@@ -192,6 +194,9 @@ export default function Layout() {
           <UserProfileDropdown user={user} onLogout={handleLogout} />
         </div>
       </header>
+
+      {/* Global Search Overlay */}
+      {showSearch && <SearchBar onClose={() => setShowSearch(false)} />}
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && <div className="mobile-menu-overlay" onClick={() => setMobileMenuOpen(false)} />}
