@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiX, FiSearch, FiUser, FiMessageSquare } from 'react-icons/fi';
-import apiClient from '../api/client';
+import apiClient from '../../api/client';
 
 const StartChatModal = ({ isOpen, onClose, onSelectUser }) => {
   const [search, setSearch] = useState('');
