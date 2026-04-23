@@ -6,8 +6,6 @@ import { getApiBaseUrl, getFullImageUrl } from '../utils/api'
 import {
   FiVideo, FiMessageSquare, FiMessageCircle, FiUser, FiLogOut, FiArrowRight, FiChevronLeft,
   FiUsers, FiSettings, FiSearch, FiAlertCircle,
-  FiShield, FiGrid, FiBookOpen, FiActivity, FiBriefcase
-} from 'react-icons/fi'
 import SearchBar from './SearchBar'
 import './Layout.css'
 import useTheme from '../hooks/useTheme'
@@ -137,9 +135,6 @@ export default function Layout() {
       {/* Top Navigation Bar */}
       <header className="top-navbar">
         <div className="top-navbar-left">
-          <button className="mobile-menu-toggle-navbar" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            <FiGrid />
-          </button>
           
           {location.pathname !== '/' && location.pathname !== '/dashboard' && (
             <button className="nav-back-btn" onClick={handleBack} title="Go Back">
