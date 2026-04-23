@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSocket } from '../../api/socket';
+import { useSocket } from '../../contexts/SocketProvider';
 import { encryptionUtil } from '../../utils/encryption';
 import { channelsAPI } from '../../api/channels';
 import { directMessagesAPI } from '../../api/directMessages';
@@ -11,7 +11,7 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const socket = useSocket();
+  const { socket } = useSocket();
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
