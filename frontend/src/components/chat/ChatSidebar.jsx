@@ -5,6 +5,9 @@ import { FiHash, FiLock, FiUser, FiSearch, FiMessageSquare, FiPlus, FiMessageCir
 import { formatDistanceToNow } from 'date-fns';
 import './ChatSidebar.css';
 
+const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
+  const [activeTab, setActiveTab] = useState(window.location.pathname.includes('direct-messages') ? 'dms' : 'channels'); 
+  const [channels, setChannels] = useState([]);
   const [dms, setDms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -150,7 +153,7 @@ import './ChatSidebar.css';
                 ) : (
                   <div className="user-avatar-wrapper">
                     {item.user?.avatar_url ? (
-                      <img src={item.user.avatar_url} alt={item.name} className="avatar-img" />
+                      <img src={item.user.avatar_url} alt={item.name} className="w-full h-full object-cover rounded-xl" />
                     ) : (
                       <div className="avatar-initials">
                         {item.name?.charAt(0).toUpperCase() || <FiUser />}
