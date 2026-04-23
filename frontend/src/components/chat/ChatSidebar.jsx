@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { channelsAPI } from '../../api/channels';
 import { directMessagesAPI } from '../../api/directMessages';
-import { FiHash, FiLock, FiUser, FiSearch, FiMessageSquare } from 'react-icons/fi';
+import { FiHash, FiLock, FiUser, FiSearch, FiMessageSquare, FiPlus, FiMessageCircle } from 'react-icons/fi';
 import { formatDistanceToNow } from 'date-fns';
 import './ChatSidebar.css';
 
-const ChatSidebar = ({ onSelectChat, selectedId, selectedType }) => {
-  const [items, setItems] = useState([]);
+  const [dms, setDms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [error, setError] = useState(null);
@@ -18,37 +17,29 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType }) => {
         directMessagesAPI.getConversations().catch(e => { console.error('DMs fetch error:', e); return []; })
       ]);
 
-      const unified = [
-        ...(Array.isArray(channelsData) ? channelsData : []).map(c => ({ 
-          ...c, 
-          type: 'channel', 
-          id: c.id, 
-          name: c.name,
-          last_message: c.last_message,
-          unread_count: c.unread_count || 0
-        })),
-        ...(Array.isArray(conversationsData) ? conversationsData : []).map(conv => ({ 
-          ...conv, 
-          type: 'dm', 
-          id: conv.user_id, 
-          name: conv.user?.first_name || conv.user?.username || 'Unknown User',
-          last_message: conv.last_message,
-          user: conv.user,
-          unread_count: conv.unread_count || 0
-        }))
-      ];
+      setChannels((Array.isArray(channelsData) ? channelsData : []).map(c => ({ 
+        ...c, 
+        type: 'channel', 
+        id: c.id, 
+        name: c.name,
+        last_message: c.last_message,
+        unread_count: c.unread_count || 0
+      })));
 
-      unified.sort((a, b) => {
-        const timeA = a.last_message?.created_at ? new Date(a.last_message.created_at).getTime() : 0;
-        const timeB = b.last_message?.created_at ? new Date(b.last_message.created_at).getTime() : 0;
-        return timeB - timeA;
-      });
+      setDms((Array.isArray(conversationsData) ? conversationsData : []).map(conv => ({ 
+        ...conv, 
+        type: 'dm', 
+        id: conv.user_id, 
+        name: conv.user?.first_name || conv.user?.username || 'Unknown User',
+        last_message: conv.last_message,
+        user: conv.user,
+        unread_count: conv.unread_count || 0
+      })));
 
-      setItems(unified);
       setError(null);
     } catch (err) {
       console.error('Failed to fetch chat list', err);
-      setError('Could not load chats. Please try again.');
+      setError('Could not load chats.');
     } finally {
       setLoading(false);
     }
@@ -60,7 +51,8 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const filteredItems = items.filter(item => 
+  const currentItems = activeTab === 'channels' ? channels : dms;
+  const filteredItems = currentItems.filter(item => 
     item.name?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -83,12 +75,38 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType }) => {
 
   return (
     <div className="chat-sidebar-container">
-      <div className="sidebar-search-header">
+      <div className="sidebar-header-main">
+        <div className="header-top">
+           <h2>{activeTab === 'channels' ? 'Channels' : 'Messages'}</h2>
+           <button className="action-add-btn" onClick={() => onAction(activeTab)}>
+             <FiPlus />
+           </button>
+        </div>
+        
+        <div className="tab-switcher">
+          <button 
+            className={`tab-btn ${activeTab === 'channels' ? 'active' : ''}`}
+            onClick={() => setActiveTab('channels')}
+          >
+            <FiMessageSquare />
+            <span>Channels</span>
+            {channels.some(c => c.unread_count > 0) && <span className="tab-dot" />}
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'dms' ? 'active' : ''}`}
+            onClick={() => setActiveTab('dms')}
+          >
+            <FiMessageCircle />
+            <span>Direct Messages</span>
+            {dms.some(d => d.unread_count > 0) && <span className="tab-dot" />}
+          </button>
+        </div>
+
         <div className="search-input-wrapper">
           <FiSearch className="search-icon" />
           <input 
             type="text" 
-            placeholder="Search messages..." 
+            placeholder={`Search ${activeTab}...`} 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -96,11 +114,9 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType }) => {
       </div>
       
       <div className="chat-items-list">
-        {loading && items.length === 0 ? (
+        {loading && currentItems.length === 0 ? (
           <div className="sidebar-loading">
-            <div className="skeleton-item" />
-            <div className="skeleton-item" />
-            <div className="skeleton-item" />
+            {[1, 2, 3].map(i => <div key={i} className="skeleton-item" />)}
           </div>
         ) : error ? (
           <div className="sidebar-error">
@@ -110,10 +126,14 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType }) => {
         ) : filteredItems.length === 0 ? (
           <div className="sidebar-empty">
             <div className="empty-icon">
-              <FiMessageSquare />
+              {activeTab === 'channels' ? <FiHash /> : <FiUser />}
             </div>
-            <p>{search ? 'No results found' : 'No conversations yet'}</p>
-            {!search && <p className="empty-hint">Start a new chat from the directory</p>}
+            <p>{search ? 'No results found' : `No ${activeTab} yet`}</p>
+            {!search && (
+              <button className="empty-action-btn" onClick={() => onAction(activeTab)}>
+                {activeTab === 'channels' ? 'Create Channel' : 'Find People'}
+              </button>
+            )}
           </div>
         ) : (
           filteredItems.map(item => (
@@ -124,7 +144,7 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType }) => {
             >
               <div className="chat-avatar">
                 {item.type === 'channel' ? (
-                  <div className={`avatar-initials bg-gradient`}>
+                  <div className={`avatar-initials ${item.is_encrypted ? 'encrypted' : ''}`}>
                     {item.is_encrypted ? <FiLock /> : <FiHash />}
                   </div>
                 ) : (

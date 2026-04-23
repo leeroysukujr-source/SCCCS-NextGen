@@ -611,12 +611,6 @@
 }
 
 @media (max-width: 768px) {
-  .top-navbar {
-    left: 0 !important;
-    width: 100% !important;
-    padding: 0 1rem !important;
-    height: 60px !important;
-  }
 
   .main-content {
     margin-left: 0 !important;
