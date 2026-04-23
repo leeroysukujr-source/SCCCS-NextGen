@@ -5,7 +5,8 @@ import { useAuthStore } from '../store/authStore'
 import { getApiBaseUrl, getFullImageUrl } from '../utils/api'
 import {
   FiVideo, FiMessageSquare, FiMessageCircle, FiUser, FiLogOut, FiArrowRight, FiChevronLeft,
-  FiUsers, FiSettings, FiSearch, FiAlertCircle,
+  FiUsers, FiSettings, FiSearch, FiAlertCircle, FiShield, FiGrid, FiBookOpen, FiActivity, FiBriefcase, FiMenu
+} from 'react-icons/fi'
 import SearchBar from './SearchBar'
 import './Layout.css'
 import useTheme from '../hooks/useTheme'
@@ -135,6 +136,9 @@ export default function Layout() {
       {/* Top Navigation Bar */}
       <header className="top-navbar">
         <div className="top-navbar-left">
+          <button className="mobile-menu-toggle-navbar" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <FiMenu />
+          </button>
           
           {location.pathname !== '/' && location.pathname !== '/dashboard' && (
             <button className="nav-back-btn" onClick={handleBack} title="Go Back">
@@ -179,73 +183,54 @@ export default function Layout() {
         </div>
 
         <div className="top-navbar-right">
-          <button className="navbar-action-btn" onClick={() => setShowSearch(true)} title="Search">
-            <FiSearch />
+          <SearchBar />
+          
+          <button className="theme-toggle-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+            {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-          <div className="navbar-divider"></div>
-          <UserProfileDropdown />
+
+          <UserProfileDropdown user={user} onLogout={handleLogout} />
         </div>
       </header>
 
-      <nav className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''} ${isSidebarCollapsed ? '' : 'expanded'}`}>
-        {/* Toggle Button for Desktop */}
-        <button 
-          className="sidebar-collapse-toggle" 
-          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-        >
-          {isSidebarCollapsed ? <FiArrowRight /> : <FiChevronLeft />}
-        </button>
-        {/* Close button for mobile */}
-        <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}>
-          <FiLogOut style={{transform: 'rotate(180deg)'}} />
-        </button>
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && <div className="mobile-menu-overlay" onClick={() => setMobileMenuOpen(false)} />}
+      
+      {/* Sidebar Navigation */}
+      <aside className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''} ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
-          <Link to="/dashboard" className="logo-link">
-            <div className="branding-container">
-              {platformLogo ? (
-                <div className="flex items-center gap-3">
-                  <img
-                    src={getFullImageUrl(platformLogo)}
-                    alt="Platform Logo"
-                    className="h-12 w-auto object-contain max-w-[120px]"
-                  />
-                  <div className="logo-text-wrapper overflow-hidden">
-                    <h1 className="logo text-lg leading-tight truncate">
-                      {getSettingValue('APP_NAME', 'SCCCS')}
-                    </h1>
-                    <p className="logo-subtitle text-[10px] tracking-[0.2em] font-bold">Educational OS</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col">
-                  <h1 className="logo text-2xl">{getSettingValue('APP_NAME', 'SCCCS')}</h1>
-                  <p className="logo-subtitle">Educational OS</p>
-                </div>
-              )}
-            </div>
-          </Link>
-
+          {platformLogo && (
+            <img src={getFullImageUrl(platformLogo)} alt="Platform Logo" className="sidebar-logo" />
+          )}
+          <div className="scccs-branding">
+            <span className="scccs-text">SCCCS</span>
+            <span className="nextgen-text">EDUCATIONAL OS</span>
+          </div>
         </div>
 
-        <div className="sidebar-nav">
-          {filteredNavGroups.map((group, gIdx) => (
-            <div key={gIdx} className="nav-group">
-              <div className="nav-group-title">{group.title}</div>
-              <div className="nav-group-items">
-                {group.items.map((item, iIdx) => (
+        <nav className="sidebar-nav">
+          {filteredNavGroups.map((group, idx) => (
+            <div key={idx} className="nav-group">
+              <h3 className="nav-group-title">{group.title}</h3>
+              <div className="nav-items">
+                {group.items.map((item, itemIdx) => (
                   item.action ? (
-                    <button key={iIdx} onClick={item.action} className="nav-item">
-                      <span className="nav-icon">{item.icon}</span>
+                    <button 
+                      key={itemIdx} 
+                      className="nav-item" 
+                      onClick={item.action}
+                    >
+                      {item.icon}
                       <span className="nav-text">{item.text}</span>
                     </button>
                   ) : (
-                    <NavLink
-                      key={iIdx}
-                      to={item.path}
+                    <NavLink 
+                      key={itemIdx} 
+                      to={item.path} 
                       className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                      onClick={() => setMobileMenuOpen(false)}
                     >
-                      <span className="nav-icon">{item.icon}</span>
+                      {item.icon}
                       <span className="nav-text">{item.text}</span>
                     </NavLink>
                   )
@@ -253,35 +238,29 @@ export default function Layout() {
               </div>
             </div>
           ))}
+        </nav>
 
-          <div className="nav-footer">
-            <button className="nav-item" onClick={handleSwitchWorkspace} title="Switch Workspace">
-              <span className="nav-icon"><FiBriefcase /></span>
-              <span className="nav-text">Switch Workspace</span>
-            </button>
-          </div>
+        <div className="sidebar-footer">
+          <button className="sidebar-footer-btn" onClick={handleSwitchWorkspace}>
+            <FiArrowRight />
+            <span>Switch Workspace</span>
+          </button>
+          <button className="sidebar-footer-btn logout" onClick={handleLogout}>
+            <FiLogOut />
+            <span>Sign Out</span>
+          </button>
         </div>
-      </nav >
+      </aside>
 
-      {/* Overlay to close mobile menu */}
-      {mobileMenuOpen && <div className="mobile-overlay" onClick={() => setMobileMenuOpen(false)}></div>}
-
+      {/* Main Content Area */}
       <main className="main-content">
         <PresenceManager />
         <div className="content-container">
-          <Suspense fallback={<div className="flex items-center justify-center h-64 text-slate-500 animate-pulse">Initializing Interface...</div>}>
+          <Suspense fallback={<div className="loading-spinner-container"><div className="spinner"></div></div>}>
             <Outlet />
           </Suspense>
         </div>
       </main>
-
-      {isFeatureEnabled('video_room') && (
-        <button className="floating-video-btn" onClick={() => navigate('/video-room')} title="Start Meeting">
-          <FiVideo />
-        </button>
-      )}
-
-      {showSearch && <SearchBar onClose={() => setShowSearch(false)} />}
 
       {/* Mobile Bottom Navigation */}
       <nav className="mobile-bottom-nav">
@@ -302,6 +281,6 @@ export default function Layout() {
           <span>Profile</span>
         </NavLink>
       </nav>
-    </div >
+    </div>
   )
 }
