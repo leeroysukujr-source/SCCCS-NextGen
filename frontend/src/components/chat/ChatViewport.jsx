@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSocket } from '../../contexts/SocketProvider';
+import { useAuthStore } from '../../store/authStore';
 import { encryptionUtil } from '../../utils/encryption';
 import { channelsAPI } from '../../api/channels';
 import { directMessagesAPI } from '../../api/directMessages';
@@ -8,6 +9,7 @@ import { FiArrowLeft, FiSend, FiLock, FiShield, FiMoreVertical, FiSearch, FiMess
 import './ChatViewport.css';
 
 const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
+  const { user } = useAuthStore();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -119,6 +121,10 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
     );
   }
 
+  const isOwnMessage = (msg) => {
+    return msg.sender_id === user?.id || msg.sender_id === 'me';
+  };
+
   return (
     <div className="chat-viewport-container">
       <header className="viewport-header">
@@ -156,16 +162,18 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
           messages.map((msg, idx) => (
             <div 
               key={msg.id || idx} 
-              className={`message-bubble ${msg.sender_id === 'me' ? 'own' : 'other'}`}
+              className={`message-wrapper ${isOwnMessage(msg) ? 'own' : 'other'}`}
             >
-              <div className="message-content">
-                {msg.content}
-              </div>
-              <div className="message-footer">
-                <span className="message-time">
-                  {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                </span>
-                {msg.is_encrypted && <FiLock size={10} className="e2ee-indicator" />}
+              <div className="message-bubble">
+                <div className="message-content">
+                  {msg.content}
+                </div>
+                <div className="message-footer">
+                  <span className="message-time">
+                    {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                  </span>
+                  {msg.is_encrypted && <FiLock size={10} className="e2ee-indicator" />}
+                </div>
               </div>
             </div>
           ))

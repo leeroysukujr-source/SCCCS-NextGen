@@ -612,14 +612,6 @@
 
 @media (max-width: 768px) {
 
-  .main-content {
-    margin-left: 0 !important;
-    width: 100vw !important;
-    max-width: 100vw !important;
-    padding: 60px 0 70px !important;
-    height: 100vh !important;
-    overflow: hidden !important;
-  }
 
   .content-container {
     height: 100%;
