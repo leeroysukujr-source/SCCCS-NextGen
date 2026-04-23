@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { channelsAPI } from '../../api/channels';
 import { directMessagesAPI } from '../../api/directMessages';
-import { FiHash, FiLock, FiUser, FiSearch } from 'react-icons/fi';
+import { FiHash, FiLock, FiUser, FiSearch, FiMessageSquare } from 'react-icons/fi';
 import { formatDistanceToNow } from 'date-fns';
 import './ChatSidebar.css';
 
@@ -9,12 +9,13 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [error, setError] = useState(null);
 
   const fetchData = async () => {
     try {
       const [channelsData, conversationsData] = await Promise.all([
-        channelsAPI.getChannels(),
-        directMessagesAPI.getConversations()
+        channelsAPI.getChannels().catch(e => { console.error('Channels fetch error:', e); return []; }),
+        directMessagesAPI.getConversations().catch(e => { console.error('DMs fetch error:', e); return []; })
       ]);
 
       const unified = [
@@ -30,7 +31,7 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType }) => {
           ...conv, 
           type: 'dm', 
           id: conv.user_id, 
-          name: conv.user?.first_name || conv.user?.username,
+          name: conv.user?.first_name || conv.user?.username || 'Unknown User',
           last_message: conv.last_message,
           user: conv.user,
           unread_count: conv.unread_count || 0
@@ -44,8 +45,10 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType }) => {
       });
 
       setItems(unified);
+      setError(null);
     } catch (err) {
       console.error('Failed to fetch chat list', err);
+      setError('Could not load chats. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -53,7 +56,7 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType }) => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 10000);
+    const interval = setInterval(fetchData, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -91,12 +94,26 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType }) => {
           />
         </div>
       </div>
+      
       <div className="chat-items-list">
         {loading && items.length === 0 ? (
           <div className="sidebar-loading">
             <div className="skeleton-item" />
             <div className="skeleton-item" />
             <div className="skeleton-item" />
+          </div>
+        ) : error ? (
+          <div className="sidebar-error">
+            <p>{error}</p>
+            <button onClick={fetchData}>Retry</button>
+          </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="sidebar-empty">
+            <div className="empty-icon">
+              <FiMessageSquare />
+            </div>
+            <p>{search ? 'No results found' : 'No conversations yet'}</p>
+            {!search && <p className="empty-hint">Start a new chat from the directory</p>}
           </div>
         ) : (
           filteredItems.map(item => (

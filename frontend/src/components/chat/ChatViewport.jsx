@@ -4,7 +4,7 @@ import { encryptionUtil } from '../../utils/encryption';
 import { channelsAPI } from '../../api/channels';
 import { directMessagesAPI } from '../../api/directMessages';
 import { messagesAPI } from '../../api/messages';
-import { FiArrowLeft, FiSend, FiLock, FiShield, FiMoreVertical } from 'react-icons/fi';
+import { FiArrowLeft, FiSend, FiLock, FiShield, FiMoreVertical, FiSearch, FiMessageSquare } from 'react-icons/fi';
 import './ChatViewport.css';
 
 const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
@@ -23,7 +23,7 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
       fetchMessages();
       // Room joining logic via socket
       if (socket) {
-        const roomId = selectedChat.type === 'channel' ? selectedChat.id : selectedChat.conversation_id;
+        const roomId = selectedChat.type === 'channel' ? selectedChat.id : (selectedChat.conversation_id || selectedChat.id);
         socket.emit('join_room', { room: roomId });
       }
     }
@@ -34,20 +34,30 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
   }, [messages]);
 
   const fetchMessages = async () => {
+    if (!selectedChat) return;
     setLoading(true);
     try {
       let data = [];
       if (selectedChat.type === 'channel') {
         data = await messagesAPI.getMessages(selectedChat.id);
       } else {
-        data = await directMessagesAPI.getConversation(selectedChat.id);
+        // Fallback to conversation_id if available, otherwise use id
+        const dmId = selectedChat.conversation_id || selectedChat.id;
+        data = await directMessagesAPI.getConversation(dmId);
       }
       
       // Decrypt if necessary
-      const decrypted = await Promise.all(data.map(async (msg) => {
+      const decrypted = await Promise.all((Array.isArray(data) ? data : []).map(async (msg) => {
         if (msg.is_encrypted) {
-          const content = await encryptionUtil.decryptMessage(msg.content, localStorage.getItem('e2ee_private_key'));
-          return { ...msg, content };
+          try {
+            const privateKey = localStorage.getItem('e2ee_private_key');
+            if (privateKey) {
+              const content = await encryptionUtil.decryptMessage(msg.content, privateKey);
+              return { ...msg, content };
+            }
+          } catch (e) {
+            console.error('Decryption failed for message:', msg.id, e);
+          }
         }
         return msg;
       }));
@@ -62,16 +72,21 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !selectedChat) return;
 
     try {
       let encryptedContent = newMessage;
-      if (selectedChat.is_encrypted) {
-        encryptedContent = await encryptionUtil.encryptMessage(newMessage, selectedChat.public_key);
+      if (selectedChat.is_encrypted && selectedChat.public_key) {
+        try {
+          encryptedContent = await encryptionUtil.encryptMessage(newMessage, selectedChat.public_key);
+        } catch (e) {
+          console.error('Encryption failed, sending plain text:', e);
+        }
       }
 
       if (selectedChat.type === 'dm') {
-        await directMessagesAPI.sendMessage(selectedChat.id, { 
+        const dmId = selectedChat.conversation_id || selectedChat.id;
+        await directMessagesAPI.sendMessage(dmId, { 
           content: encryptedContent,
           message_type: 'text'
         });
@@ -96,8 +111,9 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
           <div className="empty-icon-circle">
             <FiMessageSquare size={48} />
           </div>
-          <h3>Select a Conversation</h3>
-          <p>Choose a channel or direct message from the sidebar to start chatting.</p>
+          <h3>SCCCS Inbox Center</h3>
+          <p>Select a colleague or student from your sidebar to start a secure, real-time professional conversation.</p>
+          {!isMobile && <div className="hint-pill">Use the search bar to find people quickly</div>}
         </div>
       </div>
     );
@@ -121,14 +137,21 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
           </p>
         </div>
         <div className="header-actions">
-          <button className="icon-btn"><FiSearch /></button>
-          <button className="icon-btn"><FiMoreVertical /></button>
+          <button className="icon-btn" title="Search messages"><FiSearch /></button>
+          <button className="icon-btn" title="Options"><FiMoreVertical /></button>
         </div>
       </header>
 
       <div className="messages-area">
         {loading && messages.length === 0 ? (
-          <div className="messages-loading">Loading messages...</div>
+          <div className="messages-loading">
+             <div className="loading-spinner" />
+             <span>Loading conversation history...</span>
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="no-messages">
+            <p>No messages here yet. Send a message to start the conversation!</p>
+          </div>
         ) : (
           messages.map((msg, idx) => (
             <div 
@@ -140,7 +163,7 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
               </div>
               <div className="message-footer">
                 <span className="message-time">
-                  {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                 </span>
                 {msg.is_encrypted && <FiLock size={10} className="e2ee-indicator" />}
               </div>
@@ -156,6 +179,7 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
           placeholder="Type a message..." 
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
+          autoFocus={!isMobile}
         />
         <button type="submit" disabled={!newMessage.trim()}>
           <FiSend />
@@ -164,8 +188,5 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
     </div>
   );
 };
-
-// Simple import for FiMessageSquare if needed
-import { FiMessageSquare } from 'react-icons/fi';
 
 export default ChatViewport;
