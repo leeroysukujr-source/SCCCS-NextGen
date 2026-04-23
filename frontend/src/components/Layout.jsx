@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/authStore'
 import { getApiBaseUrl, getFullImageUrl } from '../utils/api'
 import {
   FiVideo, FiMessageSquare, FiMessageCircle, FiUser, FiLogOut, FiArrowRight, FiChevronLeft,
-  FiUsers, FiSettings, FiSearch, FiAlertCircle, FiShield, FiGrid, FiBookOpen, FiActivity, FiBriefcase, FiMenu
+  FiUsers, FiSettings, FiSearch, FiAlertCircle, FiShield, FiGrid, FiBookOpen, FiActivity, FiBriefcase, FiMenu, FiX
 } from 'react-icons/fi'
 import SearchBar from './SearchBar'
 import './Layout.css'
@@ -81,7 +81,7 @@ export default function Layout() {
       title: 'Main',
       items: [
         { path: '/dashboard', icon: <FiGrid />, text: 'Overview' },
-        { path: '/search', icon: <FiSearch />, text: 'Search', action: () => setShowSearch(true), feature: 'search' },
+        { path: '/search', icon: <FiSearch />, text: 'Global Search', action: () => setShowSearch(true), feature: 'search' },
       ].filter(item => !item.feature || isFeatureEnabled(item.feature))
     },
     {
@@ -136,7 +136,7 @@ export default function Layout() {
       {/* Top Navigation Bar */}
       <header className="top-navbar">
         <div className="top-navbar-left">
-          <button className="mobile-menu-toggle-navbar" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          <button className="mobile-menu-toggle-navbar" onClick={() => setMobileMenuOpen(true)}>
             <FiMenu />
           </button>
           
@@ -199,10 +199,19 @@ export default function Layout() {
       {/* Sidebar Navigation */}
       <aside className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''} ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
+          <div className="flex justify-between items-center mb-4 lg:hidden">
+              <div className="scccs-branding">
+                <span className="scccs-text">SCCCS</span>
+                <span className="nextgen-text">EDUCATIONAL OS</span>
+              </div>
+              <button onClick={() => setMobileMenuOpen(false)} className="p-2 bg-slate-800 rounded-full text-white">
+                <FiX size={20} />
+              </button>
+          </div>
           {platformLogo && (
             <img src={getFullImageUrl(platformLogo)} alt="Platform Logo" className="sidebar-logo" />
           )}
-          <div className="scccs-branding">
+          <div className="hidden lg:block scccs-branding">
             <span className="scccs-text">SCCCS</span>
             <span className="nextgen-text">EDUCATIONAL OS</span>
           </div>
@@ -218,7 +227,7 @@ export default function Layout() {
                     <button 
                       key={itemIdx} 
                       className="nav-item" 
-                      onClick={item.action}
+                      onClick={() => { item.action(); setMobileMenuOpen(false); }}
                     >
                       {item.icon}
                       <span className="nav-text">{item.text}</span>
