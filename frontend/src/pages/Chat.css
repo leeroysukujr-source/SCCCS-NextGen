@@ -2,7 +2,8 @@
 
 .chat-container {
   display: flex;
-  height: 100vh;
+  height: 100%;
+  width: 100%;
   background: var(--bg-app);
   color: var(--text-primary);
   overflow: hidden;
@@ -354,8 +355,8 @@
     position: fixed;
     z-index: 2005;
     left: -100%;
-    top: 70px;
-    height: calc(100vh - 70px);
+    top: 0;
+    height: 100%;
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     transform: translateX(0);
   }
@@ -3803,7 +3804,7 @@
 
   .chat-main {
     width: 100%;
-    height: 100vh;
+    height: 100%;
     display: flex;
     flex-direction: column;
   }

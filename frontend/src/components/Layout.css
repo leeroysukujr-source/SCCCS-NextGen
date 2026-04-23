@@ -607,9 +607,11 @@
   width: 100%;
   max-width: 100vw;
   position: relative;
-  overflow-y: auto;
+  overflow: hidden; /* Prevent main scrollbar if child is full height */
   height: 100vh;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar.expanded+.main-content {
@@ -628,10 +630,10 @@
 
   .main-content {
     margin-left: 0 !important;
-    width: 100vw !important; /* Force exact viewport width */
+    width: 100vw !important;
     max-width: 100vw !important;
-    padding: 75px 1rem 5rem !important;
-    overflow-x: auto !important; /* Allow horizontal scroll if internal content blows out */
+    padding: 60px 0 70px !important; /* Exact match for top-navbar(60) and mobile-bottom-nav(70) */
+    overflow: hidden !important;
   }
 
   .sidebar {
@@ -660,7 +662,10 @@
   }
 
   .content-container {
-    padding-bottom: 7rem !important;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    overflow-y: auto; /* Allow individual pages to scroll if they aren't full-height */
   }
 
   .mobile-overlay {
