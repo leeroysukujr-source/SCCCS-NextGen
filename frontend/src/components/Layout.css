@@ -30,8 +30,6 @@
   box-shadow: var(--shadow-xl);
 }
 
-
-
 .sidebar.expanded {
   width: 260px;
 }
@@ -100,8 +98,6 @@
   letter-spacing: -0.05em;
   margin: 0;
 }
-
-/* Admin Logo Override Removed */
 
 .logo-subtitle {
   font-size: 0.7rem;
@@ -194,8 +190,6 @@
   white-space: nowrap;
 }
 
-
-
 .sidebar-user-avatar img {
   width: 100%;
   height: 100%;
@@ -213,8 +207,6 @@
   font-weight: 700;
   font-size: 1.25rem;
 }
-
-
 
 /* --- Navigation --- */
 .sidebar-nav {
@@ -235,7 +227,6 @@
   font-weight: 800;
   text-transform: uppercase;
   color: #60a5fa;
-  /* Blue-400 tint for depth */
   letter-spacing: 0.15em;
   margin-bottom: 0.75rem;
   padding-left: 0.75rem;
@@ -264,8 +255,6 @@
   transform: translateX(4px);
 }
 
-/* Admin specific hover removed */
-
 [data-theme="light"] .nav-item:hover {
   background: rgba(0, 0, 0, 0.04);
 }
@@ -277,9 +266,6 @@
   font-weight: 600;
 }
 
-/* Admin specific active state removed */
-
-/* Active Indicator */
 .nav-item.active::before,
 .admin-action-item.active::before {
   content: '';
@@ -293,8 +279,6 @@
   border-radius: 0 4px 4px 0;
   box-shadow: 0 0 10px var(--primary);
 }
-
-/* Admin Active Indicator removed */
 
 .nav-icon {
   font-size: 1.25rem;
@@ -310,8 +294,6 @@
   transform: scale(1.1);
 }
 
-
-
 .nav-text {
   margin-left: 1rem;
   white-space: nowrap;
@@ -326,7 +308,6 @@
   width: auto;
 }
 
-/* Theme Toggle Special */
 .theme-toggle {
   background: transparent;
   border: none;
@@ -409,7 +390,7 @@
   padding: 0 clamp(1rem, 3vw, 2.5rem);
   z-index: 1000;
   transition: all 0.4s var(--ease-spring);
-  overflow: visible; /* Changed from hidden to allow dropdowns to pop out */
+  overflow: visible;
 }
 
 .sidebar.expanded ~ .top-navbar {
@@ -607,11 +588,11 @@
   width: 100%;
   max-width: 100vw;
   position: relative;
-  overflow: hidden; /* Prevent main scrollbar if child is full height */
   height: 100vh;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .sidebar.expanded+.main-content {
@@ -621,15 +602,14 @@
 
 .content-container {
   flex: 1;
-  min-height: 0;
   width: 100%;
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden; /* Prevent nested scrollbars, let children handle it */
+  min-height: 0;
+  overflow: hidden;
 }
 
-/* Responsive Overrides */
 @media (max-width: 768px) {
   .top-navbar {
     left: 0 !important;
@@ -642,8 +622,14 @@
     margin-left: 0 !important;
     width: 100vw !important;
     max-width: 100vw !important;
-    padding: 60px 0 70px !important; /* Exact match for top-navbar(60) and mobile-bottom-nav(70) */
+    padding: 60px 0 70px !important;
+    height: 100vh !important;
     overflow: hidden !important;
+  }
+
+  .content-container {
+    height: 100%;
+    overflow: hidden;
   }
 
   .sidebar {
@@ -651,29 +637,12 @@
     max-width: 85vw !important;
     transform: translateX(-105%) !important;
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 2000 !important;
   }
 
   .sidebar.mobile-open {
     transform: translateX(0) !important;
     box-shadow: 20px 0 60px rgba(0,0,0,0.7) !important;
-  }
-
-  .nav-back-btn {
-    display: none !important;
-  }
-
-  .mobile-menu-toggle-navbar {
-    display: flex !important;
-    margin-right: -0.5rem;
-  }
-
-  .page-context {
-    display: none !important;
-  }
-
-  .content-container {
-    overflow-y: auto; /* Default scroll for standard pages */
-    height: 100%; /* Fill the padded main-content */
   }
 
   .mobile-overlay {
@@ -695,10 +664,9 @@
   }
 }
 
-
 /* Mobile Bottom Navigation */
 .mobile-bottom-nav {
-  display: none; /* Hidden by default on desktop */
+  display: none;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -753,7 +721,6 @@
 }
 
 /* Floating Video Button */
-
 .floating-video-btn {
   position: fixed;
   bottom: 2rem;
@@ -810,4 +777,4 @@
     .sidebar {
         width: 100%;
     }
-}
+}

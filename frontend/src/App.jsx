@@ -45,11 +45,13 @@ import RecentMeetings from './pages/RecentMeetings'
 import Settings from './pages/Settings'
 import Analytics from './pages/Analytics'
 const DirectMessages = lazy(() => import('./pages/DirectMessages'))
+const Messaging = lazy(() => import('./pages/Messaging'))
 import Feedback from './pages/Feedback'
 import GpaCalculator from './pages/GpaCalculator'
 import TwoFactor from './pages/TwoFactor'
 import Sessions from './pages/Sessions'
 const StudyRoom = lazy(() => import('./pages/StudyRoom'))
+
 const CreationHub = lazy(() => import('./pages/creation/CreationHub'))
 const CreationHubAudit = lazy(() => import('./pages/admin/CreationHubAudit'))
 const CreationPolicyManager = lazy(() => import('./pages/admin/CreationPolicyManager'))
@@ -221,14 +223,14 @@ function App() {
               <Route path="chat" element={
                 <ErrorBoundary>
                   <Suspense fallback={<div style={{ padding: 20 }}>Loading chat...</div>}>
-                    <Chat />
+                    <Messaging />
                   </Suspense>
                 </ErrorBoundary>
               } />
               <Route path="chat/:channelId" element={
                 <ErrorBoundary>
                   <Suspense fallback={<div style={{ padding: 20 }}>Loading chat...</div>}>
-                    <Chat />
+                    <Messaging />
                   </Suspense>
                 </ErrorBoundary>
               } />
@@ -367,12 +369,16 @@ function App() {
               } />
               <Route path="direct-messages" element={
                 <ErrorBoundary>
-                  <DirectMessages />
+                  <Suspense fallback={<div style={{ padding: 20 }}>Loading messages...</div>}>
+                    <Messaging />
+                  </Suspense>
                 </ErrorBoundary>
               } />
               <Route path="direct-messages/:userId" element={
                 <ErrorBoundary>
-                  <DirectMessages />
+                  <Suspense fallback={<div style={{ padding: 20 }}>Loading messages...</div>}>
+                    <Messaging />
+                  </Suspense>
                 </ErrorBoundary>
               } />
               <Route path="feedback" element={
