@@ -145,17 +145,19 @@ export default function Layout() {
           )}
 
           <div className="page-context">
-            {workspaceLogo ? (
+            {workspaceLogo && (
               <img 
                 src={getFullImageUrl(workspaceLogo)} 
                 alt="" 
                 className="header-workspace-logo" 
                 onError={(e) => e.target.style.display = 'none'}
               />
-            ) : null}
-            <div className="context-text">
-              <span className="context-label hidden sm:block">{workspaceName || 'Global View'}</span>
-              <h2 className="context-title">
+            )}
+            <div className="context-text min-w-0">
+              <span className="context-label truncate block text-indigo-400">
+                {workspaceName || 'Global View'}
+              </span>
+              <h2 className="context-title truncate">
                 {location.pathname.split('/').filter(Boolean).pop()?.replace(/-/g, ' ') || 'Dashboard'}
               </h2>
             </div>

@@ -288,7 +288,10 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
   const [connectionQuality, setConnectionQuality] = useState('Excellent');
   const [showConnectionPanel, setShowConnectionPanel] = useState(false);
   
+  const [showShareModal, setShowShareModal] = useState(false);
+  
   const room = useRoomContext();
+
   const LK_Participants = useParticipants();
   const { localParticipant } = useLocalParticipant();
 
@@ -553,39 +556,41 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
              )}
           </div>
           
-          <AdvancedControlBar 
-            onLeave={onLeave}
-            sidebarView={sidebarView}
-            onToggleSidebar={(v) => setSidebarView(sidebarView === v ? null : v)}
-            recordingActive={recordingActive}
-            onRecordingToggle={() => setRecordingActive(!recordingActive)}
-            handRaised={handRaised}
-            onHandRaise={toggleRaiseHand}
-            muted={muted}
-            onMuteToggle={handleMuteToggle}
-            videoOff={videoOff}
-            onVideoToggle={handleVideoToggle}
-            onSettings={() => setShowSettings(!showSettings)}
-            onMoreToggle={() => setShowMoreMenu(!showMoreMenu)}
-            showMoreMenu={showMoreMenu}
-            screenSharing={screenSharing}
-            onScreenShare={handleScreenShare}
-            isInitiator={isInitiator}
-            noiseSuppression={noiseSuppression}
-            onNoiseSuppressionToggle={() => setNoiseSuppression(!noiseSuppression)}
-            cameraDevices={cameraDevices}
-            selectedCamera={selectedCamera}
-            onCameraChange={setSelectedCamera}
-            showWhiteboard={showWhiteboard}
-            onWhiteboardToggle={() => setShowWhiteboard(!showWhiteboard)}
-            isCinematic={isCinematic}
-            onCinematicToggle={() => setIsCinematic(!isCinematic)}
-            layoutMode={layoutMode}
-            onLayoutChange={(l) => setLayoutMode(l)}
-            onMuteAll={handleMuteAll}
-            onEndMeeting={handleEndMeeting}
-            onStatsToggle={() => setShowConnectionPanel(!showConnectionPanel)}
-          />
+            <AdvancedControlBar 
+              onLeave={onLeave}
+              sidebarView={sidebarView}
+              onToggleSidebar={(v) => setSidebarView(sidebarView === v ? null : v)}
+              recordingActive={recordingActive}
+              onRecordingToggle={() => setRecordingActive(!recordingActive)}
+              handRaised={handRaised}
+              onHandRaise={toggleRaiseHand}
+              muted={muted}
+              onMuteToggle={handleMuteToggle}
+              videoOff={videoOff}
+              onVideoToggle={handleVideoToggle}
+              onSettings={() => setShowSettings(!showSettings)}
+              onMoreToggle={() => setShowMoreMenu(!showMoreMenu)}
+              showMoreMenu={showMoreMenu}
+              screenSharing={screenSharing}
+              onScreenShare={handleScreenShare}
+              isInitiator={isInitiator}
+              noiseSuppression={noiseSuppression}
+              onNoiseSuppressionToggle={() => setNoiseSuppression(!noiseSuppression)}
+              cameraDevices={cameraDevices}
+              selectedCamera={selectedCamera}
+              onCameraChange={setSelectedCamera}
+              showWhiteboard={showWhiteboard}
+              onWhiteboardToggle={() => setShowWhiteboard(!showWhiteboard)}
+              isCinematic={isCinematic}
+              onCinematicToggle={() => setIsCinematic(!isCinematic)}
+              layoutMode={layoutMode}
+              onLayoutChange={(l) => setLayoutMode(l)}
+              onMuteAll={handleMuteAll}
+              onEndMeeting={handleEndMeeting}
+              onStatsToggle={() => setShowConnectionPanel(!showConnectionPanel)}
+              onShareToggle={() => setShowShareModal(true)}
+            />
+
         </div>
 
         <PremiumSidebar 
@@ -642,6 +647,17 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
         `}</style>
         <MeetingStyles />
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <MeetingShareModal 
+          isOpen={showShareModal} 
+          onClose={() => setShowShareModal(false)} 
+          roomId={roomId} 
+          roomName={roomInfo?.name || 'Live Meeting'}
+        />
+      )}
+
 
       {/* Connection Stats Panel */}
       {showConnectionPanel && (
@@ -1404,8 +1420,10 @@ function AdvancedControlBar({
   onLayoutChange,
   onMuteAll,
   onEndMeeting,
-  onStatsToggle
+  onStatsToggle,
+  onShareToggle
 }) {
+
   const menuRef = useRef(null);
 
   // Close menu when clicking outside
@@ -1457,12 +1475,13 @@ function AdvancedControlBar({
         <div className="flex items-center gap-2">
           <button
             id="copy-link-btn"
-            onClick={copyMeetingLink}
-            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-transparent text-slate-400 hover:text-white hover:bg-white/5"
-            title="Copy Meeting Link"
+            onClick={onShareToggle}
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-indigo-600/20 text-indigo-400 hover:text-white hover:bg-indigo-600 shadow-lg shadow-indigo-500/10"
+            title="Share & Invite"
           >
             <FiShare2 size={18} />
           </button>
+
           
           <button
             onClick={onStatsToggle}
@@ -1879,7 +1898,92 @@ function DeviceSettingsModal({
   );
 }
 
-function PremiumButton({ icon, label, onClick, active = false, size = 'md' }) {
+function MeetingShareModal({ isOpen, onClose, roomId, roomName }) {
+  const [copied, setCopied] = useState(false);
+  const meetingLink = window.location.href;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(meetingLink)}&bgcolor=ffffff&color=020617`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(meetingLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-2xl z-[2000] flex items-center justify-center p-4">
+      <div className="bg-[#0f172a] rounded-[3rem] border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.9)] max-w-lg w-full p-10 animate-modalPop relative overflow-hidden">
+        {/* Decorative background */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/10 blur-[100px] -mr-32 -mt-32"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/10 blur-[100px] -ml-32 -mb-32"></div>
+
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-white font-black text-2xl tracking-tighter">Invite Participants</h2>
+              <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mt-1">Broadcast Link & QR Entry</p>
+            </div>
+            <button onClick={onClose} className="w-10 h-10 rounded-2xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all border border-white/5">
+              <FaTimes size={18} />
+            </button>
+          </div>
+
+          <div className="space-y-8">
+            {/* QR Code Section */}
+            <div className="flex flex-col items-center gap-6">
+              <div className="p-4 bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-4 border-indigo-500/20">
+                <img src={qrUrl} alt="Meeting QR Code" className="w-48 h-48 sm:w-56 sm:h-56" />
+              </div>
+              <p className="text-slate-400 text-[10px] font-bold text-center uppercase tracking-widest leading-relaxed">
+                Scan this code with a mobile device<br />to join the meeting instantly
+              </p>
+            </div>
+
+            {/* Link Section */}
+            <div className="space-y-3">
+              <label className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] px-2">Meeting URL</label>
+              <div className="flex gap-2">
+                <div className="flex-1 px-5 py-4 bg-black/40 rounded-2xl border border-white/5 text-slate-300 text-xs font-mono truncate">
+                  {meetingLink}
+                </div>
+                <button 
+                  onClick={handleCopy}
+                  className={`px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                    copied ? 'bg-green-600 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20'
+                  }`}
+                >
+                  {copied ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+            </div>
+
+            {/* Room Info */}
+            <div className="p-6 bg-white/5 rounded-[2rem] border border-white/5">
+               <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                    <FaVideo size={20} />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-bold text-sm">{roomName}</h4>
+                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Meeting ID: {roomId}</p>
+                  </div>
+               </div>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="w-full mt-10 h-16 bg-white/5 hover:bg-white/10 text-white font-black rounded-2xl border border-white/10 transition-all text-xs uppercase tracking-widest"
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
   const sizeClass = {
     sm: 'h-10 w-10 text-base',
     md: 'h-11 w-11 text-lg',
