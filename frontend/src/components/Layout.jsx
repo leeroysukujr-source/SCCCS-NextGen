@@ -11,8 +11,6 @@ import SearchBar from './SearchBar'
 import './Layout.css'
 import useTheme from '../hooks/useTheme'
 import PresenceManager from './PresenceManager'
-import UserProfileDropdown from './UserProfileDropdown'
-import { useSettingsStore } from '../store/settingsStore'
 import { useFeatureStore } from '../store/featureStore'
 import { useBranding } from '../contexts/BrandingContext'
 
@@ -264,9 +262,6 @@ export default function Layout() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="main-content">
-        <PresenceManager />
         <div className="content-container">
           <Suspense fallback={<div className="loading-spinner-container"><div className="spinner"></div></div>}>
             <Outlet />

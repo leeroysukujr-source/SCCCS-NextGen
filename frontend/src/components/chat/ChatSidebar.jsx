@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { channelsAPI } from '../../api/channels';
 import { directMessagesAPI } from '../../api/directMessages';
+import { useSocket } from '../../contexts/SocketProvider';
+import { useAuthStore } from '../../store/authStore';
 import { FiHash, FiLock, FiUser, FiSearch, FiMessageSquare, FiPlus, FiMessageCircle } from 'react-icons/fi';
 import { formatDistanceToNow } from 'date-fns';
 import './ChatSidebar.css';
 
 const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
+  const { user: currentUser } = useAuthStore();
+  const { socket } = useSocket();
   const [activeTab, setActiveTab] = useState(window.location.pathname.includes('direct-messages') ? 'dms' : 'channels'); 
   const [channels, setChannels] = useState([]);
   const [dms, setDms] = useState([]);
@@ -13,7 +17,6 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
   const [search, setSearch] = useState('');
   const [error, setError] = useState(null);
   const isFetchingRef = useRef(false);
-  const timerRef = useRef(null);
 
   const fetchData = async () => {
     if (isFetchingRef.current) return;
@@ -51,17 +54,88 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
     } finally {
       setLoading(false);
       isFetchingRef.current = false;
-      // Schedule next fetch only AFTER this one is done
-      timerRef.current = setTimeout(fetchData, 30000); // Increased to 30s for better server health
     }
   };
 
   useEffect(() => {
     fetchData();
-    return () => {
-        if (timerRef.current) clearTimeout(timerRef.current);
-    };
   }, []);
+
+  // Real-time Socket Listeners for Sidebar Updates
+  useEffect(() => {
+    if (socket) {
+      const handleSocketMessage = (msg) => {
+        console.log('[ChatSidebar] Real-time message received:', msg);
+        
+        // Handle Channel Message
+        if (msg.channel_id) {
+          setChannels(prev => {
+            const index = prev.findIndex(c => String(c.id) === String(msg.channel_id));
+            if (index === -1) return prev; // Not in a channel we track
+
+            const newChannels = [...prev];
+            const channel = { ...newChannels[index] };
+            
+            channel.last_message = {
+              content: msg.content,
+              created_at: msg.created_at || new Date().toISOString()
+            };
+
+            // Increment unread if not currently viewing this channel
+            if (selectedId !== channel.id || selectedType !== 'channel') {
+              channel.unread_count = (channel.unread_count || 0) + 1;
+            }
+
+            newChannels.splice(index, 1);
+            newChannels.unshift(channel); // Move to top
+            return newChannels;
+          });
+        } 
+        // Handle Direct Message
+        else if (msg.sender_id) {
+          setDms(prev => {
+            // In DMs, the 'id' in our state is the other user's ID
+            const otherUserId = String(msg.sender_id) === String(currentUser?.id) ? msg.recipient_id : msg.sender_id;
+            const index = prev.findIndex(d => String(d.id) === String(otherUserId));
+            
+            if (index === -1) {
+                // If new conversation, we should probably fetch data again or wait for poll
+                // But let's trigger a fetch to be safe
+                fetchData();
+                return prev;
+            }
+
+            const newDms = [...prev];
+            const dm = { ...newDms[index] };
+            
+            dm.last_message = {
+              content: msg.content,
+              created_at: msg.created_at || new Date().toISOString()
+            };
+
+            // Increment unread if message is FROM someone else and we aren't viewing them
+            if (String(msg.sender_id) !== String(currentUser?.id)) {
+                if (selectedId !== dm.id || selectedType !== 'dm') {
+                    dm.unread_count = (dm.unread_count || 0) + 1;
+                }
+            }
+
+            newDms.splice(index, 1);
+            newDms.unshift(dm); // Move to top
+            return newDms;
+          });
+        }
+      };
+
+      socket.on('message_received', handleSocketMessage);
+      socket.on('direct_message_received', handleSocketMessage);
+
+      return () => {
+        socket.off('message_received', handleSocketMessage);
+        socket.off('direct_message_received', handleSocketMessage);
+      };
+    }
+  }, [socket, selectedId, selectedType, currentUser?.id]);
 
   const currentItems = activeTab === 'channels' ? channels : dms;
   const filteredItems = currentItems.filter(item => 

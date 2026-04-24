@@ -28,12 +28,10 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
       if (selectedChat.type === 'channel') {
         data = await messagesAPI.getMessages(selectedChat.id);
       } else {
-        // Fallback to conversation_id if available, otherwise use id
         const dmId = selectedChat.conversation_id || selectedChat.id;
         data = await directMessagesAPI.getConversation(dmId);
       }
       
-      // Decrypt if necessary
       const decrypted = await Promise.all((Array.isArray(data) ? data : []).map(async (msg) => {
         if (msg.is_encrypted) {
           try {
@@ -58,32 +56,35 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
   };
 
   useEffect(() => {
-    if (selectedChat) {
+    if (selectedChat && socket) {
       fetchMessages();
-      // Room joining logic via socket
-      if (socket) {
-        const roomId = selectedChat.type === 'channel' ? `channel_${selectedChat.id}` : `user_${user?.id}`;
-        socket.emit('join_room', { room: roomId });
 
-        // Listen for new messages real-time
-        const handleNewMessage = (msg) => {
-            // Verify if message belongs to current chat
-            const currentRoomId = selectedChat.type === 'channel' ? selectedChat.id : (selectedChat.conversation_id || selectedChat.id);
-            const msgRoomId = msg.channel_id || msg.conversation_id || msg.sender_id;
-            
-            if (String(msgRoomId) === String(currentRoomId)) {
-                setMessages(prev => [...prev, msg]);
-            }
-        };
-
-        socket.on('message_received', handleNewMessage);
-        socket.on('direct_message_received', handleNewMessage);
-
-        return () => {
-            socket.off('message_received', handleNewMessage);
-            socket.off('direct_message_received', handleNewMessage);
-        };
+      // Room joining logic
+      if (selectedChat.type === 'channel') {
+        socket.emit('join_channel', { channel_id: selectedChat.id });
       }
+
+      const handleNewMessage = (msg) => {
+        if (selectedChat.type === 'channel') {
+          if (String(msg.channel_id) === String(selectedChat.id)) {
+            setMessages(prev => [...prev, msg]);
+          }
+        } else {
+          // For DMs, determine if message belongs to this conversation
+          const msgPartnerId = String(msg.sender_id) === String(user?.id) ? msg.recipient_id : msg.sender_id;
+          if (String(msgPartnerId) === String(selectedChat.id)) {
+            setMessages(prev => [...prev, msg]);
+          }
+        }
+      };
+
+      socket.on('message_received', handleNewMessage);
+      socket.on('direct_message_received', handleNewMessage);
+
+      return () => {
+        socket.off('message_received', handleNewMessage);
+        socket.off('direct_message_received', handleNewMessage);
+      };
     }
   }, [selectedChat, socket, user?.id]);
 
@@ -119,7 +120,6 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
       }
       
       setNewMessage('');
-      // fetchMessages(); // No longer needed as we have real-time listeners
     } catch (err) {
       console.error('Failed to send message', err);
     }
@@ -127,7 +127,6 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
 
   const isOwnMessage = (msg) => {
     if (!msg || !user) return false;
-    // Handle both Channel (author_id) and DM (sender_id) structures
     const authorId = msg.author_id || msg.sender_id;
     return String(authorId) === String(user.id) || authorId === 'me';
   };
