@@ -131,10 +131,13 @@ export default function Layout() {
   const filteredNavGroups = navGroups.filter(group => group.items && group.items.length > 0)
 
   return (
-    <div className="layout">
+    <div className={`layout ${isSidebarCollapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}`}>
       <header className="top-navbar">
         <div className="top-navbar-left">
-          <button className="mobile-menu-toggle-navbar" onClick={() => setMobileMenuOpen(true)} title="Open Menu">
+          <button className="desktop-menu-toggle icon-btn hidden lg:flex" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} title="Toggle Menu">
+            <FiMenu />
+          </button>
+          <button className="mobile-menu-toggle-navbar lg:hidden" onClick={() => setMobileMenuOpen(true)} title="Open Menu">
             <FiMenu />
           </button>
           
@@ -192,9 +195,11 @@ export default function Layout() {
           {platformLogo && (
             <img src={getFullImageUrl(platformLogo)} alt="Platform Logo" className="sidebar-logo" />
           )}
-          <div className="hidden lg:block scccs-branding">
-            <span className="scccs-text">SCCCS</span>
-            <span className="nextgen-text">EDUCATIONAL OS</span>
+          <div className="hidden lg:flex items-center justify-between w-full">
+            <div className="scccs-branding">
+              <span className="scccs-text">SCCCS</span>
+              <span className="nextgen-text">EDUCATIONAL OS</span>
+            </div>
           </div>
         </div>
 

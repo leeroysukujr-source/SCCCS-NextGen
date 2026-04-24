@@ -506,6 +506,7 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
         handsRaised={new Set()} 
         isInitiator={isInitiator} 
         onReturn={() => onSwitchRoom(roomInfo?.parent_id)}
+        onLeave={onLeave}
       />
 
       {/* No button here to avoid icon mismatch */}
@@ -694,7 +695,7 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
 
 // ============= PREMIUM COMPONENTS =============
 
-function PremiumMeetingHeader({ roomId, roomInfo = {}, recordingActive, handsRaised = new Set(), isInitiator, onReturn }) {
+function PremiumMeetingHeader({ roomId, roomInfo = {}, recordingActive, handsRaised = new Set(), isInitiator, onReturn, onLeave }) {
   const [elapsed, setElapsed] = useState(0);
   const participants = useParticipants();
 
@@ -716,6 +717,13 @@ function PremiumMeetingHeader({ roomId, roomInfo = {}, recordingActive, handsRai
     <div className="h-16 md:h-20 border-b backdrop-blur-2xl flex items-center justify-between px-4 md:px-8 shrink-0 shadow-2xl" style={{ background: 'var(--mt-header-grad)', borderColor: 'var(--mt-border)' }}>
       {/* Left - Title & Status */}
       <div className="flex items-center gap-4">
+        <button 
+          onClick={onLeave || (() => window.history.length > 2 ? window.history.back() : window.location.href = '/dashboard')}
+          className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white border border-white/5 transition-all shrink-0"
+          title="Go Back"
+        >
+          <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" height="18" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"></path></svg>
+        </button>
         <h2 className="font-bold text-xl truncate max-w-xs" style={{ color: 'var(--mt-text-primary)' }}>{(roomInfo && (roomInfo.name || roomInfo.title)) || 'Live Meeting'}</h2>
         <div className="px-3 py-1.5 rounded-lg text-xs border cursor-pointer transition-all" style={{ background: 'var(--vb-hover-bg)', color: 'var(--mt-text-secondary)', borderColor: 'var(--mt-border)' }}>
           {roomId?.substring(0, 8)}...
@@ -833,8 +841,13 @@ function PremiumSidebar({
         </button>
       </div>
       {/* Header with Tab Selection */}
-      <div className="flex flex-col border-b px-4 pt-6 pb-4" style={{ borderColor: 'var(--mt-border)', background: 'transparent' }}>
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 px-2" style={{ color: 'var(--mt-text-secondary)' }}>Operational Interface</h3>
+      <div className="flex flex-col border-b px-4 pt-6 pb-4 relative" style={{ borderColor: 'var(--mt-border)', background: 'transparent' }}>
+        <div className="flex items-center justify-between mb-4 px-2">
+           <h3 className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--mt-text-secondary)' }}>Operational Interface</h3>
+           <button onClick={onClose} className="hidden md:flex items-center justify-center w-6 h-6 rounded-md hover:bg-white/10 text-slate-400 hover:text-white transition-all cursor-pointer" title="Close Panel">
+              <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 320 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"></path></svg>
+           </button>
+        </div>
         <div className="flex gap-1.5 p-1 rounded-2xl border" style={{ background: 'var(--vb-hover-bg)', borderColor: 'var(--mt-border)' }}>
           {tabs.map(tab => (
             <button

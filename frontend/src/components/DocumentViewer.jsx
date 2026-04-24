@@ -34,7 +34,11 @@ export default function DocumentViewer({ file, onClose, onOpenAI }) {
         setLoading(false)
       } catch (err) {
         console.error('Error loading file:', err)
-        setError('Failed to load document. Please try again.')
+        if (err.response && err.response.status === 404) {
+          setError('This document is no longer available on the server. It may have been deleted.')
+        } else {
+          setError('Failed to load document. Please try again.')
+        }
         setLoading(false)
       }
     }
