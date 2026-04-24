@@ -136,6 +136,7 @@ ensure_livekit_running()
 
 from app import create_app, socketio
 from eventlet import websocket
+import socketio as s_io
 
 # Shared memory for document synchronization (Relay)
 document_rooms = {} 
@@ -160,6 +161,17 @@ def collab_ws_handler(ws):
 
 app = create_app(Config)
 
+# Correctly wrap the Flask app with the SocketIO middleware at top level
+# This ensures gunicorn can find 'application' and that it handles Socket.IO correctly.
+socketio_app = s_io.WSGIApp(socketio, app)
+
+def application(environ, start_response):
+    """Entry point for Gunicorn (Render) and local execution."""
+    path = environ.get('PATH_INFO', '')
+    if path.startswith('/collab'):
+        return collab_ws_handler(environ, start_response)
+    return socketio_app(environ, start_response)
+
 # Self-Bootstrapping Seeder
 try:
     from seeders import run_all_seeders
@@ -168,19 +180,6 @@ except Exception as e:
     print(f"[run.py] Seeding status: {e}")
 
 if __name__ == '__main__':
-    import socketio as s_io # Avoid shadowing the global socketio
-    
-    # Correctly wrap the Flask app with the SocketIO middleware
-    # This ensures that /socket.io routes are handled by SocketIO
-    socketio_app = s_io.WSGIApp(socketio, app)
-
-    # Dispatcher to handle /collab for Yjs (raw WS) and everything else for Flask-SocketIO
-    def application(environ, start_response):
-        path = environ.get('PATH_INFO', '')
-        if path.startswith('/collab'):
-            return collab_ws_handler(environ, start_response)
-        return socketio_app(environ, start_response)
-
     print(f"[run.py] Starting Unified Real-Time Server on {Config.SERVER_HOST}:{Config.SERVER_PORT}")
     print(f"[run.py] - /socket.io -> Chat & Awareness (SocketIO)")
     print(f"[run.py] - /collab    -> Document Synchronization (Yjs/Raw WS)")
