@@ -103,25 +103,35 @@ def upload_system_logo():
             return jsonify({'error': 'Failed to save logo', 'success': False}), 500
             
         # 2. Update DB: Ensure SYSTEM_LOGO_URL is updated directly in the table
-        # Standardizing on key-based update to bypass any abstraction layers during critical branding changes.
+        import time
+        cache_buster = int(time.time())
+        # Add cache buster to force browsers to fetch the new image
+        versioned_logo_url = f"{logo_url}?v={cache_buster}"
+        
         SystemSetting.query.filter_by(key='SYSTEM_LOGO_URL').update({
-            'value': logo_url,
+            'value': versioned_logo_url,
             'category': 'ui_ux',
             'is_public': True
         })
         db.session.commit()
         
         # 3. Clear Redis Cache: force-refresh the server-side cache for all sessions
-        # Instruction: Clear Redis Cache: redis_client.delete('public_settings')
         cache_manager.delete('public_settings')
         
-        print(f"[Master Brand] System logo updated and cache invalidated: {logo_url}")
+        # 4. Global Real-time Notification
+        from app import socketio
+        socketio.emit('system_setting_updated', {
+            'key': 'SYSTEM_LOGO_URL',
+            'value': versioned_logo_url
+        })
+        
+        print(f"[Master Brand] System logo updated and cache invalidated: {versioned_logo_url}")
         
         return jsonify({
             'success': True,
             'message': 'Global System Logo updated and cache invalidated',
-            'logo_url': logo_url,
-            'full_url': logo_url
+            'logo_url': versioned_logo_url,
+            'full_url': versioned_logo_url
         }), 200
         
     except Exception as e:

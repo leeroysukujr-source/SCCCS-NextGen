@@ -108,10 +108,21 @@ def upload_avatar():
         file_extension = None
         file_content = None
 
+        import base64
+        import imghdr
+        import io
+        import os
+
         # Check for FileStorage (multipart/form-data)
         if 'file' in request.files:
             file = request.files['file']
             if file.filename != '':
+                # Check size before reading into memory (5MB limit)
+                file.seek(0, os.SEEK_END)
+                if file.tell() > 5 * 1024 * 1024:
+                    return jsonify({'error': 'File too large. Maximum size is 5MB.', 'success': False}), 400
+                file.seek(0)
+                
                 filename = secure_filename(file.filename)
                 file_extension = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'jpg'
                 unique_filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S_')}{current_user_id}.{file_extension}"
@@ -119,6 +130,11 @@ def upload_avatar():
         
         # Check for base64 JSON payload
         elif request.is_json:
+            # First check content length from headers to avoid parsing massive JSON
+            content_length = request.headers.get('Content-Length')
+            if content_length and int(content_length) > 7 * 1024 * 1024: # 7MB for base64 overhead
+                return jsonify({'error': 'Payload too large. Maximum size is 5MB.', 'success': False}), 400
+                
             data = request.get_json()
             if 'image' in data or 'avatar' in data:
                 b64_data = data.get('image') or data.get('avatar')
@@ -126,6 +142,9 @@ def upload_avatar():
                     b64_data = b64_data.split(',')[1]
                 
                 file_content = base64.b64decode(b64_data)
+                if len(file_content) > 5 * 1024 * 1024:
+                    return jsonify({'error': 'File too large. Maximum size is 5MB.', 'success': False}), 400
+                
                 # Determine extension from content
                 file_extension = imghdr.what(None, h=file_content) or 'jpg'
                 unique_filename = f"b64_{datetime.now().strftime('%Y%m%d_%H%M%S_')}{current_user_id}.{file_extension}"
@@ -133,12 +152,7 @@ def upload_avatar():
         if not file_content:
             return jsonify({'error': 'No image data provided. Support multipart/form-data or base64 JSON.'}), 400
 
-        # Memory limit enforcement for Render (5MB max)
-        if len(file_content) > 5 * 1024 * 1024:
-            return jsonify({'error': 'File too large. Maximum size is 5MB.', 'success': False}), 400
-
         # Security Enforcement: Strict image/* Content-Type checking to prevent RCE
-        import imghdr
         img_type = imghdr.what(None, h=file_content)
         if not img_type:
             return jsonify({'error': 'Invalid image format. RCE Prevention: Only image/ files are allowed.', 'success': False}), 400
