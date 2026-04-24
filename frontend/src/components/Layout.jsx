@@ -134,10 +134,10 @@ export default function Layout() {
     <div className={`layout ${isSidebarCollapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}`}>
       <header className="top-navbar">
         <div className="top-navbar-left">
-          <button className="desktop-menu-toggle icon-btn hidden lg:flex" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} title={isSidebarCollapsed ? "Expand Menu" : "Collapse Menu"}>
+          <button className="desktop-menu-toggle icon-btn hidden md:flex" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} title={isSidebarCollapsed ? "Expand Menu" : "Collapse Menu"}>
             {isSidebarCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
           </button>
-          <button className="mobile-menu-toggle-navbar lg:hidden" onClick={() => setMobileMenuOpen(true)} title="Open Menu">
+          <button className="mobile-menu-toggle-navbar md:hidden" onClick={() => setMobileMenuOpen(true)} title="Open Menu">
             <FiMenu />
           </button>
           

@@ -20,13 +20,21 @@ def get_s3_client():
         if not endpoint:
             return None
 
+        from botocore.config import Config
+        s3_config = Config(
+            connect_timeout=5,
+            read_timeout=5,
+            retries={'max_attempts': 1}
+        )
+        
         session = boto3.session.Session()
         s3 = session.client(
             's3',
             endpoint_url=endpoint,
             aws_access_key_id=access_key,
             aws_secret_access_key=secret_key,
-            region_name=region
+            region_name=region or 'us-east-1',
+            config=s3_config
         )
         return s3
     except Exception as e:
