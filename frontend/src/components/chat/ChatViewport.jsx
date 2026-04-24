@@ -121,9 +121,6 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
     );
   }
 
-  const isOwnMessage = (msg) => {
-    return msg.sender_id === user?.id || msg.sender_id === 'me';
-  };
 
   return (
     <div className="chat-viewport-container">
