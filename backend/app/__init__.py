@@ -104,32 +104,35 @@ def create_app(config_class=Config):
     final_origins = cors_origins if cors_origins else "*"
     allow_credentials = True if cors_origins else False
 
-    # Maximum Robustness CORS - Senior DevOps Requirement: allow_headers="*"
-    CORS(app, 
-         resources={r"/api/*": {"origins": final_origins}}, 
-         supports_credentials=allow_credentials,
-         allow_headers="*", # Unblocks 'bypass-tunnel-reminder' and others
-         expose_headers=["Content-Type", "Authorization"],
-         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"])
+    # Maximum Robustness CORS - Fully Custom Implementation
+    # Flask-CORS has known edge cases when supports_credentials=True and custom headers are sent.
+    # We use a bulletproof interceptor for OPTIONS requests.
+    @app.before_request
+    def handle_options():
+        if request.method == 'OPTIONS':
+            return '', 200
 
     @app.after_request
     def add_cors_headers(response):
         origin = request.headers.get('Origin')
-        # Only add if not already present to avoid duplicates
-        if origin and 'Access-Control-Allow-Origin' not in response.headers:
-            if final_origins == "*" or origin in (cors_origins if isinstance(cors_origins, list) else []):
-                response.headers['Access-Control-Allow-Origin'] = origin
-                response.headers['Access-Control-Allow-Credentials'] = 'true'
-                
-                # For credentials=true, browsers reject '*' for Allow-Headers. We must echo them.
-                req_headers = request.headers.get('Access-Control-Request-Headers')
-                if req_headers:
-                    response.headers['Access-Control-Allow-Headers'] = req_headers
-                else:
-                    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, bypass-tunnel-reminder, x-requested-with'
-                
-                if 'Access-Control-Allow-Methods' not in response.headers:
-                    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
+        
+        # Determine valid origin
+        valid_origin = origin if (final_origins == "*" or origin in (cors_origins if isinstance(cors_origins, list) else [])) else None
+        
+        if valid_origin:
+            response.headers['Access-Control-Allow-Origin'] = valid_origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            
+            # Dynamically echo requested headers to satisfy strict browser requirements
+            req_headers = request.headers.get('Access-Control-Request-Headers')
+            if req_headers:
+                response.headers['Access-Control-Allow-Headers'] = req_headers
+            else:
+                response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, bypass-tunnel-reminder, x-requested-with'
+            
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
+            response.headers['Access-Control-Expose-Headers'] = 'Content-Type, Authorization'
+            
         return response
 
     # CORS configuration - Senior Deployment Hardening

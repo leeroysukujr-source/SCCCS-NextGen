@@ -7,6 +7,16 @@ from app.models import User
 
 settings_bp = Blueprint('settings', __name__)
 
+@settings_bp.route('', methods=['GET'])
+@settings_bp.route('/', methods=['GET'])
+@jwt_required(optional=True)
+def get_all_settings():
+    """Get all settings"""
+    try:
+        return jsonify(settings_service.get_system_settings(public_only=True)), 200
+    except Exception:
+        return jsonify([]), 200
+
 @settings_bp.route('/public', methods=['GET'])
 def get_public_settings():
     """Get all public (non-sensitive) system settings"""
