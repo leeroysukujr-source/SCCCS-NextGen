@@ -149,11 +149,11 @@ export default function Layout() {
               <img 
                 src={getFullImageUrl(workspaceLogo)} 
                 alt={workspaceName} 
-                className="header-workspace-logo hidden xs:block" 
+                className="header-workspace-logo" 
               />
             )}
             <div className="context-text">
-              <span className="context-label hidden sm:block">{workspaceName || 'Global View'}</span>
+              <span className="context-label">{workspaceName || 'Global View'}</span>
               <h2 className="context-title">
                 {location.pathname.split('/').filter(Boolean).pop()?.replace(/-/g, ' ') || 'Dashboard'}
               </h2>
@@ -181,7 +181,7 @@ export default function Layout() {
         </div>
 
         <div className="top-navbar-right">
-          <button className="icon-btn search-trigger hidden sm:flex" onClick={() => setShowSearch(true)} title="Search Everywhere">
+          <button className="icon-btn search-trigger" onClick={() => setShowSearch(true)} title="Search Everywhere">
             <FiSearch />
           </button>
           
