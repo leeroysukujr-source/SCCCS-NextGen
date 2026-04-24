@@ -4,7 +4,7 @@ import { Outlet, useNavigate, useLocation, NavLink } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { getFullImageUrl } from '../utils/api'
 import {
-  FiVideo, FiMessageSquare, FiMessageCircle, FiUser, FiLogOut, FiArrowRight, FiChevronLeft,
+  FiVideo, FiMessageSquare, FiMessageCircle, FiUser, FiLogOut, FiArrowRight, FiChevronLeft, FiChevronRight,
   FiUsers, FiSettings, FiSearch, FiActivity, FiShield, FiGrid, FiBookOpen, FiMenu, FiX
 } from 'react-icons/fi'
 import SearchBar from './SearchBar'
@@ -134,18 +134,16 @@ export default function Layout() {
     <div className={`layout ${isSidebarCollapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}`}>
       <header className="top-navbar">
         <div className="top-navbar-left">
-          <button className="desktop-menu-toggle icon-btn hidden lg:flex" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} title="Toggle Menu">
-            <FiMenu />
+          <button className="desktop-menu-toggle icon-btn hidden lg:flex" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} title={isSidebarCollapsed ? "Expand Menu" : "Collapse Menu"}>
+            {isSidebarCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
           </button>
           <button className="mobile-menu-toggle-navbar lg:hidden" onClick={() => setMobileMenuOpen(true)} title="Open Menu">
             <FiMenu />
           </button>
           
-          {location.pathname !== '/' && location.pathname !== '/dashboard' && (
-            <button className="nav-back-btn" onClick={handleBack} title="Go Back">
-              <FiChevronLeft />
-            </button>
-          )}
+          <button className="nav-back-btn" onClick={handleBack} title="Go Back">
+            <FiChevronLeft />
+          </button>
 
           <div className="page-context">
             {workspaceLogo && (
