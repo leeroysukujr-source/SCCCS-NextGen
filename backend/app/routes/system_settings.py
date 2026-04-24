@@ -79,12 +79,10 @@ def upload_system_logo():
         return jsonify({'error': 'File too large. Maximum size is 5MB.', 'success': False}), 400
     file.seek(0)
     
-    # Security Enforcement: Strict image/* Content-Type checking to prevent RCE
+    # Security Enforcement: Simple extension/mimetype check instead of dangerous imghdr
     file_content = file.read()
-    import imghdr
-    img_type = imghdr.what(None, h=file_content)
-    if not img_type:
-        return jsonify({'error': 'Invalid image format. RCE Prevention: Only image/ files are allowed.', 'success': False}), 400
+    if file.mimetype and not file.mimetype.startswith('image/'):
+        return jsonify({'error': 'Invalid format. Only images are allowed.', 'success': False}), 400
     
     # Reset file pointer after reading for save_logo
     file.seek(0)

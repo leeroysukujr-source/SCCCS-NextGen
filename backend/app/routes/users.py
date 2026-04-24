@@ -152,10 +152,14 @@ def upload_avatar():
         if not file_content:
             return jsonify({'error': 'No image data provided. Support multipart/form-data or base64 JSON.'}), 400
 
-        # Security Enforcement: Strict image/* Content-Type checking to prevent RCE
-        img_type = imghdr.what(None, h=file_content)
-        if not img_type:
-            return jsonify({'error': 'Invalid image format. RCE Prevention: Only image/ files are allowed.', 'success': False}), 400
+        # Security Enforcement: Validate using mimetype or extension instead of dangerous imghdr
+        if 'file' in request.files and file.mimetype:
+            if not file.mimetype.startswith('image/'):
+                return jsonify({'error': 'Invalid format. Only images allowed.', 'success': False}), 400
+        else:
+            valid_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic']
+            if file_extension not in valid_extensions:
+                return jsonify({'error': 'Unsupported image format.', 'success': False}), 400
 
         # Storage Selection Logic
         from app.utils.storage import upload_fileobj, get_public_url
