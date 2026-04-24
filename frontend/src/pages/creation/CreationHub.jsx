@@ -49,8 +49,90 @@ const CreationHub = () => {
         );
     }
 
+    return (
+        <div className="min-h-full flex flex-col bg-slate-50 dark:bg-slate-900 w-full overflow-x-hidden">
+            <DashboardHeader user={user} />
+            <div className="flex-1 p-4 md:p-8 space-y-10 md:space-y-16 font-sans w-full max-w-7xl mx-auto box-border">
+                {user?.role !== 'student' && (
+                    <Suspense fallback={<div className="h-64 bg-slate-100 dark:bg-slate-800 rounded-3xl animate-pulse" />}>
+                        <LecturerCoursesSection onOpenTool={handleOpenTool} />
+                    </Suspense>
+                )}
 
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 dark:bg-slate-700/30 rounded-bl-[100px] -mr-8 -mt-8 opacity-50 group-hover:scale-125 transition-transform duration-700"></div>
+                <CreateNewSection onOpenTool={handleOpenTool} user={user} />
+
+                {/* Student Room Section */}
+                {user?.role === 'student' && <StudentRoomSection />}
+
+                <TemplatesSection onOpenTool={handleOpenTool} user={user} />
+                <RecentFilesSection onOpenTool={handleOpenTool} />
+            </div>
+        </div>
+    );
+};
+
+const DashboardHeader = ({ user }) => (
+    <div className="flex items-center justify-between p-4 md:p-8 pb-0 w-full max-w-7xl mx-auto">
+        <div className="flex-1 min-w-0">
+            <h1 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+                Creation Hub
+            </h1>
+            <p className="text-xs md:text-base text-slate-500 dark:text-slate-400 mt-1 md:mt-2 line-clamp-1 md:line-clamp-none">
+                Unified workspace for academic content and assessment design.
+            </p>
+        </div>
+        <div className="flex-shrink-0 ml-4 hidden sm:block">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white dark:border-slate-800 bg-indigo-500 flex items-center justify-center text-white text-xs md:text-sm font-bold ring-2 ring-indigo-500/20 shadow-xl">
+                {user?.first_name?.charAt(0) || 'U'}
+            </div>
+        </div>
+    </div>
+);
+
+const CreateNewSection = ({ onOpenTool, user }) => {
+    const tools = [
+        { id: 'smart_docs', name: 'Smart Doc', icon: <FiFileText size={24} />, color: 'bg-blue-600', desc: 'Advanced Word Processor', subtitle: 'Academic Writing & Docs' },
+        { id: 'data_sheet', name: 'Data Sheet', icon: <FiGrid size={24} />, color: 'bg-green-600', desc: 'Academic Spreadsheet', subtitle: 'Data & Analysis' },
+        { id: 'presentation', name: 'Presentation', icon: <FiMonitor size={24} />, color: 'bg-orange-600', desc: 'Lecture Slides', subtitle: 'Interactive Presentations' },
+        { id: 'rubric', name: 'Rubric Creator', icon: <FiCheckCircle size={24} />, color: 'bg-teal-600', desc: 'Assessment Standards', subtitle: 'Grading Frameworks', role: 'teacher' },
+        { id: 'assignment', name: 'Assignment', icon: <FiPieChart size={24} />, color: 'bg-purple-600', desc: 'Assessment Builder', subtitle: 'Task & Quiz Design', excludedRoles: ['student'] },
+        { id: 'whiteboard', name: 'Whiteboard', icon: <FiPenTool size={24} />, color: 'bg-indigo-600', desc: 'Lesson Planning Board', subtitle: 'Visual Collaboration', excludedRoles: ['student'] },
+    ].filter(tool => (!tool.role || user?.role === tool.role) && (!tool.excludedRoles || !tool.excludedRoles.includes(user?.role)));
+
+    return (
+        <div className="space-y-6 w-full">
+            <h2 className="text-sm md:text-xl font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest flex items-center gap-2">
+                <FiPlus className="text-indigo-500" /> Start a new project
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 w-full">
+                {tools.map(tool => (
+                    <div
+                        key={tool.id}
+                        className="group bg-white dark:bg-slate-800 rounded-[28px] md:rounded-[40px] border border-slate-100 dark:border-slate-700 hover:shadow-2xl transition-all p-6 md:p-10 flex flex-col relative overflow-hidden shadow-sm hover:-translate-y-1 duration-300"
+                    >
+                        <div className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl ${tool.color} text-white flex items-center justify-center mb-4 md:mb-6 shadow-lg group-hover:rotate-6 transition-all duration-500`}>
+                            {tool.icon}
+                        </div>
+                        <h3 className="font-black text-slate-900 dark:text-white text-lg md:text-2xl">{tool.name}</h3>
+                        <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">{tool.subtitle}</p>
+                        <p className="text-[10px] md:text-xs text-slate-400 mt-3 line-clamp-2 leading-relaxed opacity-80">{tool.desc}</p>
+
+                        <div className="mt-8 md:mt-10 flex items-center gap-3">
+                            <button
+                                onClick={() => onOpenTool(tool.id)}
+                                className="flex-1 bg-slate-900 dark:bg-white dark:text-slate-900 text-white py-3 md:py-4 rounded-2xl md:rounded-[24px] font-black text-[10px] md:text-xs hover:opacity-90 transition-all shadow-md active:scale-95"
+                            >
+                                CREATE NEW
+                            </button>
+                            <button
+                                onClick={() => { }}
+                                className="px-4 py-3 md:py-4 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 rounded-2xl md:rounded-[24px] font-black text-[10px] md:text-xs hover:bg-slate-200 transition-all active:scale-95"
+                            >
+                                RECENT
+                            </button>
+                        </div>
+
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 dark:bg-slate-700/30 rounded-bl-[100px] -mr-8 -mt-8 opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
                     </div>
                 ))}
             </div>
@@ -62,12 +144,12 @@ const StudentRoomSection = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 w-full">
             <div className="text-center space-y-2 mb-8">
-                <p className="text-slate-500 dark:text-slate-400 font-medium tracking-wide">collaborative space for peer-to-peer learning and academic excellence.</p>
+                <p className="text-slate-500 dark:text-slate-400 font-medium tracking-wide">Collaborative space for peer-to-peer learning and academic excellence.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 w-full">
                 {/* Card 1: Group Study Rooms */}
                 <div
                     onClick={() => navigate('/study-room/group')}
@@ -104,37 +186,43 @@ const StudentRoomSection = () => {
                     <p className="text-xs text-slate-500 leading-relaxed">Topic-based forums for Q&A, sharing notes, and academic discussions.</p>
                 </div>
             </div>
-
-            {/* Stats Row */}
-            <div className="bg-slate-100 dark:bg-slate-800/50 rounded-[40px] p-8 mt-8">
-                <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
-                    <div className="flex items-center gap-4 bg-white dark:bg-slate-800 px-6 py-4 rounded-2xl shadow-sm">
-                        <FiClock className="text-slate-800 dark:text-white" size={32} />
-                        <div className="flex flex-col text-left">
-                            <span className="text-lg font-black text-slate-900 dark:text-white">24/7</span>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Access</span>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4 bg-white dark:bg-slate-800 px-6 py-4 rounded-2xl shadow-sm">
-                        <FiBookOpen className="text-slate-800 dark:text-white" size={32} />
-                        <div className="flex flex-col text-left">
-                            <span className="text-lg font-black text-slate-900 dark:text-white">100+</span>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Topics</span>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4 bg-white dark:bg-slate-800 px-6 py-4 rounded-2xl shadow-sm">
-                        <FiCpu className="text-slate-800 dark:text-white" size={32} />
-                        <div className="flex flex-col text-left">
-                            <span className="text-lg font-black text-slate-900 dark:text-white">AI</span>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Assisted</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     );
 };
 
+const TemplatesSection = ({ onOpenTool, user }) => {
+    const templates = [
+        { name: 'Assignment Template', icon: <FiPieChart />, type: 'assignment' },
+        { name: 'Lab Report', icon: <FiFileText />, type: 'smart_docs' },
+        { name: 'Thesis format', icon: <FiFileText />, type: 'smart_docs' },
+        { name: 'Lesson plan', icon: <FiCalendar />, type: 'smart_docs' },
+        { name: 'Gradebook sheet', icon: <FiGrid />, type: 'data_sheet' },
+    ];
+
+    const visibleTemplates = templates.filter(t => user?.role !== 'student' || t.type !== 'assignment');
+
+    return (
+        <div className="space-y-6 w-full">
+            <h2 className="text-sm md:text-xl font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest flex items-center gap-2">
+                <FiLayers className="text-indigo-500" /> Quick Templates
+            </h2>
+            <div className="flex gap-4 md:gap-6 overflow-x-auto pb-6 no-scrollbar snap-x">
+                {visibleTemplates.map((tpl, i) => (
+                    <button
+                        key={i}
+                        onClick={() => onOpenTool(tpl.type)}
+                        className="min-w-[140px] md:min-w-[200px] group flex flex-col items-center gap-4 p-6 md:p-8 bg-white dark:bg-slate-800 rounded-[32px] border border-slate-100 dark:border-slate-700 hover:shadow-xl transition-all snap-center active:scale-95"
+                    >
+                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-50 dark:bg-slate-700 text-slate-400 group-hover:text-indigo-500 group-hover:bg-indigo-50 transition-all flex items-center justify-center">
+                            {tpl.icon}
+                        </div>
+                        <span className="text-[10px] md:text-xs font-black text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors text-center">{tpl.name}</span>
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 const RecentFilesSection = ({ onOpenTool }) => {
     const notify = useNotify();
@@ -263,8 +351,8 @@ const RecentFilesSection = ({ onOpenTool }) => {
     );
 
     return (
-        <div className="space-y-8 pb-20">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-8 pb-20 w-full">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
                 <div className="flex items-center gap-1 overflow-x-auto no-scrollbar bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl w-fit">
                     {[
                         { id: 'recent', label: 'Recent', icon: <FiClock size={14} /> },
@@ -293,7 +381,7 @@ const RecentFilesSection = ({ onOpenTool }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 w-full">
                 {creations.length === 0 && (
                     <div className="col-span-full py-20 bg-white dark:bg-slate-800 rounded-[40px] border border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center text-slate-400">
                         <FiStar size={48} className="mb-4 opacity-20" />
@@ -304,7 +392,7 @@ const RecentFilesSection = ({ onOpenTool }) => {
                     <div
                         key={item.id}
                         onClick={() => filter !== 'trash' && onOpenTool(item.doc_type, item.id)}
-                        className={`group bg-white dark:bg-slate-800 rounded-[32px] p-6 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-2xl transition-all ${filter === 'trash' ? 'cursor-default opacity-80' : 'cursor-pointer'} relative hover:z-10`}
+                        className={`group bg-white dark:bg-slate-800 rounded-[32px] p-6 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-2xl transition-all ${filter === 'trash' ? 'cursor-default opacity-80' : 'cursor-pointer'} relative hover:z-10 w-full`}
                     >
                         <div className="flex items-start justify-between mb-4">
                             <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 transition-transform group-hover:scale-110">
@@ -383,8 +471,6 @@ const EditorShell = ({ tool, id, user, onBack }) => {
     const [refreshKey, setRefreshKey] = useState(0);
 
     const handleRestore = (version) => {
-        // Trigger a re-mount or a state update in the child editor to fetch new DB content
-        // Or Yjs might need a special handler. For now, a simple refresh of the component.
         setRefreshKey(prev => prev + 1);
         setShowHistory(false);
     };

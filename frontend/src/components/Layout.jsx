@@ -132,62 +132,6 @@ export default function Layout() {
 
   return (
     <div className="layout">
-      <header className="top-navbar">
-        <div className="top-navbar-left">
-          <button className="mobile-menu-toggle-navbar" onClick={() => setMobileMenuOpen(true)}>
-            <FiMenu />
-          </button>
-          
-          {location.pathname !== '/' && location.pathname !== '/dashboard' && (
-            <button className="nav-back-btn" onClick={handleBack} title="Go Back">
-              <FiChevronLeft />
-            </button>
-          )}
-
-          <div className="page-context">
-            {workspaceLogo && (
-              <img 
-                src={getFullImageUrl(workspaceLogo)} 
-                alt={workspaceName} 
-                className="header-workspace-logo" 
-              />
-            )}
-            <div className="context-text">
-              <span className="context-label">{workspaceName || 'Global View'}</span>
-              <h2 className="context-title">
-                {location.pathname.split('/').filter(Boolean).pop()?.replace(/-/g, ' ') || 'Dashboard'}
-              </h2>
-            </div>
-          </div>
-        </div>
-
-        <div className="top-navbar-center">
-          <NavLink to="/dashboard" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}>
-            <FiGrid />
-            <span>Home</span>
-          </NavLink>
-          <NavLink to="/chat" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}>
-            <FiMessageSquare />
-            <span>Chat</span>
-          </NavLink>
-          <NavLink to="/classes" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}>
-            <FiBookOpen />
-            <span>Classes</span>
-          </NavLink>
-          <NavLink to="/profile" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}>
-            <FiUser />
-            <span>Profile</span>
-          </NavLink>
-        </div>
-
-        <div className="top-navbar-right">
-          <button className="icon-btn search-trigger" onClick={() => setShowSearch(true)} title="Search Everywhere">
-            <FiSearch />
-          </button>
-          
-          <UserProfileDropdown user={user} onLogout={handleLogout} />
-        </div>
-      </header>
 
       {showSearch && <SearchBar onClose={() => setShowSearch(false)} />}
 
