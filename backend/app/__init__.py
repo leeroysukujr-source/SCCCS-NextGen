@@ -134,7 +134,7 @@ def create_app(config_class=Config):
         ping_interval=25, 
         ping_timeout=120, # Higher resilience for cloud handshakes
         max_http_buffer_size=1e7, # 10MB limit for file shares
-        transports=['websocket', 'polling']
+        transports=['polling', 'websocket']
     )
     if async_mode == "threading":
         # Werkzeug cannot serve real WebSockets; disable upgrades to avoid 500s.
@@ -217,19 +217,7 @@ def create_app(config_class=Config):
             response.headers['Cache-Control'] = 'public, max-age=31536000' # Optional: high cache for static assets
         return response
 
-    # Senior DevOps Strategy: Ensure CORS headers are ALWAYS present, even on errors
-    @app.after_request
-    def add_cors_headers(response):
-        # Already handled by Flask-CORS for success, but we force it for safety on early returns/errors
-        origin = request.headers.get('Origin')
-        if origin and (final_origins == "*" or origin in (cors_origins if isinstance(cors_origins, list) else [])):
-            response.headers['Access-Control-Allow-Origin'] = origin
-            response.headers['Access-Control-Allow-Credentials'] = 'true'
-            # Senior DevOps Requirement: Support all headers to avoid extension/proxy blocks
-            response.headers['Access-Control-Allow-Headers'] = '*'
-            if 'Access-Control-Allow-Methods' not in response.headers:
-                response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
-        return response
+    # ---------------------------------------------
     # ---------------------------------------------
     
     # Register blueprints

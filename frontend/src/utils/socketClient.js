@@ -3,10 +3,9 @@ import { io } from 'socket.io-client'
 export function createSocket(socketUrl, token) {
   if (!socketUrl) throw new Error('socketUrl required')
   
-  // Strategy: In production, we prefer 'websocket' only to avoid session-affinity (sticky session)
-  // issues on Render's load balancer. In development, we use both for maximum compatibility.
-  const isProd = import.meta.env.PROD
-  let transports = isProd ? ['websocket'] : ['polling', 'websocket']
+  // Strategy: Allow both polling and websocket in all environments for maximum resilience.
+  // We prioritize polling to ensure immediate connection, then upgrade to websocket.
+  let transports = ['polling', 'websocket']
   
   try {
     const sys = JSON.parse(localStorage.getItem('system_settings') || '{}')
@@ -22,7 +21,7 @@ export function createSocket(socketUrl, token) {
     reconnectionDelayMax: 10000,
     randomizationFactor: 0.5,
     timeout: 45000, // Handle cold starts/latency
-    upgrade: !isProd, // In prod, we jump straight to WS
+    upgrade: true, 
     forceNew: false,
   })
 
