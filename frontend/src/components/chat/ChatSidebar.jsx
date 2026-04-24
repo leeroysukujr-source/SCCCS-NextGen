@@ -164,9 +164,34 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
       <div className="sidebar-header-main">
         <div className="header-top">
            <h2>{activeTab === 'channels' ? 'Channels' : 'Messages'}</h2>
-           <button className="action-add-btn" onClick={() => onAction(activeTab)}>
-             <FiPlus />
-           </button>
+           <div className="header-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+             {activeTab === 'channels' && currentUser?.role === 'student' && (
+               <button 
+                 className="action-discover-btn" 
+                 onClick={() => onAction('discover_channels')}
+                 title="Discover Channels"
+                 style={{
+                   padding: '6px 12px',
+                   borderRadius: '8px',
+                   border: 'none',
+                   background: 'rgba(59, 130, 246, 0.1)',
+                   color: 'var(--primary-color, #3b82f6)',
+                   fontSize: '0.85rem',
+                   fontWeight: '600',
+                   cursor: 'pointer',
+                   display: 'flex',
+                   alignItems: 'center',
+                   gap: '6px',
+                   transition: 'all 0.2s'
+                 }}
+               >
+                 Discover
+               </button>
+             )}
+             <button className="action-add-btn" onClick={() => onAction(activeTab)}>
+               <FiPlus />
+             </button>
+           </div>
         </div>
         
         <div className="tab-switcher">

@@ -3,6 +3,7 @@ import ChatSidebar from './ChatSidebar';
 import ChatViewport from './ChatViewport';
 import CreateChatroomModal from '../CreateChatroomModal';
 import StartChatModal from './StartChatModal';
+import DiscoverChannelsModal from './DiscoverChannelsModal';
 import './ChatLayout.css';
 
 const ChatLayout = () => {
@@ -10,6 +11,7 @@ const ChatLayout = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showStartDMModal, setShowStartDMModal] = useState(false);
+  const [showDiscoverModal, setShowDiscoverModal] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -28,7 +30,9 @@ const ChatLayout = () => {
   };
 
   const handleAction = (tab) => {
-    if (tab === 'channels') {
+    if (tab === 'discover_channels') {
+      setShowDiscoverModal(true);
+    } else if (tab === 'channels') {
       setShowCreateModal(true);
     } else {
       setShowStartDMModal(true);
@@ -102,6 +106,15 @@ const ChatLayout = () => {
         isOpen={showStartDMModal} 
         onClose={() => setShowStartDMModal(false)}
         onSelectUser={handleStartDM}
+      />
+
+      <DiscoverChannelsModal
+        isOpen={showDiscoverModal}
+        onClose={() => setShowDiscoverModal(false)}
+        onSuccess={() => {
+          setShowDiscoverModal(false);
+          // Sidebar fetches data on interval, or you can trigger a fetch here.
+        }}
       />
     </div>
   );
