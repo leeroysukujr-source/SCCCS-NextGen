@@ -269,9 +269,9 @@ def list_logs():
         page = 1
         per_page = 50
         
-    # Combined logs from TwoFactorAudit and AuditLog
-    two_factor_logs = TwoFactorAudit.query.all()
-    general_logs = AuditLog.query.all()
+    # Combined logs from TwoFactorAudit and AuditLog (optimized to prevent OOM)
+    two_factor_logs = TwoFactorAudit.query.order_by(TwoFactorAudit.created_at.desc()).limit(per_page * page).all()
+    general_logs = AuditLog.query.order_by(AuditLog.created_at.desc()).limit(per_page * page).all()
     
     combined = []
     for l in two_factor_logs:
