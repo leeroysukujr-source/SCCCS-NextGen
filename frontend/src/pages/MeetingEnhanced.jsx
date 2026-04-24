@@ -1984,6 +1984,7 @@ function MeetingShareModal({ isOpen, onClose, roomId, roomName }) {
   );
 }
 
+function PremiumButton({ icon, label, onClick, active = false, size = 'md' }) {
   const sizeClass = {
     sm: 'h-10 w-10 text-base',
     md: 'h-11 w-11 text-lg',
