@@ -214,6 +214,19 @@ def get_system_file(filename):
     system_folder = os.path.join(backend_dir, 'uploads', 'system')
     
     if not os.path.exists(os.path.join(system_folder, filename)):
+        # Fallback for ephemeral disk (Render)
+        if filename == 'logo.png':
+            from app.models import SystemSetting
+            backup = SystemSetting.query.filter_by(key='SYSTEM_LOGO_BACKUP').first()
+            if backup and backup.value and backup.value.startswith('data:image'):
+                import base64
+                from io import BytesIO
+                from flask import send_file
+                header, encoded = backup.value.split(',', 1)
+                mime_type = header.split(';')[0].split(':')[1]
+                binary_data = base64.b64decode(encoded)
+                return send_file(BytesIO(binary_data), mimetype=mime_type)
+                
         return jsonify({'error': 'File not found'}), 404
         
     return send_from_directory(system_folder, filename)
@@ -240,6 +253,27 @@ def serve_static_assets(filepath):
     
     if not os.path.exists(full_path):
         current_app.logger.warning(f"⚠️ Static asset missing: {filepath} at {full_path}")
+        
+        # --- Fallback for ephemeral disk (Render) ---
+        if 'workspaces/logo_' in filepath:
+            import re
+            match = re.search(r'logo_ws_(\d+)\.', filepath)
+            if match:
+                ws_id = match.group(1)
+                from app.models import Workspace
+                ws = Workspace.query.get(ws_id)
+                if ws:
+                    settings = ws.get_settings()
+                    backup = settings.get('logo_persistent_backup')
+                    if backup and backup.startswith('data:image'):
+                        import base64
+                        from io import BytesIO
+                        from flask import send_file
+                        header, encoded = backup.split(',', 1)
+                        mime_type = header.split(';')[0].split(':')[1]
+                        binary_data = base64.b64decode(encoded)
+                        return send_file(BytesIO(binary_data), mimetype=mime_type)
+                        
         return jsonify({'error': 'Asset not found', 'requested': filepath}), 404
         
     return send_from_directory(static_folder, filepath)

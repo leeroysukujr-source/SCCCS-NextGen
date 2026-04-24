@@ -100,7 +100,27 @@ def upload_system_logo():
         if not logo_url:
             return jsonify({'error': 'Failed to save logo', 'success': False}), 500
             
-        # 2. Update DB: Ensure SYSTEM_LOGO_URL is updated directly in the table
+        # 2. Persistent Backup for Ephemeral Disks
+        import base64
+        from PIL import Image
+        import io
+        
+        try:
+            file.seek(0)
+            img = Image.open(io.BytesIO(file.read()))
+            img.thumbnail((400, 400))
+            buffered = io.BytesIO()
+            img.save(buffered, format="PNG")
+            b64_logo = base64.b64encode(buffered.getvalue()).decode('utf-8')
+            persistent_backup = f"data:image/png;base64,{b64_logo}"
+            
+            # Save backup to database
+            SystemSetting.query.filter_by(key='SYSTEM_LOGO_BACKUP').delete()
+            db.session.add(SystemSetting(key='SYSTEM_LOGO_BACKUP', value=persistent_backup, category='ui_ux', is_public=True))
+        except Exception as e:
+            print(f"[Master Brand] Persistent backup failed: {e}")
+            
+        # 3. Update DB: Ensure SYSTEM_LOGO_URL is updated directly in the table
         import time
         cache_buster = int(time.time())
         # Add cache buster to force browsers to fetch the new image
