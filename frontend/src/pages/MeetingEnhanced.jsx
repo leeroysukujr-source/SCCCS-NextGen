@@ -255,6 +255,7 @@ export default function MeetingEnhanced({ roomId: propRoomId, onReady }) {
           </LayoutContextProvider>
         </LiveKitRoom>
       )}
+      <MeetingStyles />
     </div>
   );
 }
