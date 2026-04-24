@@ -20,21 +20,6 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  useEffect(() => {
-    if (selectedChat) {
-      fetchMessages();
-      // Room joining logic via socket
-      if (socket) {
-        const roomId = selectedChat.type === 'channel' ? selectedChat.id : (selectedChat.conversation_id || selectedChat.id);
-        socket.emit('join_room', { room: roomId });
-      }
-    }
-  }, [selectedChat, socket]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
   const fetchMessages = async () => {
     if (!selectedChat) return;
     setLoading(true);
@@ -72,6 +57,40 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
     }
   };
 
+  useEffect(() => {
+    if (selectedChat) {
+      fetchMessages();
+      // Room joining logic via socket
+      if (socket) {
+        const roomId = selectedChat.type === 'channel' ? `channel_${selectedChat.id}` : `user_${user?.id}`;
+        socket.emit('join_room', { room: roomId });
+
+        // Listen for new messages real-time
+        const handleNewMessage = (msg) => {
+            // Verify if message belongs to current chat
+            const currentRoomId = selectedChat.type === 'channel' ? selectedChat.id : (selectedChat.conversation_id || selectedChat.id);
+            const msgRoomId = msg.channel_id || msg.conversation_id || msg.sender_id;
+            
+            if (String(msgRoomId) === String(currentRoomId)) {
+                setMessages(prev => [...prev, msg]);
+            }
+        };
+
+        socket.on('message_received', handleNewMessage);
+        socket.on('direct_message_received', handleNewMessage);
+
+        return () => {
+            socket.off('message_received', handleNewMessage);
+            socket.off('direct_message_received', handleNewMessage);
+        };
+      }
+    }
+  }, [selectedChat, socket, user?.id]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   const handleSend = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedChat) return;
@@ -100,10 +119,17 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
       }
       
       setNewMessage('');
-      fetchMessages(); // Refresh list
+      // fetchMessages(); // No longer needed as we have real-time listeners
     } catch (err) {
       console.error('Failed to send message', err);
     }
+  };
+
+  const isOwnMessage = (msg) => {
+    if (!msg || !user) return false;
+    // Handle both Channel (author_id) and DM (sender_id) structures
+    const authorId = msg.author_id || msg.sender_id;
+    return String(authorId) === String(user.id) || authorId === 'me';
   };
 
   if (!selectedChat) {
@@ -120,7 +146,6 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
       </div>
     );
   }
-
 
   return (
     <div className="chat-viewport-container">
