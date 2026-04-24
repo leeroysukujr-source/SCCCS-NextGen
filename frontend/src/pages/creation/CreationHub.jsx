@@ -49,90 +49,6 @@ const CreationHub = () => {
         );
     }
 
-    return (
-        <div className="h-full flex flex-col bg-slate-50 dark:bg-slate-900 mx-auto max-w-7xl">
-            <DashboardHeader user={user} />
-            <div className="flex-1 overflow-y-auto p-8 space-y-16 font-sans">
-                {user?.role !== 'student' && (
-                    <Suspense fallback={<div className="h-64 bg-slate-100 dark:bg-slate-800 rounded-3xl animate-pulse" />}>
-                        <LecturerCoursesSection onOpenTool={handleOpenTool} />
-                    </Suspense>
-                )}
-
-                <CreateNewSection onOpenTool={handleOpenTool} user={user} />
-
-                {/* Student Room Section */}
-                {user?.role === 'student' && <StudentRoomSection />}
-
-                <TemplatesSection onOpenTool={handleOpenTool} user={user} />
-                <RecentFilesSection onOpenTool={handleOpenTool} />
-            </div>
-        </div>
-    );
-};
-
-const DashboardHeader = ({ user }) => (
-    <div className="flex items-center justify-between p-8 pb-0">
-        <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                Creation Hub
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-2">
-                Unified workspace for academic content and assessment design.
-            </p>
-        </div>
-        <div className="flex gap-3">
-            <div className="flex -space-x-2">
-                <div className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-800 bg-indigo-500 flex items-center justify-center text-white text-xs font-bold ring-2 ring-indigo-500/20">
-                    {user?.first_name?.charAt(0) || 'U'}
-                </div>
-            </div>
-        </div>
-    </div>
-);
-
-const CreateNewSection = ({ onOpenTool, user }) => {
-    const tools = [
-        { id: 'smart_docs', name: 'Smart Doc', icon: <FiFileText size={24} />, color: 'bg-blue-600', desc: 'Advanced Word Processor', subtitle: 'Academic Writing & Docs' },
-        { id: 'data_sheet', name: 'Data Sheet', icon: <FiGrid size={24} />, color: 'bg-green-600', desc: 'Academic Spreadsheet', subtitle: 'Data & Analysis' },
-        { id: 'presentation', name: 'Presentation', icon: <FiMonitor size={24} />, color: 'bg-orange-600', desc: 'Lecture Slides', subtitle: 'Interactive Presentations' },
-        { id: 'rubric', name: 'Rubric Creator', icon: <FiCheckCircle size={24} />, color: 'bg-teal-600', desc: 'Assessment Standards', subtitle: 'Grading Frameworks', role: 'teacher' },
-        { id: 'assignment', name: 'Assignment', icon: <FiPieChart size={24} />, color: 'bg-purple-600', desc: 'Assessment Builder', subtitle: 'Task & Quiz Design', excludedRoles: ['student'] },
-        { id: 'whiteboard', name: 'Whiteboard', icon: <FiPenTool size={24} />, color: 'bg-indigo-600', desc: 'Lesson Planning Board', subtitle: 'Visual Collaboration', excludedRoles: ['student'] },
-    ].filter(tool => (!tool.role || user?.role === tool.role) && (!tool.excludedRoles || !tool.excludedRoles.includes(user?.role)));
-
-    return (
-        <div className="space-y-6">
-            <h2 className="text-xl font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest flex items-center gap-2">
-                <FiPlus className="text-indigo-500" /> Start a new project
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
-                {tools.map(tool => (
-                    <div
-                        key={tool.id}
-                        className="group bg-white dark:bg-slate-800 rounded-[32px] border border-slate-100 dark:border-slate-700 hover:shadow-2xl transition-all p-8 flex flex-col relative overflow-hidden shadow-sm h-[260px]"
-                    >
-                        <div className={`w-14 h-14 rounded-2xl ${tool.color} text-white flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
-                            {tool.icon}
-                        </div>
-                        <h3 className="font-black text-slate-900 dark:text-white text-xl">{tool.name}</h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">{tool.subtitle}</p>
-                        <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">{tool.desc}</p>
-
-                        <div className="mt-auto flex items-center gap-3">
-                            <button
-                                onClick={() => onOpenTool(tool.id)}
-                                className="flex-1 bg-slate-900 dark:bg-white dark:text-slate-900 text-white py-3 rounded-2xl font-bold text-xs hover:opacity-90 transition-all shadow-md"
-                            >
-                                Create New
-                            </button>
-                            <button
-                                onClick={() => { }}
-                                className="px-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 rounded-2xl font-bold text-xs hover:bg-slate-200 transition-all"
-                            >
-                                Open Recent
-                            </button>
-                        </div>
 
                         <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 dark:bg-slate-700/30 rounded-bl-[100px] -mr-8 -mt-8 opacity-50 group-hover:scale-125 transition-transform duration-700"></div>
                     </div>
@@ -219,39 +135,6 @@ const StudentRoomSection = () => {
     );
 };
 
-const TemplatesSection = ({ onOpenTool, user }) => {
-    const templates = [
-        { name: 'Assignment Template', icon: <FiPieChart />, type: 'assignment' },
-        { name: 'Lab Report', icon: <FiFileText />, type: 'smart_docs' },
-        { name: 'Thesis format', icon: <FiFileText />, type: 'smart_docs' },
-        { name: 'Lesson plan', icon: <FiCalendar />, type: 'smart_docs' },
-        { name: 'Gradebook sheet', icon: <FiGrid />, type: 'data_sheet' },
-    ];
-
-    const visibleTemplates = templates.filter(t => user?.role !== 'student' || t.type !== 'assignment');
-
-    return (
-        <div className="space-y-6">
-            <h2 className="text-xl font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest flex items-center gap-2">
-                <FiLayers className="text-indigo-500" /> Quick Templates
-            </h2>
-            <div className="flex gap-6 overflow-x-auto pb-6 no-scrollbar">
-                {visibleTemplates.map((tpl, i) => (
-                    <button
-                        key={i}
-                        onClick={() => onOpenTool(tpl.type)}
-                        className="min-w-[180px] group flex flex-col items-center gap-4 p-6 bg-white dark:bg-slate-800 rounded-[32px] border border-slate-100 dark:border-slate-700 hover:shadow-xl transition-all"
-                    >
-                        <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-700 text-slate-400 group-hover:text-indigo-500 group-hover:bg-indigo-50 transition-all flex items-center justify-center">
-                            {tpl.icon}
-                        </div>
-                        <span className="text-xs font-black text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors text-center">{tpl.name}</span>
-                    </button>
-                ))}
-            </div>
-        </div>
-    );
-};
 
 const RecentFilesSection = ({ onOpenTool }) => {
     const notify = useNotify();
