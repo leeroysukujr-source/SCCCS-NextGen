@@ -164,7 +164,7 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
       <div className="sidebar-header-main">
         <div className="header-top">
            <h2>{activeTab === 'channels' ? 'Channels' : 'Messages'}</h2>
-           <div className="header-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+           <div className="chat-sidebar-header-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
              {activeTab === 'channels' && currentUser?.role === 'student' && (
                <button 
                  className="action-discover-btn" 
