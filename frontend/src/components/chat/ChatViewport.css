@@ -135,6 +135,28 @@
   color: var(--text-tertiary);
 }
 
+.message-link {
+  color: #818cf8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  word-break: break-all;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.message-link:hover {
+  color: #a5b4fc;
+  filter: drop-shadow(0 0 5px rgba(129, 140, 248, 0.4));
+}
+
+.own .message-link {
+  color: #e0e7ff;
+}
+
+.own .message-link:hover {
+  color: #ffffff;
+}
+
 .e2ee-indicator {
   opacity: 0.6;
 }

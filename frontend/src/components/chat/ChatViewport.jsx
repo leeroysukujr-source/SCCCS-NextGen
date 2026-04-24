@@ -131,6 +131,32 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
     return String(authorId) === String(user.id) || authorId === 'me';
   };
 
+  const renderMessageContent = (content) => {
+    if (!content) return null;
+    
+    // URL detection regex
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = content.split(urlRegex);
+    
+    return parts.map((part, i) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a 
+            key={i} 
+            href={part} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="message-link"
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
+
   if (!selectedChat) {
     return (
       <div className="viewport-empty">
@@ -187,8 +213,9 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
             >
               <div className="message-bubble">
                 <div className="message-content">
-                  {msg.content}
+                  {renderMessageContent(msg.content)}
                 </div>
+
                 <div className="message-footer">
                   <span className="message-time">
                     {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
