@@ -168,8 +168,15 @@ def upload_avatar():
         # Cloud Storage Path (S3)
         if current_app.config.get('S3_ENDPOINT') and current_app.config.get('S3_BUCKET'):
             key = f"avatars/{unique_filename}"
-            if upload_fileobj(io.BytesIO(file_content), key):
-                file_url = get_public_url(key)
+            try:
+                if upload_fileobj(io.BytesIO(file_content), key):
+                    file_url = get_public_url(key)
+                    print(f"[Avatar Upload] Successfully uploaded to cloud: {file_url}")
+                else:
+                    print(f"[Avatar Upload] S3 upload_fileobj returned False for key: {key}")
+            except Exception as s3_err:
+                print(f"[Avatar Upload] S3 error: {str(s3_err)}")
+                # Continue to local fallback
                 
         # Fallback to local
         if not file_url:
