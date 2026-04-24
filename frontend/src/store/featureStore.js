@@ -10,6 +10,7 @@ export const useFeatureStore = create(
             error: null,
 
             fetchFeatures: async (workspaceId = null) => {
+                if (get().isLoading) return
                 set({ isLoading: true, error: null })
                 try {
                     const params = workspaceId ? { workspace_id: workspaceId } : {}

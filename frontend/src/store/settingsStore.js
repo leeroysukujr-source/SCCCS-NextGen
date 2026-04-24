@@ -9,6 +9,7 @@ export const useSettingsStore = create((set, get) => ({
     brandingVersion: Date.now(), // Stable version for cache busting
 
     fetchSettings: async (isPublicOnly = false) => {
+        if (get().loading) return
         set({ loading: true, error: null })
         try {
             const endpoint = isPublicOnly ? '/settings/public' : '/settings'

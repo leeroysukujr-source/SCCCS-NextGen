@@ -18,7 +18,7 @@ import { useBranding } from '../contexts/BrandingContext'
 
 export default function Layout() {
   const { user, logout, refreshUser } = useAuthStore()
-  const { getSettingValue } = useSettingsStore()
+  const { getSettingValue, fetchSettings } = useSettingsStore()
   const { fetchFeatures, isFeatureEnabled } = useFeatureStore()
   const { getLogoUrl } = useBranding()
   const navigate = useNavigate()
@@ -70,8 +70,10 @@ export default function Layout() {
     if (user?.role) {
       document.body.setAttribute('data-role', user.role)
     }
+    // Fetch critical system data on layout mount
+    fetchSettings()
     fetchFeatures(user?.workspace_id)
-  }, [user?.role, user?.workspace_id, fetchFeatures])
+  }, [user?.role, user?.workspace_id, fetchFeatures, fetchSettings])
 
   const isSuperAdmin = () => user?.platform_role === 'SUPER_ADMIN' || user?.role === 'super_admin'
   const isAtLeastAdmin = () => ['admin', 'super_admin'].includes(user?.role)

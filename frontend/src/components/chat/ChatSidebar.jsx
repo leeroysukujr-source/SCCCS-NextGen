@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { channelsAPI } from '../../api/channels';
 import { directMessagesAPI } from '../../api/directMessages';
 import { FiHash, FiLock, FiUser, FiSearch, FiMessageSquare, FiPlus, FiMessageCircle } from 'react-icons/fi';
@@ -12,8 +12,13 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [error, setError] = useState(null);
+  const isFetchingRef = useRef(false);
+  const timerRef = useRef(null);
 
   const fetchData = async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    
     try {
       const [channelsData, conversationsData] = await Promise.all([
         channelsAPI.getChannels().catch(e => { console.error('Channels fetch error:', e); return []; }),
@@ -45,13 +50,17 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
       setError('Could not load chats.');
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
+      // Schedule next fetch only AFTER this one is done
+      timerRef.current = setTimeout(fetchData, 30000); // Increased to 30s for better server health
     }
   };
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 15000);
-    return () => clearInterval(interval);
+    return () => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, []);
 
   const currentItems = activeTab === 'channels' ? channels : dms;
