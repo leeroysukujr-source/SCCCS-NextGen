@@ -112,7 +112,6 @@ def create_app(config_class=Config):
          expose_headers=["Content-Type", "Authorization"],
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"])
 
-    # Senior DevOps Strategy: Ensure CORS headers are ALWAYS present, even on errors
     @app.after_request
     def add_cors_headers(response):
         origin = request.headers.get('Origin')
@@ -121,7 +120,14 @@ def create_app(config_class=Config):
             if final_origins == "*" or origin in (cors_origins if isinstance(cors_origins, list) else []):
                 response.headers['Access-Control-Allow-Origin'] = origin
                 response.headers['Access-Control-Allow-Credentials'] = 'true'
-                response.headers['Access-Control-Allow-Headers'] = '*'
+                
+                # For credentials=true, browsers reject '*' for Allow-Headers. We must echo them.
+                req_headers = request.headers.get('Access-Control-Request-Headers')
+                if req_headers:
+                    response.headers['Access-Control-Allow-Headers'] = req_headers
+                else:
+                    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, bypass-tunnel-reminder, x-requested-with'
+                
                 if 'Access-Control-Allow-Methods' not in response.headers:
                     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
         return response
