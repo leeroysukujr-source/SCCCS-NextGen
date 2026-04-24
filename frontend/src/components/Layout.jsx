@@ -164,24 +164,6 @@ export default function Layout() {
           </div>
         </div>
 
-        <div className="top-navbar-center">
-          <NavLink to="/dashboard" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}>
-            <FiGrid />
-            <span>Home</span>
-          </NavLink>
-          <NavLink to="/chat" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}>
-            <FiMessageSquare />
-            <span>Chat</span>
-          </NavLink>
-          <NavLink to="/classes" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}>
-            <FiBookOpen />
-            <span>Classes</span>
-          </NavLink>
-          <NavLink to="/profile" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}>
-            <FiUser />
-            <span>Profile</span>
-          </NavLink>
-        </div>
 
         <div className="top-navbar-right">
           <button className="icon-btn search-trigger" onClick={() => setShowSearch(true)} title="Search Everywhere">

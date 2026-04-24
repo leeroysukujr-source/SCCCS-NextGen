@@ -67,6 +67,12 @@
   transition: all 0.2s;
 }
 
+@media (min-width: 1024px) {
+  .mobile-menu-toggle-navbar {
+    display: none;
+  }
+}
+
 .mobile-menu-toggle-navbar:hover {
     background: var(--primary);
     color: white;
@@ -113,39 +119,30 @@
   text-overflow: ellipsis;
 }
 
-.top-navbar-center {
-    display: none;
-    gap: 0.5rem;
+.top-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-@media (min-width: 1200px) {
-    .top-navbar-center {
-        display: flex;
-    }
+.icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.navbar-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0.6rem 1.25rem;
-    color: var(--text-tertiary);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 700;
-    border-radius: 14px;
-    transition: all 0.3s;
-}
-
-.navbar-link:hover {
-    color: var(--primary);
-    background: var(--bg-secondary);
-}
-
-.navbar-link.active {
-    background: var(--primary);
-    color: white;
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+.icon-btn:hover {
+  background: var(--primary);
+  color: white;
 }
 
 /* Sidebar Styling - PREMIUM */
@@ -320,13 +317,13 @@
   }
 
   .sidebar {
-    transform: translateX(-110%);
+    transform: translateX(-110%) !important;
     width: 320px; /* Generous width on mobile */
     z-index: 6000;
   }
 
   .sidebar.mobile-open {
-    transform: translateX(0);
+    transform: translateX(0) !important;
     box-shadow: 20px 0 60px rgba(0,0,0,0.6);
   }
 

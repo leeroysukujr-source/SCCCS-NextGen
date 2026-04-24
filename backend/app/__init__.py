@@ -112,6 +112,20 @@ def create_app(config_class=Config):
          expose_headers=["Content-Type", "Authorization"],
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"])
 
+    # Senior DevOps Strategy: Ensure CORS headers are ALWAYS present, even on errors
+    @app.after_request
+    def add_cors_headers(response):
+        origin = request.headers.get('Origin')
+        # Only add if not already present to avoid duplicates
+        if origin and 'Access-Control-Allow-Origin' not in response.headers:
+            if final_origins == "*" or origin in (cors_origins if isinstance(cors_origins, list) else []):
+                response.headers['Access-Control-Allow-Origin'] = origin
+                response.headers['Access-Control-Allow-Credentials'] = 'true'
+                response.headers['Access-Control-Allow-Headers'] = '*'
+                if 'Access-Control-Allow-Methods' not in response.headers:
+                    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
+        return response
+
     # CORS configuration - Senior Deployment Hardening
     # Flask-CORS handles OPTIONS preflight automatically for blueprints.
     # We allow the specific Vercel production domains and wildcard headers for proxy flexibility.

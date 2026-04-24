@@ -41,10 +41,17 @@ export const BrandingProvider = ({ children }) => {
         if (type === 'system') {
             url = getSettingValue('SYSTEM_LOGO_URL') || getSettingValue('branding_logo_url');
         } else {
-            url = user?.workspace_logo || getSettingValue('WORKSPACE_LOGO_URL');
+            // Priority 1: Direct user object property (cached)
+            // Priority 2: Persistent DB-backed backup (Base64 - survives Render restarts)
+            // Priority 3: Global workspace setting fallback
+            const persistentBackup = user?.workspace_branding?.logo_persistent_backup || getSettingValue('WORKSPACE_LOGO_BACKUP');
+            url = user?.workspace_logo || persistentBackup || getSettingValue('WORKSPACE_LOGO_URL');
         }
 
         if (!url) return null;
+
+        // If it's a base64 string, don't add cache-buster
+        if (url.startsWith('data:')) return url;
 
         // Clean existing version tags to avoid duplication
         const cleanUrl = url.split('?v=')[0];

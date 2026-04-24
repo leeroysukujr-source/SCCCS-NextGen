@@ -97,6 +97,7 @@ class User(db.Model):
             'workspace_id': self.workspace_id,
             'workspace_name': self.workspace_obj.name if self.workspace_obj else None,
             'workspace_logo': self.workspace_obj.logo_url if self.workspace_obj else None,
+            'workspace_branding': self.workspace_obj.get_settings() if self.workspace_obj else {},
             'workspace_code': self.workspace_obj.code if self.workspace_obj else None,
             'workspace_status': self.workspace_obj.status if self.workspace_obj else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,

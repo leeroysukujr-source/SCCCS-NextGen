@@ -1944,9 +1944,14 @@ function MeetingShareModal({ isOpen, onClose, roomId, roomName }) {
             <div className="space-y-3">
               <label className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] px-2">Meeting URL</label>
               <div className="flex gap-2">
-                <div className="flex-1 px-5 py-4 bg-black/40 rounded-2xl border border-white/5 text-slate-300 text-xs font-mono truncate">
+                <a 
+                  href={meetingLink} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex-1 px-5 py-4 bg-black/40 rounded-2xl border border-white/5 text-indigo-400 hover:text-indigo-300 text-xs font-mono truncate underline decoration-indigo-500/30 hover:decoration-indigo-400 transition-colors block cursor-pointer"
+                >
                   {meetingLink}
-                </div>
+                </a>
                 <button 
                   onClick={handleCopy}
                   className={`px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${

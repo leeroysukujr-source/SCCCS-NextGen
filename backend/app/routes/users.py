@@ -133,6 +133,10 @@ def upload_avatar():
         if not file_content:
             return jsonify({'error': 'No image data provided. Support multipart/form-data or base64 JSON.'}), 400
 
+        # Memory limit enforcement for Render (5MB max)
+        if len(file_content) > 5 * 1024 * 1024:
+            return jsonify({'error': 'File too large. Maximum size is 5MB.', 'success': False}), 400
+
         # Security Enforcement: Strict image/* Content-Type checking to prevent RCE
         import imghdr
         img_type = imghdr.what(None, h=file_content)
@@ -178,13 +182,15 @@ def upload_avatar():
         }), 200
 
     except Exception as e:
+        db.session.rollback() # CRITICAL: prevent transaction lock in production
         import traceback
         print(f"[Avatar Upload ERROR] Unexpected failure: {str(e)}")
-        print(traceback.format_exc())
+        traceback.print_exc()
         return jsonify({
             'error': 'An unexpected error occurred during avatar upload',
             'details': str(e),
-            'success': False
+            'success': False,
+            'transaction': 'rolled_back'
         }), 500
 
 # Route removed and moved to top for reliability

@@ -56,9 +56,39 @@ def upload_workspace_logo(workspace_id):
         # Step B: Save file using workspace-specific convention
         filename = f'logo_ws_{workspace_id}.png'
         target_path = os.path.join(workspaces_path, filename)
-        file.save(target_path)
         
-        # Step C: Update DB
+        # Check file size (5MB limit)
+        file.seek(0, os.SEEK_END)
+        if file.tell() > 5 * 1024 * 1024:
+            return jsonify({'error': 'File too large. Maximum size is 5MB.', 'success': False}), 400
+        file.seek(0)
+        
+        # Read for both disk save and persistent DB backup
+        file_data = file.read()
+        with open(target_path, 'wb') as f:
+            f.write(file_data)
+        
+        # Step C: Persistent Backup (DevOps Strategy for Ephemeral Disks)
+        # We store a small base64 version in settings to survive Render restarts
+        import base64
+        from PIL import Image
+        import io
+        
+        try:
+            # Resize for storage efficiency (max 400px width/height)
+            img = Image.open(io.BytesIO(file_data))
+            img.thumbnail((400, 400))
+            buffered = io.BytesIO()
+            img.save(buffered, format="PNG")
+            b64_logo = base64.b64encode(buffered.getvalue()).decode('utf-8')
+            
+            settings = workspace.get_settings()
+            settings['logo_persistent_backup'] = f"data:image/png;base64,{b64_logo}"
+            workspace.set_settings(settings)
+        except Exception as e:
+            print(f"[Tenant Brand] Persistent backup failed: {e}")
+
+        # Step D: Update DB
         logo_url = f"/static/uploads/workspaces/{filename}"
         workspace.logo_url = logo_url
         db.session.commit()
@@ -68,6 +98,7 @@ def upload_workspace_logo(workspace_id):
         full_url = f"{request.host_url.rstrip('/')}{logo_url}?v={cache_buster}"
         
         # Real-time Notification for other members of the same workspace
+        from app import socketio
         socketio.emit('workspace_branding_updated', {
             'workspace_id': workspace_id,
             'logo_url': full_url
@@ -83,5 +114,8 @@ def upload_workspace_logo(workspace_id):
         }), 200
 
     except Exception as e:
+        db.session.rollback()
+        import traceback
+        traceback.print_exc()
         print(f"[Tenant Brand] CRITICAL CRASH in upload_workspace_logo: {e}")
         return jsonify({'error': str(e), 'success': False}), 500

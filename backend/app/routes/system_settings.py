@@ -73,6 +73,12 @@ def upload_system_logo():
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
         
+    # Check file size (5MB limit)
+    file.seek(0, os.SEEK_END)
+    if file.tell() > 5 * 1024 * 1024:
+        return jsonify({'error': 'File too large. Maximum size is 5MB.', 'success': False}), 400
+    file.seek(0)
+    
     # Security Enforcement: Strict image/* Content-Type checking to prevent RCE
     file_content = file.read()
     import imghdr
@@ -88,31 +94,39 @@ def upload_system_logo():
     from app.models import SystemSetting
     from app import db
     
-    # 1. Save file to absolute fixed path: 'static/uploads/system/logo.png'
-    # This ensures the master brand is always served from a predictable location.
-    logo_url = save_logo(file, folder='system', filename='logo.png')
-    
-    if not logo_url:
-        return jsonify({'error': 'Failed to save logo', 'success': False}), 500
+    try:
+        # 1. Save file to absolute fixed path: 'static/uploads/system/logo.png'
+        # This ensures the master brand is always served from a predictable location.
+        logo_url = save_logo(file, folder='system', filename='logo.png')
         
-    # 2. Update DB: Ensure SYSTEM_LOGO_URL is updated directly in the table
-    # Standardizing on key-based update to bypass any abstraction layers during critical branding changes.
-    SystemSetting.query.filter_by(key='SYSTEM_LOGO_URL').update({
-        'value': logo_url,
-        'category': 'ui_ux',
-        'is_public': True
-    })
-    db.session.commit()
-    
-    # 3. Clear Redis Cache: force-refresh the server-side cache for all sessions
-    # Instruction: Clear Redis Cache: redis_client.delete('public_settings')
-    cache_manager.delete('public_settings')
-    
-    print(f"[Master Brand] System logo updated and cache invalidated: {logo_url}")
-    
-    return jsonify({
-        'success': True,
-        'message': 'Global System Logo updated and cache invalidated',
-        'logo_url': logo_url,
-        'full_url': logo_url
-    }), 200
+        if not logo_url:
+            return jsonify({'error': 'Failed to save logo', 'success': False}), 500
+            
+        # 2. Update DB: Ensure SYSTEM_LOGO_URL is updated directly in the table
+        # Standardizing on key-based update to bypass any abstraction layers during critical branding changes.
+        SystemSetting.query.filter_by(key='SYSTEM_LOGO_URL').update({
+            'value': logo_url,
+            'category': 'ui_ux',
+            'is_public': True
+        })
+        db.session.commit()
+        
+        # 3. Clear Redis Cache: force-refresh the server-side cache for all sessions
+        # Instruction: Clear Redis Cache: redis_client.delete('public_settings')
+        cache_manager.delete('public_settings')
+        
+        print(f"[Master Brand] System logo updated and cache invalidated: {logo_url}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Global System Logo updated and cache invalidated',
+            'logo_url': logo_url,
+            'full_url': logo_url
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        import traceback
+        traceback.print_exc()
+        print(f"[Master Brand] CRITICAL CRASH in upload_system_logo: {e}")
+        return jsonify({'error': str(e), 'success': False}), 500
