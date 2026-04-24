@@ -92,7 +92,7 @@ def update_current_user():
     
     return jsonify(user.to_dict()), 200
 
-@users_bp.route('/me/avatar', methods=['POST'])
+@users_bp.route('/me/avatar', methods=['POST', 'OPTIONS'])
 @jwt_required()
 def upload_avatar():
     """Upload profile picture for current user"""

@@ -199,6 +199,25 @@ def get_avatar(filename):
     avatars_folder = os.path.join(current_app.static_folder, 'uploads', 'avatars')
     
     if not os.path.exists(os.path.join(avatars_folder, filename)):
+        # Fallback to S3 if available
+        from app.utils.storage import get_s3_client
+        from flask import current_app
+        s3 = get_s3_client()
+        if s3:
+            bucket = current_app.config.get('S3_BUCKET')
+            key = f"avatars/{filename}"
+            try:
+                # Check if object exists in S3
+                s3.head_object(Bucket=bucket, Key=key)
+                # Redirect to S3 public URL or serve it
+                from app.utils.storage import get_public_url
+                s3_url = get_public_url(key)
+                if s3_url:
+                    from flask import redirect
+                    return redirect(s3_url)
+            except Exception:
+                pass # Not in S3 either
+                
         return jsonify({'error': 'Avatar not found'}), 404
         
     return send_from_directory(avatars_folder, filename)

@@ -104,36 +104,9 @@ def create_app(config_class=Config):
     final_origins = cors_origins if cors_origins else "*"
     allow_credentials = True if cors_origins else False
 
-    # Maximum Robustness CORS - Fully Custom Implementation
-    # Flask-CORS has known edge cases when supports_credentials=True and custom headers are sent.
-    # We use a bulletproof interceptor for OPTIONS requests.
-    @app.before_request
-    def handle_options():
-        if request.method == 'OPTIONS':
-            return '', 200
-
-    @app.after_request
-    def add_cors_headers(response):
-        origin = request.headers.get('Origin')
-        
-        # Determine valid origin
-        valid_origin = origin if (final_origins == "*" or origin in (cors_origins if isinstance(cors_origins, list) else [])) else None
-        
-        if valid_origin:
-            response.headers['Access-Control-Allow-Origin'] = valid_origin
-            response.headers['Access-Control-Allow-Credentials'] = 'true'
-            
-            # Dynamically echo requested headers to satisfy strict browser requirements
-            req_headers = request.headers.get('Access-Control-Request-Headers')
-            if req_headers:
-                response.headers['Access-Control-Allow-Headers'] = req_headers
-            else:
-                response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, bypass-tunnel-reminder, x-requested-with'
-            
-            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
-            response.headers['Access-Control-Expose-Headers'] = 'Content-Type, Authorization'
-            
-        return response
+    # Maximum Robustness CORS - Industry Standard Implementation
+    # We allow the specific Vercel production domains and wildcard headers for proxy flexibility.
+    CORS(app, resources={r"/api/*": {"origins": final_origins}}, supports_credentials=True)
 
     # CORS configuration - Senior Deployment Hardening
     # Flask-CORS handles OPTIONS preflight automatically for blueprints.
@@ -231,14 +204,6 @@ def create_app(config_class=Config):
     app.before_request(waf_middleware)
     app.after_request(security_headers)
     
-    @app.after_request
-    def add_header(response):
-        """Instruction: Update the CORS policy and static file serving to allow .css and .js mime-types."""
-        if response.mimetype in ['text/css', 'application/javascript', 'text/javascript']:
-            response.headers['Access-Control-Allow-Origin'] = '*'
-            response.headers['X-Content-Type-Options'] = 'nosniff' # Ensure browser trusts the server's MIME type
-            response.headers['Cache-Control'] = 'public, max-age=31536000' # Optional: high cache for static assets
-        return response
 
     # ---------------------------------------------
     # ---------------------------------------------
