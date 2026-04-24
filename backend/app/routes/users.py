@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, url_for, send_file, make_response
 from app.utils.decorators import audit_logger
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_cors import cross_origin
 from app import db
 from app.models import User
 from app.utils.scoping import scope_query, get_current_workspace_id
@@ -93,6 +94,7 @@ def update_current_user():
     return jsonify(user.to_dict()), 200
 
 @users_bp.route('/me/avatar', methods=['POST', 'OPTIONS'])
+@cross_origin()
 @jwt_required()
 def upload_avatar():
     """Upload profile picture for current user"""
