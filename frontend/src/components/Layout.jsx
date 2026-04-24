@@ -1,28 +1,31 @@
 import axios from '../api/client'
 import { useEffect, useState, Suspense } from 'react'
-import { Outlet, Link, useNavigate, useLocation, NavLink } from 'react-router-dom'
+import { Outlet, useNavigate, useLocation, NavLink } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-import { getApiBaseUrl, getFullImageUrl } from '../utils/api'
+import { getFullImageUrl } from '../utils/api'
 import {
   FiVideo, FiMessageSquare, FiMessageCircle, FiUser, FiLogOut, FiArrowRight, FiChevronLeft,
-  FiUsers, FiSettings, FiSearch, FiAlertCircle, FiShield, FiGrid, FiBookOpen, FiActivity, FiBriefcase, FiMenu, FiX
+  FiUsers, FiSettings, FiSearch, FiActivity, FiShield, FiGrid, FiBookOpen, FiMenu, FiX
 } from 'react-icons/fi'
 import SearchBar from './SearchBar'
 import './Layout.css'
 import useTheme from '../hooks/useTheme'
 import PresenceManager from './PresenceManager'
+import UserProfileDropdown from './UserProfileDropdown'
+import NotificationCenter from './NotificationCenter'
+import { useSettingsStore } from '../store/settingsStore'
 import { useFeatureStore } from '../store/featureStore'
 import { useBranding } from '../contexts/BrandingContext'
 
 export default function Layout() {
   const { user, logout, refreshUser } = useAuthStore()
-  const { getSettingValue, fetchSettings } = useSettingsStore()
+  const { fetchSettings } = useSettingsStore()
   const { fetchFeatures, isFeatureEnabled } = useFeatureStore()
   const { getLogoUrl } = useBranding()
   const navigate = useNavigate()
   const location = useLocation()
   const [showSearch, setShowSearch] = useState(false)
-  const [theme, setTheme] = useTheme()
+  const [, setTheme] = useTheme()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(window.innerWidth < 1200)
 
@@ -58,8 +61,6 @@ export default function Layout() {
     navigate(-1)
   }
 
-
-  // Branding Observer Logic: Uses cache-busting provided by BrandingProvider
   const platformLogo = getLogoUrl('system')
   const workspaceLogo = getLogoUrl('workspace')
   const workspaceName = user?.workspace_name
@@ -68,7 +69,6 @@ export default function Layout() {
     if (user?.role) {
       document.body.setAttribute('data-role', user.role)
     }
-    // Fetch critical system data on layout mount
     fetchSettings()
     fetchFeatures(user?.workspace_id)
   }, [user?.role, user?.workspace_id, fetchFeatures, fetchSettings])
@@ -128,12 +128,10 @@ export default function Layout() {
     ]
   })
 
-  // Filter out empty groups
   const filteredNavGroups = navGroups.filter(group => group.items && group.items.length > 0)
 
   return (
     <div className="layout">
-      {/* Top Navigation Bar */}
       <header className="top-navbar">
         <div className="top-navbar-left">
           <button className="mobile-menu-toggle-navbar" onClick={() => setMobileMenuOpen(true)}>
@@ -191,13 +189,10 @@ export default function Layout() {
         </div>
       </header>
 
-      {/* Global Search Overlay */}
       {showSearch && <SearchBar onClose={() => setShowSearch(false)} />}
 
-      {/* Mobile Menu Overlay */}
       {mobileMenuOpen && <div className="mobile-menu-overlay" onClick={() => setMobileMenuOpen(false)} />}
       
-      {/* Sidebar Navigation */}
       <aside className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''} ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
           <div className="flex justify-between items-center mb-4 lg:hidden">
@@ -262,6 +257,9 @@ export default function Layout() {
         </div>
       </aside>
 
+      <main className="main-content">
+        <NotificationCenter />
+        <PresenceManager />
         <div className="content-container">
           <Suspense fallback={<div className="loading-spinner-container"><div className="spinner"></div></div>}>
             <Outlet />
@@ -269,7 +267,6 @@ export default function Layout() {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation */}
       <nav className="mobile-bottom-nav">
         <NavLink to="/dashboard" className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
           <FiGrid />
