@@ -71,7 +71,8 @@ def get_user(user_id):
     
     return jsonify(user.to_dict()), 200
 
-@users_bp.route('/me', methods=['PUT'])
+@users_bp.route('/me', methods=['PUT', 'OPTIONS'])
+@cross_origin()
 @jwt_required()
 def update_current_user():
     current_user_id = get_jwt_identity()
