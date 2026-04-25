@@ -31,12 +31,19 @@ def update_system_logo_url():
         if not (is_super_admin(user) or getattr(user, 'platform_role', '') == 'SUPER_ADMIN'):
             return jsonify({'error': 'Super Admin access required', 'success': False}), 403
 
-        # Parse JSON payload
-        data = request.get_json()
-        logo_url = data.get('logo_url')
+        # Support both JSON (Cloud Sync) and Multipart (Local Fallback)
+        logo_url = None
+        if request.is_json:
+            data = request.get_json()
+            logo_url = data.get('logo_url')
+        elif 'file' in request.files:
+            from app.utils.uploads import save_logo
+            file = request.files['file']
+            # Save to global system folder
+            logo_url = save_logo(file, folder='system', filename='system_logo.png')
         
         if not logo_url:
-            return jsonify({'error': 'Missing logo_url in request body', 'success': False}), 400
+            return jsonify({'error': 'Missing logo_url or file in request', 'success': False}), 400
 
         logger.info(f"🌐 Updating Global System logo to: {logo_url}")
 

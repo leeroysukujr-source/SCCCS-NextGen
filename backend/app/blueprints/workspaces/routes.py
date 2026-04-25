@@ -37,12 +37,18 @@ def update_workspace_logo_url(workspace_id):
         if not workspace:
             return jsonify({'error': 'Workspace not found', 'success': False}), 404
             
-        # Parse JSON payload
-        data = request.get_json()
-        logo_url = data.get('logo_url')
+        # Support both JSON (Cloud Sync) and Multipart (Local Fallback)
+        logo_url = None
+        if request.is_json:
+            data = request.get_json()
+            logo_url = data.get('logo_url')
+        elif 'file' in request.files:
+            from app.utils.uploads import save_logo
+            file = request.files['file']
+            logo_url = save_logo(file, folder='workspaces', filename=f'logo_ws_{workspace_id}.png')
         
         if not logo_url:
-            return jsonify({'error': 'Missing logo_url in request body', 'success': False}), 400
+            return jsonify({'error': 'Missing logo_url or file in request', 'success': False}), 400
 
         logger.info(f"💾 Updating Workspace {workspace_id} logo to: {logo_url}")
 
