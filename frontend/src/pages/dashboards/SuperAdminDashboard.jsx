@@ -28,7 +28,7 @@ import UserListModal from '../../components/UserListModal'
 import { superAdminAPI } from '../../api/superAdmin'
 import { useAuthStore } from '../../store/authStore'
 import SuperAdminStats from '../../components/SuperAdminStats'
-import { uploadFile } from '../../utils/supabase'
+import { uploadToSupabase } from '../../utils/supabase'
 
 const SuperAdminDashboard = () => {
     const { updateUser } = useAuthStore();
@@ -312,7 +312,7 @@ const SuperAdminDashboard = () => {
                     const fileName = `${wsId}-${Math.random().toString(36).substring(7)}.${fileExt}`;
                     const filePath = `logos/${fileName}`;
                     
-                    const publicUrl = await uploadFile(wsForm.logoFile, 'workspace-logos', filePath);
+                    const publicUrl = await uploadToSupabase(wsForm.logoFile, 'workspace-logo', wsId);
                     
                     // Update backend with the URL
                     await apiClient.post(`/workspaces/${wsId}/logo`, { logo_url: publicUrl });
