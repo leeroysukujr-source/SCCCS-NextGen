@@ -282,15 +282,21 @@ export default function AdminDashboard() {
 
             <div className="agenda-actions">
               <button className="action-large" onClick={() => setShowInstantMeetingModal(true)} title="Start an instant meeting">
-                <FiVideo className="action-icon" />
+                <div className="action-icon">
+                  <FiVideo size={18} />
+                </div>
                 <span>Start a meeting</span>
               </button>
               <button className="action-large" onClick={() => document.getElementById('join-input')?.focus()} title="Join with code or link">
-                <FiPlus className="action-icon" />
+                <div className="action-icon">
+                  <FiPlus size={18} />
+                </div>
                 <span>Join a meeting</span>
               </button>
               <button className="action-large" onClick={() => setShowScheduleModal(true)} title="Schedule for later">
-                <FiCalendar className="action-icon" />
+                <div className="action-icon">
+                  <FiCalendar size={18} />
+                </div>
                 <span>Schedule a meeting</span>
               </button>
             </div>
