@@ -1605,3 +1605,50 @@ class AssignmentGrade(db.Model):
         }
 
 
+# --- Real-Time "Live" System Sync Listeners ---
+def register_live_sync_listeners():
+    from sqlalchemy import event
+    
+    def on_change(mapper, connection, target):
+        try:
+            from app import socketio
+            from app.utils.socket_helpers import emit_system_update
+            
+            # Mapping tablenames to query keys used in frontend React Query
+            mapping = {
+                'users': 'profile',
+                'workspaces': 'workspace',
+                'rooms': 'rooms',
+                'classes': 'classes',
+                'channels': 'channels',
+                'assignments': 'assignments',
+                'assignment_submissions': 'assignments',
+                'assignment_grades': 'assignments',
+                'documents': 'documents'
+            }
+            query_key = mapping.get(target.__tablename__)
+            if not query_key:
+                return
+
+            # Determine workspace_id for targeted emission
+            wid = getattr(target, 'workspace_id', None)
+            if target.__tablename__ == 'workspaces':
+                wid = target.id
+            
+            # Emit the update event to relevant rooms
+            emit_system_update(socketio, query_key, workspace_id=wid)
+        except Exception:
+            pass
+
+    # Core models that trigger UI refreshes
+    live_models = [Room, Class, Channel, Assignment, Workspace, User, AssignmentSubmission, AssignmentGrade]
+    
+    for model in live_models:
+        event.listen(model, 'after_insert', on_change)
+        event.listen(model, 'after_update', on_change)
+        event.listen(model, 'after_delete', on_change)
+
+# Initialize listeners after models are defined
+register_live_sync_listeners()
+
+

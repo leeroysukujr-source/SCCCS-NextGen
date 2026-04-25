@@ -94,3 +94,22 @@ def handle_message_ack(user_id, data):
         except Exception:
             pass
     return False
+
+
+def emit_system_update(socketio, category, workspace_id=None, user_id=None, data=None):
+    """
+    Emit a system-wide update event to trigger frontend re-fetching without refresh.
+    Targeting specific rooms (workspace, user, or global) for performance.
+    """
+    payload = {
+        'category': category,
+        'timestamp': datetime.utcnow().isoformat(),
+        'data': data or {}
+    }
+    
+    if workspace_id:
+        socketio.emit('system_update', payload, room=f'workspace_{workspace_id}')
+    elif user_id:
+        socketio.emit('system_update', payload, room=f'user_{user_id}')
+    else:
+        socketio.emit('system_update', payload) # Global

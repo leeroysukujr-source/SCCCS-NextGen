@@ -33,8 +33,6 @@ export default function TeacherDashboard() {
     queryKey: ['rooms'],
     queryFn: roomsAPI.getRooms,
     retry: 1,
-    refetchInterval: 60000,
-    refetchIntervalInBackground: false,
     onError: (error) => {
       console.error('Error fetching rooms:', error)
     }
@@ -44,8 +42,6 @@ export default function TeacherDashboard() {
     queryKey: ['channels'],
     queryFn: channelsAPI.getChannels,
     retry: 1,
-    refetchInterval: 60000,
-    refetchIntervalInBackground: false,
     onError: (error) => {
       console.error('Error fetching channels:', error)
     }
@@ -57,17 +53,13 @@ export default function TeacherDashboard() {
       const res = await apiClient.get('/assignments')
       return res.data
     },
-    retry: 1,
-    refetchInterval: 30000,
-    refetchIntervalInBackground: true
+    retry: 1
   })
 
   const { data: classes = [], error: classesError } = useQuery({
     queryKey: ['classes'],
     queryFn: classesAPI.getClasses,
     retry: 1,
-    refetchInterval: 30000,
-    refetchIntervalInBackground: true,
     onError: (error) => {
       console.error('Error fetching classes:', error)
     }

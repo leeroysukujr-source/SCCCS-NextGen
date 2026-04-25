@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { getSocketUrl } from '../utils/api'
 import { useAuthStore } from '../store/authStore'
 import { initSocket } from '../api/socket'
@@ -10,6 +11,7 @@ export function SocketProvider({ children }) {
   const [socket, setSocket] = useState(null)
   const [status, setStatus] = useState('disconnected')
   const socketRef = useRef(null)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     // Instruction: Delay the socket.connect() until isAuthenticated is true and hasHydrated is true.
@@ -56,10 +58,21 @@ export function SocketProvider({ children }) {
       refreshUser()
     }
 
+    const onSystemUpdate = (payload) => {
+      console.log('[SocketProvider] System update received:', payload)
+      // payload: { category: 'rooms', timestamp: '...', data: {} }
+      const { category } = payload
+      
+      if (category) {
+        queryClient.invalidateQueries({ queryKey: [category] })
+      }
+    }
+
     s.on('connect', onConnect)
     s.on('disconnect', onDisconnect)
     s.on('connect_error', onConnectError)
     s.on('workspace_branding_updated', onBrandingUpdate)
+    s.on('system_update', onSystemUpdate)
 
     return () => {
       try {
@@ -67,6 +80,7 @@ export function SocketProvider({ children }) {
         s.off('disconnect', onDisconnect)
         s.off('connect_error', onConnectError)
         s.off('workspace_branding_updated', onBrandingUpdate)
+        s.off('system_update', onSystemUpdate)
       } catch (e) { }
       try { s.close() } catch (e) { }
       socketRef.current = null
