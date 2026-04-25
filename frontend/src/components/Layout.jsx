@@ -179,7 +179,7 @@ export default function Layout() {
 
       {mobileMenuOpen && <div className="mobile-menu-overlay" onClick={() => setMobileMenuOpen(false)} />}
       
-      <aside className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''} ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+      <aside className={`sidebar ${(isSidebarCollapsed && !mobileMenuOpen) ? 'collapsed' : ''} ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
           <div className="flex justify-between items-center mb-4 lg:hidden">
               <div className="scccs-branding">

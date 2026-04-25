@@ -377,6 +377,19 @@
   .sidebar.mobile-open {
     transform: translateX(0) !important;
     box-shadow: 20px 0 60px rgba(0,0,0,0.6);
+    width: 320px !important;
+  }
+
+  .sidebar.mobile-open .scccs-branding,
+  .sidebar.mobile-open .nav-group-title,
+  .sidebar.mobile-open .nav-text,
+  .sidebar.mobile-open .sidebar-footer-btn span {
+    display: flex !important;
+  }
+
+  .sidebar.mobile-open .nav-item {
+    justify-content: flex-start !important;
+    padding: 0.85rem 1.5rem !important;
   }
 
   .mobile-menu-overlay {
