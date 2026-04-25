@@ -51,9 +51,22 @@ def upload_workspace_logo(workspace_id):
             return jsonify({'error': 'No selected file', 'success': False}), 400
 
         # Step A: Persistent Cloud Upload
-        from app.utils.uploads import save_logo
+        from app.utils.uploads import save_logo, allowed_file, ALLOWED_EXTENSIONS
         filename = f'logo_ws_{workspace_id}.png'
         file.seek(0)
+        input_filename = getattr(file, 'filename', '')
+        if not input_filename:
+            logger.warning("save_logo called with file having no filename")
+            return jsonify({'error': 'No filename provided', 'success': False}), 400
+        
+        # MIME Type and Extension Integrity
+        ext = input_filename.rsplit('.', 1)[1].lower() if '.' in input_filename else ''
+        logger.info(f"🔍 Analyzing file: {input_filename} (Ext: {ext}, Type: {getattr(file, 'content_type', 'unknown')})")
+
+        if not allowed_file(input_filename):
+            logger.warning(f"❌ File extension '{ext}' not in permitted list: {ALLOWED_EXTENSIONS}")
+            return jsonify({'error': 'Invalid file type', 'success': False}), 400
+
         logger.info(f"☁️ Uploading to cloud: {filename}")
         logo_url = save_logo(file, folder='workspaces', filename=filename)
         
@@ -71,15 +84,23 @@ def upload_workspace_logo(workspace_id):
             file.seek(0)
             file_data = file.read()
             if file_data:
-                img = Image.open(io.BytesIO(file_data))
-                img.thumbnail((400, 400))
-                buffered = io.BytesIO()
-                img.save(buffered, format="PNG")
-                b64_logo = base64.b64encode(buffered.getvalue()).decode('utf-8')
-                
-                settings = workspace.get_settings()
-                settings['logo_persistent_backup'] = f"data:image/png;base64,{b64_logo}"
-                workspace.set_settings(settings)
+                # Use a separate try-except for Image processing to avoid crashing the whole request
+                try:
+                    img = Image.open(io.BytesIO(file_data))
+                    # Ensure we handle various modes (RGBA -> RGB for some formats)
+                    if img.mode in ("RGBA", "P"):
+                        img = img.convert("RGB")
+                    img.thumbnail((400, 400))
+                    buffered = io.BytesIO()
+                    img.save(buffered, format="JPEG", quality=85) # Use JPEG for backup to save space
+                    b64_logo = base64.b64encode(buffered.getvalue()).decode('utf-8')
+                    
+                    settings = workspace.get_settings()
+                    settings['logo_persistent_backup'] = f"data:image/jpeg;base64,{b64_logo}"
+                    workspace.set_settings(settings)
+                except Exception as img_err:
+                    logger.error(f"Image processing failed: {img_err}")
+                    # Non-fatal, continue with the main upload
         except Exception as bkp_err:
             logger.warning(f"Persistent backup warning: {bkp_err}")
 

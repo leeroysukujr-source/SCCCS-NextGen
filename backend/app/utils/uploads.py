@@ -28,8 +28,12 @@ def save_logo(file, folder='logos', filename=None):
         logger.warning("save_logo called with file having no filename")
         return None
     
+    # MIME Type and Extension Integrity
+    ext = input_filename.rsplit('.', 1)[1].lower() if '.' in input_filename else ''
+    logger.info(f"🔍 [save_logo] Analyzing file: {input_filename} (Ext: {ext}, Type: {getattr(file, 'content_type', 'unknown')})")
+
     if not allowed_file(input_filename):
-        logger.warning(f"File type not allowed for {input_filename}")
+        logger.warning(f"❌ [save_logo] File extension '{ext}' not in permitted list: {ALLOWED_EXTENSIONS}")
         return None
 
     try:
