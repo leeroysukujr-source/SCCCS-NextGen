@@ -24,18 +24,23 @@ def upload_workspace_logo(workspace_id):
         return jsonify({'error': 'Unauthorized'}), 401
         
     try:
+        from app.utils.logger import logger
+        logger.info(f"🚀 Starting logo upload for workspace {workspace_id}")
         user = User.query.get(uid)
         
         if not user:
+            logger.warning(f"User {uid} not found during logo upload")
             return jsonify({'error': 'User not found', 'success': False}), 404
             
         # Tiered Jurisdiction Check
         is_super = user.role == "super_admin" or getattr(user, 'platform_role', '') == 'SUPER_ADMIN'
         if not is_super and int(user.workspace_id) != int(workspace_id):
+            logger.warning(f"Jurisdiction Denied for user {uid} on workspace {workspace_id}")
             return jsonify({'error': 'Jurisdiction Denied', 'success': False}), 403
             
         workspace = Workspace.query.get(workspace_id)
         if not workspace:
+            logger.warning(f"Workspace {workspace_id} not found")
             return jsonify({'error': 'Workspace not found', 'success': False}), 404
             
         if 'file' not in request.files:
@@ -49,34 +54,39 @@ def upload_workspace_logo(workspace_id):
         from app.utils.uploads import save_logo
         filename = f'logo_ws_{workspace_id}.png'
         file.seek(0)
+        logger.info(f"☁️ Uploading to cloud: {filename}")
         logo_url = save_logo(file, folder='workspaces', filename=filename)
         
         if not logo_url:
+            logger.error(f"Failed to save logo for workspace {workspace_id}")
             return jsonify({'error': 'Failed to save logo', 'success': False}), 500
 
-        # Step B: Persistent Backup in DB settings
+        # Step B: Persistent Backup in DB settings (survives storage wipes)
         try:
             import base64
             from PIL import Image
             import io
             
+            logger.info("📸 Creating persistent B64 backup")
             file.seek(0)
             file_data = file.read()
-            img = Image.open(io.BytesIO(file_data))
-            img.thumbnail((400, 400))
-            buffered = io.BytesIO()
-            img.save(buffered, format="PNG")
-            b64_logo = base64.b64encode(buffered.getvalue()).decode('utf-8')
-            
-            settings = workspace.get_settings()
-            settings['logo_persistent_backup'] = f"data:image/png;base64,{b64_logo}"
-            workspace.set_settings(settings)
-        except Exception as e:
-            print(f"[Tenant Brand] Persistent backup warning: {e}")
+            if file_data:
+                img = Image.open(io.BytesIO(file_data))
+                img.thumbnail((400, 400))
+                buffered = io.BytesIO()
+                img.save(buffered, format="PNG")
+                b64_logo = base64.b64encode(buffered.getvalue()).decode('utf-8')
+                
+                settings = workspace.get_settings()
+                settings['logo_persistent_backup'] = f"data:image/png;base64,{b64_logo}"
+                workspace.set_settings(settings)
+        except Exception as bkp_err:
+            logger.warning(f"Persistent backup warning: {bkp_err}")
 
         # Step C: Update DB
         workspace.logo_url = logo_url
         db.session.commit()
+        logger.info(f"✅ Logo updated successfully: {logo_url}")
         
         # Step D: Return the Full URL with cache-buster
         cache_buster = int(time.time())
@@ -86,10 +96,13 @@ def upload_workspace_logo(workspace_id):
             final_url = f"{request.host_url.rstrip('/')}{logo_url}?v={cache_buster}"
         
         # Real-time Notification
-        socketio.emit('workspace_branding_updated', {
-            'workspace_id': workspace_id,
-            'logo_url': final_url
-        }, room=f'workspace_{workspace_id}')
+        try:
+            socketio.emit('workspace_branding_updated', {
+                'workspace_id': workspace_id,
+                'logo_url': final_url
+            }, room=f'workspace_{workspace_id}')
+        except Exception as sock_err:
+            logger.warning(f"Socket emit failed: {sock_err}")
         
         return jsonify({
             'success': True,
@@ -99,6 +112,7 @@ def upload_workspace_logo(workspace_id):
 
     except Exception as e:
         db.session.rollback()
+        import traceback
+        traceback.print_exc()
         from app.utils.supabase import handle_supabase_error
-        print(f"[Tenant Brand] CRITICAL CRASH: {e}")
         return handle_supabase_error(e)

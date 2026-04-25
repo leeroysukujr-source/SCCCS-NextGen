@@ -28,6 +28,8 @@ def upload_system_logo():
         return jsonify({'error': 'Unauthorized'}), 401
         
     try:
+        from app.utils.logger import logger
+        logger.info("🚀 Starting global system logo upload")
         user = User.query.get(uid)
         
         if not (is_super_admin(user) or getattr(user, 'platform_role', '') == 'SUPER_ADMIN'):
