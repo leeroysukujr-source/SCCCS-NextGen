@@ -70,7 +70,8 @@ export default function TeacherDashboard() {
 
   const stats = {
     myClasses: myClasses.length,
-    totalStudents: myClasses.reduce((sum, c) => sum + (c.member_count || 0), 0),
+    totalStudents: myClasses.reduce((sum, c) => sum + (c.member_count || 0), 0) + 
+                   channels.filter(ch => ch.created_by === user?.id).reduce((sum, ch) => sum + (ch.member_count || 0), 0),
     totalLessons: myClasses.reduce((sum, c) => sum + (c.lesson_count || 0), 0),
     upcomingMeetings: rooms.filter(r =>
       r.meeting_type === 'scheduled' &&
