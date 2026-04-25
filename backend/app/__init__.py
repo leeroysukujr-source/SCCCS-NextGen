@@ -106,7 +106,13 @@ def create_app(config_class=Config):
 
     # Maximum Robustness CORS - Industry Standard Implementation
     # We allow the specific Vercel production domains and wildcard headers for proxy flexibility.
-    CORS(app, resources={r"/api/*": {"origins": final_origins}}, supports_credentials=True)
+    CORS(app, resources={r"/api/*": {
+        "origins": final_origins,
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": "*",  # The "Nuclear" fix for bypass-tunnel-reminder
+        "expose_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
+    }})
 
     # CORS configuration - Senior Deployment Hardening
     # Flask-CORS handles OPTIONS preflight automatically for blueprints.

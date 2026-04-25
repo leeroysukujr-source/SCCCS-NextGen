@@ -149,23 +149,29 @@ export async function findWorkingApiUrl() {
 /**
  * Get the full URL for an image/file from the backend
  * Handles /api, /static, and protocol-relative URLs
+ * Includes an optional cache-buster to force fresh loads
  */
-export function getFullImageUrl(url) {
+export function getFullImageUrl(url, useCacheBuster = false) {
   if (!url) return null;
   if (url.startsWith('data:')) return url;
-  if (url.startsWith('http')) return url;
-
-  const base = getApiBaseUrl();
-
-  // Ensure we have a leading slash if not present
-  const path = url.startsWith('/') ? url : `/${url}`;
-
-  // If it already starts with /api or /static, just prepend the base
-  if (path.startsWith('/api') || path.startsWith('/static')) {
-    return `${base}${path}`;
+  
+  let finalUrl = url;
+  if (!url.startsWith('http')) {
+    const base = getApiBaseUrl();
+    const path = url.startsWith('/') ? url : `/${url}`;
+    
+    if (path.startsWith('/api') || path.startsWith('/static')) {
+      finalUrl = `${base}${path}`;
+    } else {
+      finalUrl = `${base}/api${path}`;
+    }
   }
 
-  // Fallback: assume it's an API route if no prefix
-  return `${base}/api${path}`;
+  if (useCacheBuster) {
+    const separator = finalUrl.includes('?') ? '&' : '?';
+    return `${finalUrl}${separator}t=${Date.now()}`;
+  }
+  
+  return finalUrl;
 }
 

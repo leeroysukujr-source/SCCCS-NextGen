@@ -148,7 +148,7 @@ export default function Layout() {
           <div className="page-context">
             {workspaceLogo && (
               <img 
-                src={getFullImageUrl(workspaceLogo)} 
+                src={getFullImageUrl(workspaceLogo, true)} 
                 alt="" 
                 className="header-workspace-logo" 
                 onError={(e) => e.target.style.display = 'none'}

@@ -9,13 +9,17 @@ from flask import current_app
 workspaces_logo_bp = Blueprint('workspaces_logo', __name__)
 
 @workspaces_logo_bp.route('/<int:workspace_id>/logo', methods=['POST', 'OPTIONS'])
-@cross_origin(origins=["https://scccs-next-gen-nine.vercel.app", "https://scccs-next-gen.vercel.app", "https://scccs-nextgen-q2ll.onrender.com"], allow_headers=['Authorization', 'Content-Type'])
+@cross_origin(
+    origins=["https://scccs-next-gen-nine.vercel.app", "https://scccs-next-gen.vercel.app", "https://scccs-nextgen-q2ll.onrender.com"],
+    allow_headers="*",
+    methods=["POST", "OPTIONS"],
+    supports_credentials=True
+)
 @jwt_required()
 def upload_workspace_logo(workspace_id):
     """
     Robust Workspace Logo Jurisdiction (The Tenant Brand)
-    Instruction: Resolve CORS Preflight failure and ensure multipart handling.
-    Save file to: static/uploads/workspaces/logo_ws_{workspace_id}.png
+    Instruction: Resolve CORS Preflight failure and ensure cloud persistence.
     """
     if request.method == 'OPTIONS':
         return jsonify({'status': 'ok'}), 200
@@ -43,39 +47,26 @@ def upload_workspace_logo(workspace_id):
         if file.filename == '':
             return jsonify({'error': 'No selected file', 'success': False}), 400
 
-        # Step A: Explicitly ensure the workspaces branding directory exists and has permissions
-        static_folder = current_app.static_folder or os.path.join(current_app.root_path, 'static')
-        workspaces_path = os.path.join(static_folder, 'uploads', 'workspaces')
-        
-        if not os.path.exists(workspaces_path):
-            os.makedirs(workspaces_path, mode=0o755, exist_ok=True)
-        else:
-            try: os.chmod(workspaces_path, 0o755)
-            except: pass
-
-        # Step B: Save file using workspace-specific convention
+        # Step A: Persistent Cloud Upload using save_logo utility
+        # This handles S3/Supabase vs Local fallback automatically
+        from app.utils.uploads import save_logo
         filename = f'logo_ws_{workspace_id}.png'
-        target_path = os.path.join(workspaces_path, filename)
         
-        # Check file size (5MB limit)
-        file.seek(0, os.SEEK_END)
-        if file.tell() > 5 * 1024 * 1024:
-            return jsonify({'error': 'File too large. Maximum size is 5MB.', 'success': False}), 400
+        # We must seek to 0 before saving to ensure full read
         file.seek(0)
+        logo_url = save_logo(file, folder='workspaces', filename=filename)
         
-        # Read for both disk save and persistent DB backup
-        file_data = file.read()
-        with open(target_path, 'wb') as f:
-            f.write(file_data)
-        
-        # Step C: Persistent Backup (DevOps Strategy for Ephemeral Disks)
-        # We store a small base64 version in settings to survive Render restarts
-        import base64
-        from PIL import Image
-        import io
-        
+        if not logo_url:
+            return jsonify({'error': 'Failed to save logo to storage', 'success': False}), 500
+
+        # Step B: Persistent Backup in DB settings (survives disk wipes)
         try:
-            # Resize for storage efficiency (max 400px width/height)
+            import base64
+            from PIL import Image
+            import io
+            
+            file.seek(0)
+            file_data = file.read()
             img = Image.open(io.BytesIO(file_data))
             img.thumbnail((400, 400))
             buffered = io.BytesIO()
@@ -86,31 +77,31 @@ def upload_workspace_logo(workspace_id):
             settings['logo_persistent_backup'] = f"data:image/png;base64,{b64_logo}"
             workspace.set_settings(settings)
         except Exception as e:
-            print(f"[Tenant Brand] Persistent backup failed: {e}")
+            print(f"[Tenant Brand] Persistent backup warning: {e}")
 
-        # Step D: Update DB
-        logo_url = f"/static/uploads/workspaces/{filename}"
+        # Step C: Update DB and Cache
         workspace.logo_url = logo_url
         db.session.commit()
         
-        # Step D: Return the Full URL with cache-buster for immediate Sidebar update
+        # Step D: Return the Full URL with cache-buster
         cache_buster = int(time.time())
-        full_url = f"{request.host_url.rstrip('/')}{logo_url}?v={cache_buster}"
+        # If logo_url is already absolute (cloud), append v. Otherwise construct it.
+        if logo_url.startswith('http'):
+            final_url = f"{logo_url}{'&' if '?' in logo_url else '?'}v={cache_buster}"
+        else:
+            final_url = f"{request.host_url.rstrip('/')}{logo_url}?v={cache_buster}"
         
-        # Real-time Notification for other members of the same workspace
-        from app import socketio
+        # Real-time Notification
         socketio.emit('workspace_branding_updated', {
             'workspace_id': workspace_id,
-            'logo_url': full_url
+            'logo_url': final_url
         }, room=f'workspace_{workspace_id}')
         
-        print(f"[Tenant Brand] Logo updated for workspace {workspace_id}: {full_url}")
-
         return jsonify({
             'success': True,
             'message': 'Workspace logo updated successfully',
-            'logo_url': full_url,
-            'full_url': full_url
+            'logo_url': final_url,
+            'full_url': final_url
         }), 200
 
     except Exception as e:

@@ -72,7 +72,7 @@ const LogoUpload = ({ initialLogo, uploadUrl, onUploadSuccess, label = "Upload L
                 <div className="relative w-28 h-28 bg-slate-900 rounded-2xl border-2 border-dashed border-slate-700 flex items-center justify-center overflow-hidden transition-all hover:border-indigo-400 group shadow-xl">
                     {preview ? (
                         <img 
-                            src={getFullImageUrl(preview)} 
+                            src={getFullImageUrl(preview, true)} 
                             alt="Logo Preview" 
                             className="w-full h-full object-contain p-2" 
                         />

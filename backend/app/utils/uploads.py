@@ -53,6 +53,8 @@ def save_logo(file, folder='logos', filename=None):
             logger.info(f"S3 target detected: {s3_endpoint}/{s3_bucket}")
             file.seek(0)
             try:
+                # Instruction 3: Ensure bucket is Public (Supabase Storage Hardening)
+                # Note: supabase.storage.update_bucket('workspace-logos', {'public': True})
                 success = upload_fileobj(file, key)
                 if success:
                     url = get_public_url(key)
