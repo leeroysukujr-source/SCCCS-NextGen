@@ -401,8 +401,14 @@ const RecentFilesSection = ({ onOpenTool }) => {
                             <div className="px-2.5 py-1 rounded-full bg-slate-50 dark:bg-slate-700 text-[9px] font-black uppercase text-slate-400 tracking-tighter">
                                 {filter === 'trash' ? 'Trashed' : (item.visibility === 'private' ? 'Draft' : 'Published')}
                             </div>
-                            {item.visibility !== 'private' && filter !== 'trash' && (
-                                <div className="absolute top-4 right-4 px-3 py-1 bg-green-500 rounded-full flex items-center gap-1.5 text-white shadow-xl shadow-green-500/30 animate-in slide-in-from-top-2">
+                            {item.is_verified && (
+                                <div className="absolute top-4 right-4 px-3 py-1 bg-indigo-600 rounded-full flex items-center gap-1.5 text-white shadow-xl shadow-indigo-500/30 animate-in zoom-in duration-500 border border-white/20">
+                                    <FiCheckCircle size={10} strokeWidth={4} />
+                                    <span className="text-[9px] font-black uppercase tracking-widest">Verified accurate</span>
+                                </div>
+                            )}
+                            {item.visibility !== 'private' && !item.is_verified && filter !== 'trash' && (
+                                <div className="absolute top-4 right-4 px-3 py-1 bg-green-500 rounded-full flex items-center gap-1.5 text-white shadow-xl shadow-green-500/30">
                                     <FiCheckCircle size={10} strokeWidth={4} />
                                     <span className="text-[9px] font-black uppercase tracking-widest">Live</span>
                                 </div>
@@ -445,6 +451,24 @@ const RecentFilesSection = ({ onOpenTool }) => {
                                                 <button onClick={(e) => handleToggleStar(e, item)} className={`w-full text-left px-4 py-3 flex items-center gap-3 text-xs font-bold transition-colors outline-none ${item.is_starred ? 'text-amber-500 bg-amber-50 dark:bg-amber-900/10' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}>
                                                     <FiStar size={14} fill={item.is_starred ? "currentColor" : "none"} /> {item.is_starred ? 'Starred' : 'Star Project'}
                                                 </button>
+                                                {user?.role === 'admin' && (
+                                                    <button 
+                                                        onClick={async (e) => {
+                                                            e.stopPropagation();
+                                                            try {
+                                                                await apiClient.put(`/documents/${item.id}`, { is_verified: !item.is_verified });
+                                                                notify('success', item.is_verified ? 'Verification removed' : 'Project verified as accurate');
+                                                                setOpenMenuId(null);
+                                                                fetchCreations();
+                                                            } catch (err) {
+                                                                notify('error', 'Failed to verify');
+                                                            }
+                                                        }} 
+                                                        className={`w-full text-left px-4 py-3 flex items-center gap-3 text-xs font-bold transition-colors outline-none ${item.is_verified ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/10' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                                                    >
+                                                        <FiCheckCircle size={14} /> {item.is_verified ? 'Unverify' : 'Verify as Accurate'}
+                                                    </button>
+                                                )}
                                                 <div className="border-t border-slate-50 dark:border-slate-700/50 my-1"></div>
                                                 <button onClick={(e) => handleTrash(e, item.id)} className="w-full text-left px-4 py-3 flex items-center gap-3 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors outline-none">
                                                     <FiTrash2 size={14} /> Move to Trash
@@ -488,7 +512,7 @@ const EditorShell = ({ tool, id, user, onBack }) => {
                     </button>
                 </div>
 
-                {tool === 'smart_docs' && <SmartDocEditor docId={id === 'new' ? null : id} onBack={onBack} onShare={() => setShowShare(true)} />}
+                {tool === 'smart_docs' && <SmartDocEditor docId={id === 'new' ? null : id} tool={tool} onBack={onBack} onShare={() => setShowShare(true)} />}
                 {tool === 'quick_notes' && <QuickNotes />}
                 {/* ... other tools ... */}
                 {(tool === 'whiteboard' || tool === 'design_canvas') && (

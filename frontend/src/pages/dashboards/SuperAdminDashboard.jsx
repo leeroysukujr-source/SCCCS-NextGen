@@ -28,6 +28,7 @@ import UserListModal from '../../components/UserListModal'
 import { superAdminAPI } from '../../api/superAdmin'
 import { useAuthStore } from '../../store/authStore'
 import SuperAdminStats from '../../components/SuperAdminStats'
+import { uploadFile } from '../../utils/supabase'
 
 const SuperAdminDashboard = () => {
     const { updateUser } = useAuthStore();
@@ -305,12 +306,21 @@ const SuperAdminDashboard = () => {
 
             // Handle Logo Upload if file exists
             if (wsForm.logoFile && wsId) {
-                const formData = new FormData();
-                formData.append('file', wsForm.logoFile);
-                await apiClient.post(`/workspaces/${wsId}/logo`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                notify('Logo uploaded successfully', 'success');
+                try {
+                    // Upload to Supabase
+                    const fileExt = wsForm.logoFile.name.split('.').pop();
+                    const fileName = `${wsId}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+                    const filePath = `logos/${fileName}`;
+                    
+                    const publicUrl = await uploadFile(wsForm.logoFile, 'workspace-logos', filePath);
+                    
+                    // Update backend with the URL
+                    await apiClient.post(`/workspaces/${wsId}/logo`, { logo_url: publicUrl });
+                    notify('Logo uploaded to cloud storage', 'success');
+                } catch (uploadErr) {
+                    console.error("Supabase upload failed:", uploadErr);
+                    notify('Workspace created, but logo upload failed', 'warning');
+                }
             }
 
             setIsWsModalOpen(false);

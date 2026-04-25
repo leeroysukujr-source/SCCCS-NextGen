@@ -14,6 +14,7 @@ class Document(db.Model):
     status = db.Column(db.String(20), default='active') 
     group_id = db.Column(db.Integer, db.ForeignKey('assignment_groups.id'), nullable=True)
     is_starred = db.Column(db.Boolean, default=False)
+    is_verified = db.Column(db.Boolean, default=False)  # For accurate/institutional content
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -33,6 +34,7 @@ class Document(db.Model):
             'status': self.status,
             'group_id': self.group_id,
             'is_starred': self.is_starred,
+            'is_verified': self.is_verified,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }

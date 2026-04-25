@@ -15,9 +15,9 @@ import {
 import { useAuthStore } from '../../store/authStore';
 
 
-const SmartDocEditor = ({ docId, onBack, onSuccess, onShare }) => {
+const SmartDocEditor = ({ docId, tool, onBack, onSuccess, onShare }) => {
     const { user } = useAuthStore();
-    const [title, setTitle] = useState('Untitled Document');
+    const [title, setTitle] = useState(docId === 'new' || !docId ? `New ${tool ? tool.replace('_', ' ') : 'Document'}` : 'Loading...');
     const [saving, setSaving] = useState(false);
     const [lastSaved, setLastSaved] = useState(null);
     const [collaborators, setCollaborators] = useState([]);

@@ -220,6 +220,9 @@ def update_document(id):
     if 'is_starred' in data:
         doc.is_starred = bool(data['is_starred'])
         
+    if 'is_verified' in data and user.role == 'admin':
+        doc.is_verified = bool(data['is_verified'])
+        
     doc.updated_at = datetime.utcnow()
     db.session.commit()
     return jsonify(doc.to_dict()), 200
