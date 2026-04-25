@@ -57,7 +57,9 @@ export default function TeacherDashboard() {
       const res = await apiClient.get('/assignments')
       return res.data
     },
-    retry: 1
+    retry: 1,
+    refetchInterval: 30000,
+    refetchIntervalInBackground: true
   })
 
   const { data: classes = [], error: classesError } = useQuery({
@@ -261,10 +263,10 @@ export default function TeacherDashboard() {
           {/* Statistics Cards (StatsGrid) */}
           <StatsGrid
             stats={[
-              { value: stats.myClasses, label: 'My Classes', icon: <FiBook />, trend: 'Active' },
-              { value: stats.totalStudents, label: 'Total Students', icon: <FiUsers />, trend: 'Enrolled' },
-              { value: stats.pendingSubmissions, label: 'Pending Grades', icon: <FiZap />, trend: 'Needs Action' },
-              { value: stats.totalSubmissions, label: 'Submissions', icon: <FiCheckCircle />, trend: 'Collected' }
+              { value: stats.myClasses, label: 'My Classes', icon: <FiBook />, trend: 'Active', iconColor: '#6366f1' },
+              { value: stats.totalStudents, label: 'Total Students', icon: <FiUsers />, trend: 'Enrolled', iconColor: '#8b5cf6' },
+              { value: stats.pendingSubmissions, label: 'Pending Grades', icon: <FiZap />, trend: 'Needs Action', iconColor: '#f59e0b' },
+              { value: stats.totalSubmissions, label: 'Submissions', icon: <FiCheckCircle />, trend: 'Collected', iconColor: '#10b981' }
             ]}
           />
 

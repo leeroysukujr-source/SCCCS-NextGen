@@ -197,10 +197,10 @@ export default function StudentDashboard() {
           {/* Statistics Cards (StatsGrid) */}
           <StatsGrid
             stats={[
-              { value: stats.enrolledClasses, label: 'Enrolled Classes', icon: <FiBook />, trend: 'Active' },
-              { value: stats.upcomingMeetings, label: 'Upcoming', icon: <FiVideo />, trend: 'Scheduled' },
-              { value: stats.recentActivity, label: 'This Week', icon: <FiCheckCircle />, trend: '+3' },
-              { value: stats.activeMeetings, label: 'Active Now', icon: <FiUsers />, trend: 'Live' }
+              { value: stats.enrolledClasses, label: 'Enrolled Classes', icon: <FiBook />, trend: 'Active', iconColor: '#6366f1' },
+              { value: stats.upcomingMeetings, label: 'Upcoming', icon: <FiVideo />, trend: 'Scheduled', iconColor: '#8b5cf6' },
+              { value: stats.recentActivity, label: 'This Week', icon: <FiCheckCircle />, trend: '+3', iconColor: '#10b981' },
+              { value: stats.activeMeetings, label: 'Active Now', icon: <FiUsers />, trend: 'Live', iconColor: '#f59e0b' }
             ]}
           />
 
