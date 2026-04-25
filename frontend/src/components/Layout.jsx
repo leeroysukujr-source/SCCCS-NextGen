@@ -27,13 +27,13 @@ export default function Layout() {
   const [showSearch, setShowSearch] = useState(false)
   const [, setTheme] = useTheme()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(window.innerWidth < 1200)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(window.innerWidth < 768)
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 1200 && !isSidebarCollapsed) {
+      if (window.innerWidth < 768 && !isSidebarCollapsed) {
         setIsSidebarCollapsed(true)
-      } else if (window.innerWidth >= 1200 && isSidebarCollapsed) {
+      } else if (window.innerWidth >= 768 && isSidebarCollapsed) {
         setIsSidebarCollapsed(false)
       }
     }

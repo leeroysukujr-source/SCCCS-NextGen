@@ -120,17 +120,16 @@ def create_app(config_class=Config):
     @app.after_request
     def after_request(response):
         """The Global 'Force-CORS' Middleware (Architect Requirement)"""
-        origin = request.headers.get('Origin')
+        # For regular requests, only add if missing to avoid duplicates from Flask-CORS
+        if 'Access-Control-Allow-Origin' not in response.headers:
+            origin = request.headers.get('Origin')
+            if origin and (origin in final_origins or final_origins == "*"):
+                response.headers['Access-Control-Allow-Origin'] = origin
+            else:
+                response.headers['Access-Control-Allow-Origin'] = 'https://scccs-next-gen-nine.vercel.app'
         
-        # If the origin is in our allowed list, use it explicitly (required for supports_credentials)
-        if origin and (origin in final_origins or final_origins == "*"):
-            response.headers['Access-Control-Allow-Origin'] = origin
-        elif 'Access-Control-Allow-Origin' not in response.headers:
-            # Fallback to primary production domain
-            response.headers['Access-Control-Allow-Origin'] = 'https://scccs-next-gen-nine.vercel.app'
-        
-        # Always inject headers to ensure reliability
-        response.headers['Access-Control-Allow-Headers'] = '*'
+        # Standard hardening headers (Standard Architect Compliance)
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,bypass-tunnel-reminder,x-requested-with'
         response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
         response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response

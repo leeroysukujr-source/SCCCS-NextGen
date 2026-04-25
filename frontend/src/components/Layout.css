@@ -37,7 +37,7 @@
   transition: all 0.3s ease;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .top-navbar {
     padding: 0 2rem;
     left: var(--sidebar-width);
@@ -362,7 +362,7 @@
 }
 
 /* Responsive Overrides */
-@media (max-width: 1023px) {
+@media (max-width: 767px) {
   .main-content {
     margin-left: 0 !important;
     padding-bottom: 70px;

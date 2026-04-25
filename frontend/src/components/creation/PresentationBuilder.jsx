@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-    FiSave, FiArrowRight, FiPlus, FiMonitor, FiType, FiImage, FiGrid, FiUsers, FiPlay, FiStopCircle,
-    FiArrowRight as FiArrowRightIcon, FiMaximize2, FiChevronDown, FiPlusSquare,
+    FiSave, FiPlus, FiMonitor, FiType, FiImage, FiGrid, FiUsers, FiPlay, FiStopCircle,
+    FiArrowRight, FiArrowRight as FiArrowRightIcon, FiMaximize2, FiChevronDown, FiPlusSquare,
     FiLayout, FiSmile, FiSquare, FiLayers, FiX, FiActivity, FiYoutube, FiCheck, FiRotateCcw, FiRotateCw
 } from 'react-icons/fi';
 import apiClient from '../../api/client';
