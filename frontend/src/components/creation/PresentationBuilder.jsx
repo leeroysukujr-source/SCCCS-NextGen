@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
     FiSave, FiPlus, FiMonitor, FiType, FiImage, FiGrid, FiUsers, FiPlay, FiStopCircle,
-    FiArrowRight, FiArrowRight as FiArrowRightIcon, FiMaximize2, FiChevronDown, FiPlusSquare,
+    FiArrowRight, FiArrowLeft, FiMaximize2, FiChevronDown, FiPlusSquare,
     FiLayout, FiSmile, FiSquare, FiLayers, FiX, FiActivity, FiYoutube, FiCheck, FiRotateCcw, FiRotateCw
 } from 'react-icons/fi';
 import apiClient from '../../api/client';
@@ -355,7 +355,7 @@ const PresentationBuilder = ({ docId, onBack, onSuccess, onShare }) => {
                         onClick={() => handleActiveSlideChange(activeSlideIndex - 1)}
                         className="p-2 hover:bg-slate-800 rounded-lg disabled:opacity-30 transition-colors"
                     >
-                        <FiArrowRightIcon size={18} />
+                        <FiArrowLeft size={18} />
                     </button>
                     <span className="text-[10px] font-bold tracking-widest uppercase">{activeSlideIndex + 1} / {slides.length}</span>
                     <button
