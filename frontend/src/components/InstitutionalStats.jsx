@@ -28,61 +28,73 @@ const InstitutionalStats = ({ workspaceId }) => {
     ];
 
     return (
-        <div className="relative overflow-hidden bg-[#02040a] border border-white/10 rounded-3xl p-8 mb-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] group">
-            {/* Background Accent Gradients */}
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-indigo-600/20 transition-all duration-700"></div>
-            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-purple-600/20 transition-all duration-700"></div>
+        <div className="relative group mb-10">
+            {/* Animated Neon Border Beam */}
+            <div className="absolute -inset-[1px] rounded-[24px] overflow-hidden pointer-events-none">
+                <div className="absolute inset-[-1000%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,transparent_0%,#6366f1_20%,transparent_40%,#a855f7_60%,transparent_80%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+            </div>
 
-            <div className="relative z-10">
-                <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-3">
-                        <span className="w-8 h-[1px] bg-indigo-500/50"></span>
-                        <FiShield className="text-indigo-500" />
-                        Institutional Oversight
-                    </h2>
-                    <div className="flex items-center gap-2 text-indigo-400/60 text-[10px] font-bold tracking-wider uppercase">
-                        <FiTrendingUp /> Live Monitor
-                    </div>
-                </div>
+            {/* Main Content Container */}
+            <div className="relative overflow-hidden bg-[#02040a] border border-white/10 rounded-[23px] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+                {/* Background Accent Gradients */}
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-600/5 rounded-full blur-[100px] pointer-events-none group-hover:bg-indigo-600/10 transition-all duration-700"></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-600/5 rounded-full blur-[100px] pointer-events-none group-hover:bg-purple-600/10 transition-all duration-700"></div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
-                    {statItems.map((item, idx) => (
-                        <div 
-                            key={idx} 
-                            className="flex flex-col gap-3 group/item cursor-default"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div 
-                                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 group-hover/item:scale-110 shadow-lg"
-                                    style={{ backgroundColor: item.bg, color: item.color, boxShadow: `0 0 15px ${item.bg}` }}
-                                >
-                                    {React.cloneElement(item.icon, { size: 18 })}
-                                </div>
-                                <span className="text-slate-400 text-xs font-bold tracking-tight group-hover/item:text-slate-200 transition-colors">
-                                    {item.label}
-                                </span>
-                            </div>
-                            
-                            <div className="flex items-baseline gap-2">
-                                <div className="text-3xl font-black text-white tracking-tighter tabular-nums transition-all duration-300 group-hover/item:translate-x-1">
-                                    {item.value}
-                                </div>
-                                <div className="w-1 h-1 rounded-full bg-indigo-500 opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
-                            </div>
-
-                            {/* Subtle underline progress indicator (visual only) */}
-                            <div className="w-full h-[2px] bg-white/5 rounded-full overflow-hidden mt-1">
-                                <div 
-                                    className="h-full rounded-full transition-all duration-1000 ease-out"
-                                    style={{ 
-                                        width: '40%', 
-                                        backgroundColor: item.color,
-                                        boxShadow: `0 0 10px ${item.color}`
-                                    }}
-                                ></div>
-                            </div>
+                <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div>
+                            <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-2">
+                                <FiShield className="text-indigo-500" />
+                                Institutional Oversight
+                            </h2>
                         </div>
-                    ))}
+                        <div className="flex items-center gap-2 text-indigo-400/60 text-[10px] font-bold tracking-wider uppercase">
+                            <FiTrendingUp className="animate-bounce" /> Live Monitor
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+                        {statItems.map((item, idx) => (
+                            <div 
+                                key={idx} 
+                                className="flex flex-col gap-3 group/item cursor-default"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div 
+                                        className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 group-hover/item:scale-110 shadow-lg relative overflow-hidden"
+                                        style={{ backgroundColor: item.bg, color: item.color, boxShadow: `0 0 20px ${item.bg}` }}
+                                    >
+                                        {/* Inner Glow */}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
+                                        {React.cloneElement(item.icon, { size: 18 })}
+                                    </div>
+                                    <span className="text-slate-400 text-[11px] font-bold tracking-tight group-hover/item:text-slate-100 transition-colors">
+                                        {item.label}
+                                    </span>
+                                </div>
+                                
+                                <div className="flex items-baseline gap-2">
+                                    <div className="text-3xl font-black text-white tracking-tighter tabular-nums transition-all duration-500 group-hover/item:translate-x-1">
+                                        {item.value}
+                                    </div>
+                                    <div className="w-1.5 h-1.5 rounded-full opacity-0 group-hover/item:opacity-100 transition-all duration-500" style={{ backgroundColor: item.color }}></div>
+                                </div>
+
+                                {/* Refined progress indicator */}
+                                <div className="w-full h-[1px] bg-white/10 rounded-full overflow-hidden mt-1">
+                                    <div 
+                                        className="h-full rounded-full transition-all duration-1000 ease-in-out"
+                                        style={{ 
+                                            width: '40%', 
+                                            backgroundColor: item.color,
+                                            boxShadow: `0 0 15px ${item.color}`
+                                        }}
+                                    ></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>
