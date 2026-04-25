@@ -112,6 +112,7 @@ export default function Layout() {
     }
 
     adminGroup.items.push({ path: '/admin/users', icon: <FiUsers />, text: 'Users' })
+    adminGroup.items.push({ path: '/admin/reports', icon: <FiActivity />, text: 'Institutional Reports' })
     adminGroup.items.push({ path: '/admin/creation-hub-audit', icon: <FiActivity />, text: 'Creation Hub Audit' })
     adminGroup.items.push({ path: '/admin/creation-policy', icon: <FiShield />, text: 'Creation Policy' })
     adminGroup.items.push({ path: '/admin/security', icon: <FiShield />, text: 'Security & Audit' })

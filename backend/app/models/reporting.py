@@ -34,7 +34,7 @@ class ReportSubmission(db.Model):
     __tablename__ = 'report_submissions'
 
     id = db.Column(db.Integer, primary_key=True)
-    request_id = db.Column(db.Integer, db.ForeignKey('report_requests.id'), nullable=False)
+    request_id = db.Column(db.Integer, db.ForeignKey('report_requests.id'), nullable=True)
     workspace_id = db.Column(db.Integer, db.ForeignKey('workspaces.id'), nullable=False)
     submitted_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow)

@@ -111,32 +111,36 @@ def get_report_requests():
         result.append(req_dict)
         
     return jsonify(result), 200
-
-@reporting_bp.route('/requests/<int:request_id>/submit', methods=['POST'])
+    
+@reporting_bp.route('/submissions', methods=['GET'])
 @jwt_required()
-def submit_report(request_id):
-    """Submit a report for the current workspace"""
+def get_submissions():
+    """Get all report submissions for the workspace"""
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
     
-    if not user or user.role != 'admin': # Only workspace admins submit
-        return jsonify({'error': 'Unauthorized. Workspace Admin required'}), 403
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
         
-    req = ReportRequest.query.get(request_id)
-    if not req:
-        return jsonify({'error': 'Request not found'}), 404
+    query = ReportSubmission.query
+    if user.role != 'super_admin':
+        query = query.filter_by(workspace_id=user.workspace_id)
         
-    # Check if already submitted
-    existing = ReportSubmission.query.filter_by(
-        request_id=req.id,
-        workspace_id=user.workspace_id
-    ).first()
+    submissions = query.order_by(ReportSubmission.submitted_at.desc()).all()
     
-    if existing:
-        return jsonify({'error': 'Report already submitted'}), 400
-    
+    result = []
+    for sub in submissions:
+        sub_dict = sub.to_dict()
+        # Add request title if linked
+        sub_dict['request_title'] = sub.request.title if sub.request else 'Internal Generation'
+        sub_dict['is_internal'] = sub.request_id is None
+        result.append(sub_dict)
+        
+    return jsonify(result), 200
+
+def _process_submission(user, data, request_id=None):
     # Gather data based on checklist
-    checklist = request.get_json().get('checklist', {})
+    checklist = data.get('checklist', {})
     
     # In a real system, we fetch these from the DB
     snapshot_data = {
@@ -174,16 +178,54 @@ def submit_report(request_id):
         }
 
     submission = ReportSubmission(
-        request_id=req.id,
+        request_id=request_id,
         workspace_id=user.workspace_id,
         submitted_by=user.id,
         data=snapshot_data,
-        notes=request.get_json().get('notes')
+        notes=data.get('notes')
     )
     
     db.session.add(submission)
     db.session.commit()
+    return submission
+
+@reporting_bp.route('/requests/<int:request_id>/submit', methods=['POST'])
+@jwt_required()
+def submit_report(request_id):
+    """Submit a report for the current workspace"""
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
     
+    if not user or user.role != 'admin': # Only workspace admins submit
+        return jsonify({'error': 'Unauthorized. Workspace Admin required'}), 403
+        
+    req = ReportRequest.query.get(request_id)
+    if not req:
+        return jsonify({'error': 'Request not found'}), 404
+        
+    # Check if already submitted
+    existing = ReportSubmission.query.filter_by(
+        request_id=req.id,
+        workspace_id=user.workspace_id
+    ).first()
+    
+    if existing:
+        return jsonify({'error': 'Report already submitted'}), 400
+    
+    submission = _process_submission(user, request.get_json(), request_id)
+    return jsonify(submission.to_dict()), 201
+
+@reporting_bp.route('/generate', methods=['POST'])
+@jwt_required()
+def generate_internal_report():
+    """Generate an internal report without a request"""
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if not user or (user.role != 'admin' and user.role != 'super_admin'):
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    submission = _process_submission(user, request.get_json())
     return jsonify(submission.to_dict()), 201
 
 @reporting_bp.route('/export/download', methods=['POST'])

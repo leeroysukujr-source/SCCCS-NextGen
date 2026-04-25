@@ -112,6 +112,14 @@ export default function Reports() {
         }
     });
 
+    const { data: submissions, refetch: refetchSubmissions } = useQuery({
+        queryKey: ['report-submissions'],
+        queryFn: async () => {
+            const res = await api.get('/reports/submissions');
+            return res.data;
+        }
+    });
+
     const { data: workspaces } = useQuery({
         queryKey: ['workspaces-list'],
         queryFn: async () => {
@@ -138,11 +146,16 @@ export default function Reports() {
 
     const submitReportMutation = useMutation({
         mutationFn: async ({ requestId, notes, checklist }) => {
-            await api.post(`/reports/requests/${requestId}/submit`, { notes, checklist });
+            if (requestId) {
+                await api.post(`/reports/requests/${requestId}/submit`, { notes, checklist });
+            } else {
+                await api.post('/reports/generate', { notes, checklist });
+            }
         },
         onSuccess: () => {
             setIsSubmitModalOpen(false);
             refetchRequests();
+            refetchSubmissions();
             alert('Report generated and submitted successfully!');
         },
         onError: (err) => {
@@ -278,6 +291,18 @@ export default function Reports() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    {!isSuperAdmin && (
+                        <button
+                            onClick={() => {
+                                setActiveRequestId(null);
+                                setIsSubmitModalOpen(true);
+                            }}
+                            className="flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-900/30"
+                        >
+                            <FiPlus className="text-lg" /> Generate Report
+                        </button>
+                    )}
+                    
                     {/* Export Dropdown */}
                     <div className="relative export-dropdown-container">
                         <button
@@ -375,6 +400,67 @@ export default function Reports() {
                             </div>
                         ))
                     )}
+                </div>
+            </div>
+
+            {/* Past Submissions Section */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                <div className="p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <FiCheckCircle className="text-emerald-500" />
+                        Past Generated Reports
+                    </h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Historical archive of institutional snapshots and submissions.</p>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
+                            <tr>
+                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Report Source</th>
+                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Generated Date</th>
+                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                            {submissions?.map(sub => (
+                                <tr key={sub.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                                    <td className="px-6 py-4">
+                                        <div className="font-bold text-slate-900 dark:text-slate-200">{sub.request_title}</div>
+                                        <div className="text-xs text-slate-500">{sub.is_internal ? 'Internal Institutional Snapshot' : 'Response to SuperAdmin Request'}</div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                                        {new Date(sub.submitted_at).toLocaleDateString()}
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <div className="flex justify-end gap-2">
+                                            <button 
+                                                onClick={() => handleSubmissionDownload(sub.id, 'pdf')}
+                                                className="p-2 text-slate-400 hover:text-indigo-500 transition-colors"
+                                                title="Download PDF"
+                                            >
+                                                <FiDownload />
+                                            </button>
+                                            <button 
+                                                onClick={() => handleSubmissionDownload(sub.id, 'excel')}
+                                                className="p-2 text-slate-400 hover:text-emerald-500 transition-colors"
+                                                title="Download Excel"
+                                            >
+                                                <FiDownload />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            {(!submissions || submissions.length === 0) && (
+                                <tr>
+                                    <td colSpan="3" className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
+                                        No reports generated yet.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 

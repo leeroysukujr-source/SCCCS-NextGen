@@ -423,7 +423,7 @@ function App() {
               } />
               <Route path="admin/reports" element={
                 <ErrorBoundary>
-                  <SecurityAuditCenter />
+                  <Reports />
                 </ErrorBoundary>
               } />
               <Route path="admin/security" element={
