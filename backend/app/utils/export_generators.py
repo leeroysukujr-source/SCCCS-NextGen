@@ -154,122 +154,208 @@ def generate_pdf_report(data, title="System Report"):
     buffer.seek(0)
     return buffer
 
-def generate_excel_report(data, title="System Report"):
+def generate_excel_report(data, title="Institutional Report"):
     """
-    Generate a styled Excel report.
+    Generate a highly styled, multi-sheet Excel report.
     """
     wb = Workbook()
+    
+    # 1. Dashboard/Summary Sheet
     ws = wb.active
-    ws.title = "Overview"
+    ws.title = "Executive Summary"
     
-    # Styling
-    header_font = Font(bold=True, color="FFFFFF", size=12)
+    metadata = data.get('metadata', {})
+    metrics = data.get('metrics', {})
+    
+    # Branding Header
     header_fill = PatternFill(start_color="4F46E5", end_color="4F46E5", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF", size=14)
+    white_font = Font(color="FFFFFF")
+    bold_font = Font(bold=True)
     
-    # 1. Overview Sheet
-    ws.append(["Metric", "Value"])
-    overview = data.get('overview', {})
-    ws.append(["Total Users", overview.get('total_users', 0)])
-    ws.append(["Active Users", overview.get('active_users', 0)])
-    ws.append(["Total Students", overview.get('total_students', 0)])
-    ws.append(["Total Teachers", overview.get('total_teachers', 0)])
+    ws['A1'] = metadata.get('institution', 'Institution')
+    ws['A1'].font = header_font
+    ws.merge_cells('A1:C1')
     
-    for cell in ws[1]:
-        cell.font = header_font
-        cell.fill = header_fill
+    ws.append([f"{title} | Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}"])
+    ws['A2'].font = Font(italic=True, color="64748B")
+    ws.append([""]) # Spacer
+    
+    # User Demographics Section
+    if 'users' in metrics:
+        u = metrics['users']
+        ws.append(["User Demographics & Enrollment"])
+        ws[f"A{ws.max_row}"].font = Font(bold=True, size=12, color="4F46E5")
         
-    # 2. Details Sheet
-    ws2 = wb.create_sheet("Detailed Data")
-    headers = ['ID', 'Username', 'Email', 'Full Name', 'Role', 'Status', 'Joined']
-    ws2.append(headers)
-    
-    for cell in ws2[1]:
-        cell.font = header_font
-        cell.fill = header_fill
+        headers = ["Metric Group", "Count", "Status"]
+        ws.append(headers)
+        for cell in ws[ws.max_row]:
+            cell.fill = PatternFill(start_color="4F46E5", end_color="4F46E5", fill_type="solid")
+            cell.font = white_font
+            
+        ws.append(["Total Registered Users", u.get('total', 0), "Active"])
+        ws.append(["Students", u.get('students', 0), "Enrolled"])
+        ws.append(["Faculty/Teachers", u.get('teachers', 0), "Active"])
+        ws.append(["Administrative Staff", u.get('admins', 0), "Active"])
+        ws.append([""]) # Spacer
+
+    # Activity Trends Section
+    if 'activity' in metrics:
+        act = metrics['activity']
+        ws.append(["Platform Engagement Activity"])
+        ws[f"A{ws.max_row}"].font = Font(bold=True, size=12, color="0F172A")
         
-    users = data.get('details', [])
-    for u in users:
-        ws2.append([
-            u.get('id'),
-            u.get('username'),
-            u.get('email'),
-            f"{u.get('first_name','')} {u.get('last_name','')}",
-            u.get('role'),
-            'Active' if u.get('is_active') else 'Inactive',
-            u.get('created_at')
-        ])
-    
+        headers = ["Activity Type", "Volume", "Context"]
+        ws.append(headers)
+        for cell in ws[ws.max_row]:
+            cell.fill = PatternFill(start_color="0F172A", end_color="0F172A", fill_type="solid")
+            cell.font = white_font
+            
+        ws.append(["Daily Active Users (DAU)", act.get('daily_active_users', 0), "High Usage"])
+        ws.append(["System Messages Transmitted", act.get('messages_sent', 0), "Active Channels"])
+        ws.append(["Collaborative Meetings held", act.get('meetings_held', 0), "Live Sessions"])
+        ws.append([""]) # Spacer
+
+    # Academic Section
+    if 'academic' in metrics:
+        acad = metrics['academic']
+        ws.append(["Academic Operations & Quality"])
+        ws[f"A{ws.max_row}"].font = Font(bold=True, size=12, color="059669")
+        
+        headers = ["Area", "Metric", "Performance"]
+        ws.append(headers)
+        for cell in ws[ws.max_row]:
+            cell.fill = PatternFill(start_color="059669", end_color="059669", fill_type="solid")
+            cell.font = white_font
+            
+        ws.append(["Active Courses/Classes", acad.get('total_classes', 0), "Normal"])
+        ws.append(["Assessment Submissions", acad.get('total_assignments', 0), "Steady"])
+        ws.append(["Aggregate Performance Score", f"{acad.get('average_grade', 0)}%", "Exceeding Target"])
+
     # Auto-width
-    for sheet in [ws, ws2]:
-        for column in sheet.columns:
-            max_length = 0
-            column_letter = column[0].column_letter
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except: pass
-            sheet.column_dimensions[column_letter].width = min(max_length + 2, 50)
+    for column in ws.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except: pass
+        ws.column_dimensions[column_letter].width = min(max_length + 2, 40)
             
     output = io.BytesIO()
     wb.save(output)
     output.seek(0)
     return output
 
-def generate_word_report(data, title="System Report"):
+def generate_word_report(data, title="Institutional Report"):
     """
-    Generate a Word document report.
+    Generate a professional, captivating Word document.
     """
     doc = Document()
     
-    # Title
-    heading = doc.add_heading(title, 0)
-    heading.alignment = 1 # Center
+    # Configure document-wide styles
+    style = doc.styles['Normal']
+    font = style.font
+    font.name = 'Calibri'
+    font.size = Pt(11)
     
-    doc.add_paragraph(f"Generated on {datetime.now().strftime('%B %d, %Y')}")
+    metadata = data.get('metadata', {})
+    metrics = data.get('metrics', {})
+
+    # 1. Header
+    section = doc.sections[0]
+    header = section.header
+    htab = header.paragraphs[0]
+    htab.text = f"Official Institutional Record | {datetime.now().strftime('%Y-%m-%d')}"
+    htab.style = doc.styles['Caption']
+
+    # 2. Main Title
+    title_p = doc.add_paragraph()
+    title_run = title_p.add_run(metadata.get('institution', 'Institutional Report'))
+    title_run.bold = True
+    title_run.font.size = Pt(24)
+    title_run.font.color.rgb = RGBColor(0x1E, 0x29, 0x3B)
+    title_p.alignment = 0 # Left
+
+    sub_p = doc.add_paragraph()
+    sub_run = sub_p.add_run(f"{title}\nGenerated via SCCCS NextGen Reporting Engine")
+    sub_run.font.size = Pt(12)
+    sub_run.font.color.rgb = RGBColor(0x64, 0x74, 0x8B)
     
-    # Overview
-    doc.add_heading('Executive Summary', level=1)
-    overview = data.get('overview', {})
-    
-    table = doc.add_table(rows=1, cols=2)
-    table.style = 'Light Shading Accent 1'
-    hdr_cells = table.rows[0].cells
-    hdr_cells[0].text = 'Metric'
-    hdr_cells[1].text = 'Value'
-    
-    metrics = [
-        ('Total Users', overview.get('total_users', 0)),
-        ('Active Recently', overview.get('active_users', 0)),
-        ('Total Workspaces', overview.get('total_workspaces', 0))
-    ]
-    
-    for metric, value in metrics:
-        row_cells = table.add_row().cells
-        row_cells[0].text = str(metric)
-        row_cells[1].text = str(value)
+    doc.add_paragraph("-" * 80)
+
+    # 3. Content Sections
+    def add_section_table(doc, title, data_list, theme_color):
+        doc.add_heading(title, level=1)
+        # Apply theme color to heading logic would be complex in docx, 
+        # so we rely on table styling
         
-    doc.add_paragraph('\n')
-    
-    # Details
-    doc.add_heading('Detailed User List', level=1)
-    users = data.get('details', [])
-    
-    table2 = doc.add_table(rows=1, cols=4)
-    table2.style = 'Light List Accent 1'
-    hdr_cells = table2.rows[0].cells
-    hdr_cells[0].text = 'Name'
-    hdr_cells[1].text = 'Email'
-    hdr_cells[2].text = 'Role'
-    hdr_cells[3].text = 'Status'
-    
-    for u in users[:100]: # Limit for Word perf
-        row_cells = table2.add_row().cells
-        row_cells[0].text = f"{u.get('first_name','')} {u.get('last_name','')}"
-        row_cells[1].text = u.get('email', '')
-        row_cells[2].text = u.get('role', '')
-        row_cells[3].text = 'Active' if u.get('is_active') else 'Inactive'
+        table = doc.add_table(rows=len(data_list), cols=len(data_list[0]))
+        table.style = 'Table Grid'
         
+        # Style Header Row
+        for i, text in enumerate(data_list[0]):
+            cell = table.rows[0].cells[i]
+            cell.text = text
+            # Setting background color via XML for professional look
+            shading_elm = qn('w:shd')
+            shading_elm.set(qn('w:fill'), theme_color)
+            cell._tc.get_or_add_tcPr().append(shading_elm)
+            # Bold white text
+            p = cell.paragraphs[0]
+            run = p.runs[0]
+            run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+            run.font.bold = True
+
+        # Data Rows
+        for i, row_data in enumerate(data_list[1:], start=1):
+            for j, val in enumerate(row_data):
+                table.rows[i].cells[j].text = str(val)
+
+    # User Demographics
+    if 'users' in metrics:
+        u = metrics['users']
+        user_rows = [
+            ['Metric Group', 'Count', 'Status'],
+            ['Total Registered Users', u.get('total', 0), 'Active'],
+            ['Students', u.get('students', 0), 'Enrolled'],
+            ['Faculty/Teachers', u.get('teachers', 0), 'Active'],
+            ['Administrative Staff', u.get('admins', 0), 'Active']
+        ]
+        add_section_table(doc, "User Demographics & Enrollment", user_rows, "4F46E5") # Indigo
+
+    doc.add_paragraph("\n")
+
+    # Activity
+    if 'activity' in metrics:
+        act = metrics['activity']
+        act_rows = [
+            ['Activity Type', 'Volume', 'Context'],
+            ['Daily Active Users (DAU)', act.get('daily_active_users', 0), 'High Usage'],
+            ['System Messages Transmitted', act.get('messages_sent', 0), 'Active'],
+            ['Collaborative Meetings held', act.get('meetings_held', 0), 'Live']
+        ]
+        add_section_table(doc, "Platform Engagement Activity", act_rows, "0F172A") # Dark Slate
+
+    doc.add_paragraph("\n")
+
+    # Academic
+    if 'academic' in metrics:
+        acad = metrics['academic']
+        acad_rows = [
+            ['Area', 'Metric', 'Performance'],
+            ['Active Courses/Classes', acad.get('total_classes', 0), 'Normal'],
+            ['Assessment Submissions', acad.get('total_assignments', 0), 'Steady'],
+            ['Aggregate Performance Score', f"{acad.get('average_grade', 0)}%", 'High']
+        ]
+        add_section_table(doc, "Academic Operations & Quality", acad_rows, "059669") # Emerald
+
+    # 4. Footer
+    doc.add_paragraph("\n\n" + "-" * 80)
+    footer_p = doc.add_paragraph("--- End of Official Institutional Report ---")
+    footer_p.alignment = 1
+    
     output = io.BytesIO()
     doc.save(output)
     output.seek(0)

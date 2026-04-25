@@ -15,7 +15,9 @@ import {
     FiFileText,
     FiCheckCircle,
     FiClock,
-    FiPlus
+    FiPlus,
+    FiFile,
+    FiGrid
 } from 'react-icons/fi';
 import {
     Chart as ChartJS,
@@ -176,7 +178,8 @@ export default function Reports() {
             const url = window.URL.createObjectURL(new Blob([res.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `Submission_${submissionId}.${format === 'excel' ? 'xlsx' : 'pdf'}`);
+            const ext = format === 'excel' ? 'xlsx' : format === 'word' ? 'docx' : 'pdf';
+            link.setAttribute('download', `Submission_${submissionId}.${ext}`);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -434,20 +437,27 @@ export default function Reports() {
                                         {new Date(sub.submitted_at).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <div className="flex justify-end gap-2">
+                                        <div className="flex justify-end gap-3">
                                             <button 
                                                 onClick={() => handleSubmissionDownload(sub.id, 'pdf')}
-                                                className="p-2 text-slate-400 hover:text-indigo-500 transition-colors"
+                                                className="p-2.5 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all"
                                                 title="Download PDF"
                                             >
-                                                <FiDownload />
+                                                <FiFileText className="text-lg" />
                                             </button>
                                             <button 
                                                 onClick={() => handleSubmissionDownload(sub.id, 'excel')}
-                                                className="p-2 text-slate-400 hover:text-emerald-500 transition-colors"
+                                                className="p-2.5 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all"
                                                 title="Download Excel"
                                             >
-                                                <FiDownload />
+                                                <FiGrid className="text-lg" />
+                                            </button>
+                                            <button 
+                                                onClick={() => handleSubmissionDownload(sub.id, 'word')}
+                                                className="p-2.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all"
+                                                title="Download Word"
+                                            >
+                                                <FiFile className="text-lg" />
                                             </button>
                                         </div>
                                     </td>
