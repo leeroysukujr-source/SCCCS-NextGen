@@ -27,6 +27,7 @@ import LogoUpload from '../../components/LogoUpload'
 import UserListModal from '../../components/UserListModal'
 import { superAdminAPI } from '../../api/superAdmin'
 import { useAuthStore } from '../../store/authStore'
+import SuperAdminStats from '../../components/SuperAdminStats'
 
 const SuperAdminDashboard = () => {
     const { updateUser } = useAuthStore();
@@ -1501,6 +1502,7 @@ const DashboardHome = ({
     workspacesCount
 }) => (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <SuperAdminStats stats={stats} workspacesCount={workspacesCount} />
         {/* Quick Actions Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <button
@@ -1623,39 +1625,6 @@ const DashboardHome = ({
 
             {/* System Stats Vertical */}
             <div className="space-y-6">
-                <div className="bg-white dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6">
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Platform Growth</h3>
-                    <div className="space-y-4">
-                        <div>
-                            <div className="flex justify-between text-sm mb-1">
-                                <span className="text-slate-500 dark:text-slate-400">Total Users</span>
-                                <span className="text-slate-900 dark:text-white font-bold">{stats.total_students + stats.total_teachers + stats.total_admins}</span>
-                            </div>
-                            <div className="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                                <div className="bg-blue-500 h-full" style={{ width: '75%' }}></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div className="flex justify-between text-sm mb-1">
-                                <span className="text-slate-500 dark:text-slate-400">Workspaces</span>
-                                <span className="text-slate-900 dark:text-white font-bold">{workspacesCount}</span>
-                            </div>
-                            <div className="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                                <div className="bg-purple-500 h-full" style={{ width: '45%' }}></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div className="flex justify-between text-sm mb-1">
-                                <span className="text-slate-500 dark:text-slate-400">Active Sessions</span>
-                                <span className="text-slate-900 dark:text-white font-bold">{stats.active_users}</span>
-                            </div>
-                            <div className="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                                <div className="bg-emerald-500 h-full" style={{ width: '60%' }}></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-5">
                         <Box className="w-32 h-32 transform rotate-12 text-slate-900 dark:text-white" />

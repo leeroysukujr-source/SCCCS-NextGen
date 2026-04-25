@@ -80,7 +80,7 @@ export default function TeacherDashboard() {
     activeMeetings: rooms.filter(r => r.is_active).length,
     pendingSubmissions: assignments.reduce((sum, a) => sum + (a.pending_count || 0), 0),
     totalSubmissions: assignments.reduce((sum, a) => sum + (a.submission_count || 0), 0),
-    myChannels: channels.filter(ch => ch.owner_id === user?.id || ch.creator_id === user?.id).length
+    myChannels: channels.filter(ch => ch.created_by === user?.id).length
   }
 
   const upcomingMeetings = rooms

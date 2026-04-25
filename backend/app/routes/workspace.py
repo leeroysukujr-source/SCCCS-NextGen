@@ -412,6 +412,7 @@ def get_workspace_stats(ws_id):
         'workspace_name': workspace.name,
         'stats': {
             'students': student_count,
+            'lecturers': teacher_count,
             'staff': teacher_count + admin_count,
             'classes': class_count,
             'channels': channel_count,

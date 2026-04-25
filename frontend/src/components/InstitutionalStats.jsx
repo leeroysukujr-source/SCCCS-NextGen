@@ -21,6 +21,7 @@ const InstitutionalStats = ({ workspaceId }) => {
 
     const statItems = [
         { label: 'Students', value: stats.students, icon: <FiUsers />, color: '#6366f1', bg: 'rgba(99, 102, 241, 0.15)' },
+        { label: 'Lecturers', value: stats.lecturers || 0, icon: <FiUsers />, color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' },
         { label: 'Staff members', value: stats.staff, icon: <FiShield />, color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)' },
         { label: 'Classes', value: stats.classes, icon: <FiBook />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)' },
         { label: 'Active Channels', value: stats.channels, icon: <FiMessageSquare />, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.15)' },
@@ -54,7 +55,7 @@ const InstitutionalStats = ({ workspaceId }) => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
                         {statItems.map((item, idx) => (
                             <div 
                                 key={idx} 
