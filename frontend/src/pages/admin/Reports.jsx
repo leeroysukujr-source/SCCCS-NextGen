@@ -20,6 +20,11 @@ import {
     FiGrid
 } from 'react-icons/fi';
 import {
+    BsFileEarmarkPdf,
+    BsFileEarmarkSpreadsheet,
+    BsFileEarmarkWord
+} from 'react-icons/bs';
+import {
     Chart as ChartJS,
     CategoryScale,
     LinearScale,
@@ -440,24 +445,27 @@ export default function Reports() {
                                         <div className="flex justify-end gap-3">
                                             <button 
                                                 onClick={() => handleSubmissionDownload(sub.id, 'pdf')}
-                                                className="p-2.5 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all"
+                                                className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all group flex flex-col items-center gap-1"
                                                 title="Download PDF"
                                             >
-                                                <FiFileText className="text-lg" />
+                                                <BsFileEarmarkPdf className="text-xl" />
+                                                <span className="text-[10px] font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity">PDF</span>
                                             </button>
                                             <button 
                                                 onClick={() => handleSubmissionDownload(sub.id, 'excel')}
-                                                className="p-2.5 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all"
+                                                className="p-2.5 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all group flex flex-col items-center gap-1"
                                                 title="Download Excel"
                                             >
-                                                <FiGrid className="text-lg" />
+                                                <BsFileEarmarkSpreadsheet className="text-xl" />
+                                                <span className="text-[10px] font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity">XL</span>
                                             </button>
                                             <button 
                                                 onClick={() => handleSubmissionDownload(sub.id, 'word')}
-                                                className="p-2.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all"
+                                                className="p-2.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all group flex flex-col items-center gap-1"
                                                 title="Download Word"
                                             >
-                                                <FiFile className="text-lg" />
+                                                <BsFileEarmarkWord className="text-xl" />
+                                                <span className="text-[10px] font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity">Doc</span>
                                             </button>
                                         </div>
                                     </td>

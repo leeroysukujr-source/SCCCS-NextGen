@@ -257,7 +257,7 @@ def download_export():
             return jsonify({'error': 'Unauthorized access to this report'}), 403
             
         report_data = submission.data
-        title = f"Report: {submission.request.title}"
+        title = f"Report: {submission.request.title if submission.request else 'Institutional Snapshot'}"
     else:
         # Basic logic to populate report_data based on role
         report_data = {
