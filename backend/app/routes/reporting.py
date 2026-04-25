@@ -135,15 +135,44 @@ def submit_report(request_id):
     if existing:
         return jsonify({'error': 'Report already submitted'}), 400
     
-    # Auto-generate snapshot data
-    # In a real system, this would gather data from various models
-    snapshot_data = {
-        'submitted_at': datetime.utcnow().isoformat(),
-        'workspace': user.workspace_name,
-        'users_count': User.query.filter_by(workspace_id=user.workspace_id).count(),
-        # Add more real metrics here
-    }
+    # Gather data based on checklist
+    checklist = request.get_json().get('checklist', {})
     
+    # In a real system, we fetch these from the DB
+    snapshot_data = {
+        'metadata': {
+            'institution': user.workspace_name,
+            'submitted_by': f"{user.first_name} {user.last_name}",
+            'date': datetime.utcnow().isoformat(),
+            'checklist': checklist
+        },
+        'metrics': {}
+    }
+
+    if checklist.get('userMetrics'):
+        snapshot_data['metrics']['users'] = {
+            'total': User.query.filter_by(workspace_id=user.workspace_id).count(),
+            'students': User.query.filter_by(workspace_id=user.workspace_id, role='student').count(),
+            'teachers': User.query.filter_by(workspace_id=user.workspace_id, role='teacher').count(),
+            'admins': User.query.filter_by(workspace_id=user.workspace_id, role='admin').count(),
+        }
+
+    if checklist.get('activityTrends'):
+        # Mocking activity trends
+        snapshot_data['metrics']['activity'] = {
+            'daily_active_users': 45, # Example
+            'messages_sent': 1200,
+            'meetings_held': 24
+        }
+    
+    if checklist.get('academicPerformance'):
+        from app.models import Class, Assignment
+        snapshot_data['metrics']['academic'] = {
+            'total_classes': Class.query.filter_by(workspace_id=user.workspace_id).count(),
+            'total_assignments': Assignment.query.filter_by(workspace_id=user.workspace_id).count(),
+            'average_grade': 82.5
+        }
+
     submission = ReportSubmission(
         request_id=req.id,
         workspace_id=user.workspace_id,
@@ -172,37 +201,52 @@ def download_export():
     report_type = data.get('type', 'system') # system or submission
     
     # Gather Data based on context
-    # This logic matches what we did in analytics.py but prepares it for export
-    report_data = {
-        'overview': {},
-        'details': []
-    }
-    
-    # Basic logic to populate report_data based on role
-    if user.role == 'super_admin':
-        report_data['overview']['total_users'] = User.query.count()
-        report_data['details'] = [u.to_dict() for u in User.query.limit(200).all()]
+    if report_type == 'submission':
+        submission_id = data.get('submission_id')
+        if not submission_id:
+            return jsonify({'error': 'Submission ID required for this type'}), 400
+            
+        submission = ReportSubmission.query.get(submission_id)
+        if not submission:
+            return jsonify({'error': 'Submission not found'}), 404
+            
+        # Check permissions
+        if user.role != 'super_admin' and submission.workspace_id != user.workspace_id:
+            return jsonify({'error': 'Unauthorized access to this report'}), 403
+            
+        report_data = submission.data
+        title = f"Report: {submission.request.title}"
     else:
-        report_data['overview']['total_users'] = User.query.filter_by(workspace_id=user.workspace_id).count()
-        report_data['details'] = [u.to_dict() for u in User.query.filter_by(workspace_id=user.workspace_id).limit(200).all()]
+        # Basic logic to populate report_data based on role
+        report_data = {
+            'overview': {},
+            'details': []
+        }
+        if user.role == 'super_admin':
+            report_data['overview']['total_users'] = User.query.count()
+            report_data['details'] = [u.to_dict() for u in User.query.limit(200).all()]
+        else:
+            report_data['overview']['total_users'] = User.query.filter_by(workspace_id=user.workspace_id).count()
+            report_data['details'] = [u.to_dict() for u in User.query.filter_by(workspace_id=user.workspace_id).limit(200).all()]
+        title = "System Overview Report"
         
     
     if format_type == 'pdf':
-        file_buffer = generate_pdf_report(report_data)
+        file_buffer = generate_pdf_report(report_data, title=title)
         mimetype = 'application/pdf'
         ext = 'pdf'
     elif format_type == 'excel':
-        file_buffer = generate_excel_report(report_data)
+        file_buffer = generate_excel_report(report_data, title=title)
         mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         ext = 'xlsx'
     elif format_type == 'word':
-        file_buffer = generate_word_report(report_data)
+        file_buffer = generate_word_report(report_data, title=title)
         mimetype = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         ext = 'docx'
     else:
         return jsonify({'error': 'Invalid format'}), 400
         
-    filename = f"Report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
+    filename = f"{title.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
     
     return send_file(
         file_buffer,

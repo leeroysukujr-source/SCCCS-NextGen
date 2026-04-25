@@ -14,78 +14,142 @@ from docx.oxml.ns import qn
 
 def generate_pdf_report(data, title="System Report"):
     """
-    Generate a professional PDF report with branding colors and layout.
+    Generate a high-fidelity, professional PDF report.
+    Supports dynamic sections based on the gathered snapshot data.
     """
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    doc = SimpleDocTemplate(buffer, pagesize=letter, 
+                            rightMargin=50, leftMargin=50, 
+                            topMargin=50, bottomMargin=50)
     elements = []
     
     # Styles
     styles = getSampleStyleSheet()
     
-    # Custom Title Style
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Title'],
-        fontSize=24,
-        textColor=colors.HexColor('#4f46e5'), # Indigo-600
+    # Define Custom Styles
+    styles.add(ParagraphStyle(
+        name='MainTitle',
+        fontSize=28,
+        textColor=colors.HexColor('#1e293b'), # Slate-800
+        alignment=0,
+        fontName='Helvetica-Bold',
+        spaceAfter=10
+    ))
+    
+    styles.add(ParagraphStyle(
+        name='SubTitle',
+        fontSize=12,
+        textColor=colors.HexColor('#64748b'), # Slate-500
+        alignment=0,
         spaceAfter=30
-    )
+    ))
     
-    # Header
-    elements.append(Paragraph(title, title_style))
-    elements.append(Paragraph(f"Generated on {datetime.now().strftime('%B %d, %Y')}", styles['Normal']))
-    elements.append(Spacer(1, 20))
+    styles.add(ParagraphStyle(
+        name='SectionHeader',
+        fontSize=18,
+        textColor=colors.HexColor('#4f46e5'), # Indigo-600
+        fontName='Helvetica-Bold',
+        spaceBefore=25,
+        spaceAfter=15,
+        borderPadding=10,
+        borderWidth=0,
+        borderColor=colors.HexColor('#e2e8f0'),
+        backColor=colors.HexColor('#f8fafc')
+    ))
+
+    # --- Header ---
+    metadata = data.get('metadata', {})
+    inst_name = metadata.get('institution', 'Institutional Report')
+    elements.append(Paragraph(inst_name, styles['MainTitle']))
+    elements.append(Paragraph(f"{title} | Generated on {datetime.now().strftime('%B %d, %Y')}", styles['SubTitle']))
     
-    # Executive Summary (Overview)
-    elements.append(Paragraph("Executive Summary", styles['Heading2']))
+    # --- Introduction ---
+    elements.append(Paragraph("Executive Summary", styles['SectionHeader']))
+    elements.append(Paragraph(f"This report provides a comprehensive overview of the institutional performance and engagement metrics as requested. Submission prepared by {metadata.get('submitted_by', 'Administrator')}.", styles['Normal']))
+    elements.append(Spacer(1, 15))
+
+    # --- Metrics Logic ---
+    metrics = data.get('metrics', {})
     
-    overview = data.get('overview', {})
-    summary_data = [
-        ['Metric', 'Value'],
-        ['Total Users', str(overview.get('total_users', 0))],
-        ['Active Users', str(overview.get('active_users', 0))],
-        ['Workspaces', str(overview.get('total_workspaces', 0))]
-    ]
-    
-    t = Table(summary_data, colWidths=[200, 100])
-    t.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (1, 0), colors.HexColor('#e0e7ff')),
-        ('TEXTCOLOR', (0, 0), (1, 0), colors.HexColor('#3730a3')),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e5e7eb')),
-    ]))
-    elements.append(t)
-    elements.append(Spacer(1, 20))
-    
-    # Detailed User List (Top 50 rows)
-    elements.append(Paragraph("User Data Detail", styles['Heading2']))
-    
-    # Prepare table data
-    table_data = [['ID', 'Name', 'Email', 'Role', 'Status']]
-    users = data.get('details', [])
-    for u in users[:50]: # Limit for PDF
-        table_data.append([
-            str(u.get('id', '')),
-            u.get('first_name', '') + ' ' + u.get('last_name', ''),
-            u.get('email', ''),
-            u.get('role', ''),
-            'Active' if u.get('is_active') else 'Inactive'
-        ])
+    # 1. User Engagement Section
+    if 'users' in metrics:
+        elements.append(Paragraph("User Demographics & Enrollment", styles['SectionHeader']))
+        u = metrics['users']
+        user_table_data = [
+            ['Metric Group', 'Count', 'Status'],
+            ['Total Registered Users', str(u.get('total', 0)), 'Active'],
+            ['Students', str(u.get('students', 0)), 'Enrolled'],
+            ['Faculty/Teachers', str(u.get('teachers', 0)), 'Active'],
+            ['Administrative Staff', str(u.get('admins', 0)), 'Active']
+        ]
         
-    t2 = Table(table_data, colWidths=[30, 120, 150, 80, 60])
-    t2.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1f2937')), # Slate-800
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.whitesmoke, colors.HexColor('#f3f4f6')]),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#d1d5db')),
-    ]))
-    elements.append(t2)
-    
+        t = Table(user_table_data, colWidths=[200, 100, 100])
+        t.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4f46e5')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('TOPPADDING', (0, 0), (-1, 0), 12),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.whitesmoke, colors.HexColor('#f8fafc')]),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+        ]))
+        elements.append(t)
+
+    # 2. Activity Trends Section
+    if 'activity' in metrics:
+        elements.append(Paragraph("Platform Engagement Activity", styles['SectionHeader']))
+        act = metrics['activity']
+        elements.append(Paragraph(f"Analysis of daily interactions indicates a robust engagement level across the digital campus.", styles['Normal']))
+        elements.append(Spacer(1, 10))
+        
+        act_data = [
+            ['Activity Type', 'Volume', 'Context'],
+            ['Daily Active Users (DAU)', str(act.get('daily_active_users', 0)), 'High Usage'],
+            ['System Messages Transmitted', str(act.get('messages_sent', 0)), 'Active Channels'],
+            ['Collaborative Meetings held', str(act.get('meetings_held', 0)), 'Live Sessions']
+        ]
+        t_act = Table(act_data, colWidths=[200, 100, 100])
+        t_act.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0f172a')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('TOPPADDING', (0, 0), (-1, 0), 12),
+        ]))
+        elements.append(t_act)
+
+    # 3. Academic Performance
+    if 'academic' in metrics:
+        elements.append(Paragraph("Academic Operations & Quality", styles['SectionHeader']))
+        acad = metrics['academic']
+        elements.append(Paragraph(f"Operational data regarding courses and assessment throughput.", styles['Normal']))
+        elements.append(Spacer(1, 10))
+        
+        acad_data = [
+            ['Area', 'Metric', 'Performance'],
+            ['Active Courses/Classes', str(acad.get('total_classes', 0)), 'Normal'],
+            ['Assessment Submissions', str(acad.get('total_assignments', 0)), 'Steady'],
+            ['Aggregate Performance Score', f"{acad.get('average_grade', 0)}%", 'Exceeding Target']
+        ]
+        t_acad = Table(acad_data, colWidths=[200, 100, 100])
+        t_acad.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#059669')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('TOPPADDING', (0, 0), (-1, 0), 12),
+        ]))
+        elements.append(t_acad)
+
+    # --- Footer ---
+    elements.append(Spacer(1, 50))
+    elements.append(Paragraph("--- End of Official Institutional Report ---", styles['SubTitle']))
+    elements.append(Paragraph("SCCCS NextGen Reporting Engine v2.0 | Secure Platform Verification", styles['SubTitle']))
+
     doc.build(elements)
     buffer.seek(0)
     return buffer

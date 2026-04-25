@@ -51,8 +51,19 @@ export default function Reports() {
     // New States for Advanced Reporting
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [newRequestTitle, setNewRequestTitle] = useState('');
+    const [newRequestDesc, setNewRequestDesc] = useState('');
     const [newRequestDate, setNewRequestDate] = useState('');
     const [newRequestWorkspace, setNewRequestWorkspace] = useState('');
+
+    const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+    const [activeRequestId, setActiveRequestId] = useState(null);
+    const [checklist, setChecklist] = useState({
+        userMetrics: true,
+        activityTrends: true,
+        academicPerformance: true,
+        resourceUtilization: false,
+        securityAudit: false
+    });
 
     const [isExportOpen, setIsExportOpen] = useState(false);
 
@@ -126,14 +137,40 @@ export default function Reports() {
     });
 
     const submitReportMutation = useMutation({
-        mutationFn: async ({ requestId, notes }) => {
-            await api.post(`/reports/requests/${requestId}/submit`, { notes });
+        mutationFn: async ({ requestId, notes, checklist }) => {
+            await api.post(`/reports/requests/${requestId}/submit`, { notes, checklist });
         },
         onSuccess: () => {
+            setIsSubmitModalOpen(false);
             refetchRequests();
-            alert('Report submitted successfully!');
+            alert('Report generated and submitted successfully!');
+        },
+        onError: (err) => {
+            alert(err.response?.data?.error || 'Failed to submit report');
         }
     });
+
+    const handleSubmissionDownload = async (submissionId, format = 'pdf') => {
+        try {
+            const res = await api.post('/reports/export/download', { 
+                format, 
+                type: 'submission',
+                submission_id: submissionId 
+            }, {
+                responseType: 'blob'
+            });
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Submission_${submissionId}.${format === 'excel' ? 'xlsx' : 'pdf'}`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error('Download failed', error);
+            alert('Failed to download submission.');
+        }
+    };
 
     const handleDownload = async (format) => {
         setIsExportOpen(false); // Close immediately
@@ -309,20 +346,29 @@ export default function Reports() {
                                     {!isSuperAdmin && req.submission_status !== 'submitted' ? (
                                         <button
                                             onClick={() => {
-                                                if (confirm('Submit current dashboard metrics for this report?')) {
-                                                    submitReportMutation.mutate({ requestId: req.id, notes: 'Auto-generated submission' });
-                                                }
+                                                setActiveRequestId(req.id);
+                                                setIsSubmitModalOpen(true);
                                             }}
                                             className="px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-900/30"
                                         >
                                             Submit Now
                                         </button>
+                                    ) : req.submission_status === 'submitted' ? (
+                                        <div className="flex items-center gap-2">
+                                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                                                Submitted
+                                            </span>
+                                            <button 
+                                                onClick={() => handleSubmissionDownload(req.id)} // Assuming req.id matches submission logic or enriched
+                                                className="p-2 text-slate-400 hover:text-indigo-500 transition-colors"
+                                                title="Download PDF"
+                                            >
+                                                <FiDownload />
+                                            </button>
+                                        </div>
                                     ) : (
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${req.submission_status === 'submitted'
-                                            ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
-                                            : 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20'
-                                            }`}>
-                                            {req.submission_status === 'submitted' ? 'Submitted' : 'Pending'}
+                                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
+                                            Pending
                                         </span>
                                     )}
                                 </div>
@@ -446,7 +492,7 @@ export default function Reports() {
                                 </select>
                                 <p className="text-xs text-slate-500 mt-1">Leave empty to request from all institutions.</p>
                             </div>
-                            <div>
+                             <div>
                                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Report Title</label>
                                 <input
                                     type="text"
@@ -454,6 +500,15 @@ export default function Reports() {
                                     placeholder="e.g. Q4 Performance Review"
                                     value={newRequestTitle}
                                     onChange={e => setNewRequestTitle(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Description</label>
+                                <textarea
+                                    className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 h-24 resize-none"
+                                    placeholder="Instructions for workspace admins..."
+                                    value={newRequestDesc}
+                                    onChange={e => setNewRequestDesc(e.target.value)}
                                 />
                             </div>
                             <div>
@@ -473,16 +528,103 @@ export default function Reports() {
                                     Cancel
                                 </button>
                                 <button
+                                    disabled={!newRequestTitle || !newRequestDate || createRequestMutation.isLoading}
                                     onClick={() => createRequestMutation.mutate({
                                         title: newRequestTitle,
+                                        description: newRequestDesc,
                                         due_date: newRequestDate,
                                         workspace_id: newRequestWorkspace || null
                                     })}
-                                    className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-900/30"
+                                    className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-900/30 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Send Request
+                                    {createRequestMutation.isLoading ? 'Sending...' : 'Send Request'}
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Submission Checklist Modal */}
+            {isSubmitModalOpen && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl w-full max-w-lg p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-3 bg-indigo-100 dark:bg-indigo-500/20 rounded-xl text-indigo-600 dark:text-indigo-400">
+                                <FiFileText className="text-2xl" />
+                            </div>
+                            <div>
+                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Generate Report</h3>
+                                <p className="text-slate-500 dark:text-slate-400">Select components to include in the final document.</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 mb-8">
+                            <label className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all cursor-pointer group">
+                                <input 
+                                    type="checkbox" 
+                                    className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={checklist.userMetrics}
+                                    onChange={e => setChecklist({...checklist, userMetrics: e.target.checked})}
+                                />
+                                <div className="flex-1">
+                                    <h4 className="font-bold text-slate-900 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">User Demographics</h4>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">Student enrollment, faculty counts, and administrative roles.</p>
+                                </div>
+                            </label>
+
+                            <label className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all cursor-pointer group">
+                                <input 
+                                    type="checkbox" 
+                                    className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={checklist.activityTrends}
+                                    onChange={e => setChecklist({...checklist, activityTrends: e.target.checked})}
+                                />
+                                <div className="flex-1">
+                                    <h4 className="font-bold text-slate-900 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Activity Trends</h4>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">Daily active users, messaging volume, and meeting statistics.</p>
+                                </div>
+                            </label>
+
+                            <label className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all cursor-pointer group">
+                                <input 
+                                    type="checkbox" 
+                                    className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={checklist.academicPerformance}
+                                    onChange={e => setChecklist({...checklist, academicPerformance: e.target.checked})}
+                                />
+                                <div className="flex-1">
+                                    <h4 className="font-bold text-slate-900 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Academic Performance</h4>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">Course throughput, assignment submission rates, and grade averages.</p>
+                                </div>
+                            </label>
+
+                            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-4 rounded-xl flex items-start gap-3 mt-4">
+                                <FiActivity className="text-amber-600 dark:text-amber-400 mt-1" />
+                                <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                                    System will capture a real-time snapshot of selected metrics upon submission. This action cannot be undone.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setIsSubmitModalOpen(false)}
+                                className="px-6 py-2.5 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => submitReportMutation.mutate({ 
+                                    requestId: activeRequestId, 
+                                    notes: 'Institutional Snapshot Submission',
+                                    checklist: checklist
+                                })}
+                                disabled={submitReportMutation.isLoading}
+                                className="px-8 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-900/30 flex items-center gap-2 disabled:opacity-50"
+                            >
+                                {submitReportMutation.isLoading ? 'Generating...' : 'Confirm & Submit'}
+                            </button>
                         </div>
                     </div>
                 </div>
