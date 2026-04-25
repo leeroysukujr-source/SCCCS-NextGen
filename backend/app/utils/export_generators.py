@@ -58,18 +58,21 @@ def generate_pdf_report(data, title="System Report"):
     ))
 
     # --- Header ---
-    metadata = data.get('metadata', {})
+    if not isinstance(data, dict):
+        data = {}
+    metadata = data.get('metadata') if isinstance(data.get('metadata'), dict) else {}
     inst_name = metadata.get('institution', 'Institutional Report')
-    elements.append(Paragraph(inst_name, styles['MainTitle']))
+    elements.append(Paragraph(str(inst_name), styles['MainTitle']))
     elements.append(Paragraph(f"{title} | Generated on {datetime.now().strftime('%B %d, %Y')}", styles['SubTitle']))
     
     # --- Introduction ---
     elements.append(Paragraph("Executive Summary", styles['SectionHeader']))
-    elements.append(Paragraph(f"This report provides a comprehensive overview of the institutional performance and engagement metrics as requested. Submission prepared by {metadata.get('submitted_by', 'Administrator')}.", styles['Normal']))
+    prepared_by = metadata.get('submitted_by', 'Administrator')
+    elements.append(Paragraph(f"This report provides a comprehensive overview of the institutional performance and engagement metrics as requested. Submission prepared by {prepared_by}.", styles['Normal']))
     elements.append(Spacer(1, 15))
 
     # --- Metrics Logic ---
-    metrics = data.get('metrics', {})
+    metrics = data.get('metrics') if isinstance(data.get('metrics'), dict) else {}
     
     # 1. User Engagement Section
     if 'users' in metrics:
@@ -260,8 +263,10 @@ def generate_word_report(data, title="Institutional Report"):
     font.name = 'Calibri'
     font.size = Pt(11)
     
-    metadata = data.get('metadata', {})
-    metrics = data.get('metrics', {})
+    if not isinstance(data, dict):
+        data = {}
+    metadata = data.get('metadata') if isinstance(data.get('metadata'), dict) else {}
+    metrics = data.get('metrics') if isinstance(data.get('metrics'), dict) else {}
 
     # 1. Header
     section = doc.sections[0]
@@ -288,8 +293,6 @@ def generate_word_report(data, title="Institutional Report"):
     # 3. Content Sections
     def add_section_table(doc, title, data_list, theme_color):
         doc.add_heading(title, level=1)
-        # Apply theme color to heading logic would be complex in docx, 
-        # so we rely on table styling
         
         table = doc.add_table(rows=len(data_list), cols=len(data_list[0]))
         table.style = 'Table Grid'
@@ -298,13 +301,11 @@ def generate_word_report(data, title="Institutional Report"):
         for i, text in enumerate(data_list[0]):
             cell = table.rows[0].cells[i]
             cell.text = text
-            # Setting background color via XML for professional look
             shading_elm = qn('w:shd')
             shading_elm.set(qn('w:fill'), theme_color)
             cell._tc.get_or_add_tcPr().append(shading_elm)
-            # Bold white text
             p = cell.paragraphs[0]
-            run = p.runs[0]
+            run = p.add_run()
             run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
             run.font.bold = True
 

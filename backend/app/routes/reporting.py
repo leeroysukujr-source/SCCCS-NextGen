@@ -280,26 +280,32 @@ def download_export():
         title = "System Overview Report"
         
     
-    if format_type == 'pdf':
-        file_buffer = generate_pdf_report(report_data, title=title)
-        mimetype = 'application/pdf'
-        ext = 'pdf'
-    elif format_type == 'excel':
-        file_buffer = generate_excel_report(report_data, title=title)
-        mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        ext = 'xlsx'
-    elif format_type == 'word':
-        file_buffer = generate_word_report(report_data, title=title)
-        mimetype = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        ext = 'docx'
-    else:
-        return jsonify({'error': 'Invalid format'}), 400
+    try:
+        if format_type == 'pdf':
+            file_buffer = generate_pdf_report(report_data, title=title)
+            mimetype = 'application/pdf'
+            ext = 'pdf'
+        elif format_type == 'excel':
+            file_buffer = generate_excel_report(report_data, title=title)
+            mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            ext = 'xlsx'
+        elif format_type == 'word':
+            file_buffer = generate_word_report(report_data, title=title)
+            mimetype = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            ext = 'docx'
+        else:
+            return jsonify({'error': 'Invalid format'}), 400
+            
+        filename = f"{title.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
         
-    filename = f"{title.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
-    
-    return send_file(
-        file_buffer,
-        mimetype=mimetype,
-        as_attachment=True,
-        download_name=filename
-    )
+        return send_file(
+            file_buffer,
+            mimetype=mimetype,
+            as_attachment=True,
+            download_name=filename
+        )
+    except Exception as e:
+        import traceback
+        print("REPORT GENERATION ERROR:")
+        print(traceback.format_exc())
+        return jsonify({'error': f"Report Generation Failed: {str(e)}"}), 500
