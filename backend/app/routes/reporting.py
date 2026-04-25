@@ -104,9 +104,15 @@ def get_report_requests():
                 workspace_id=user.workspace_id
             ).first()
             req_dict['submission_status'] = 'submitted' if submission else 'pending'
+            req_dict['submission_id'] = submission.id if submission else None
         else:
-             # For Super Admin, count submissions vs workspaces
-             pass # Logic for counting can be added here
+             # For Super Admin, count submissions vs total targeted workspaces
+             submission_count = ReportSubmission.query.filter_by(request_id=req.id).count()
+             req_dict['submission_status'] = 'active'
+             req_dict['stats'] = {
+                 'submitted': submission_count,
+                 'total': Workspace.query.count() if not req.workspace_id else 1
+             }
              
         result.append(req_dict)
         

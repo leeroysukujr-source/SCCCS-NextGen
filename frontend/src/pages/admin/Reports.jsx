@@ -371,7 +371,11 @@ export default function Reports() {
                                         <p className="text-sm text-slate-500 dark:text-slate-400">{req.description || 'No description provided'}</p>
                                         <div className="flex items-center gap-4 mt-2 text-xs font-medium text-slate-500">
                                             <span>Due: {new Date(req.due_date).toLocaleDateString()}</span>
-                                            <span>Created: {new Date(req.created_at).toLocaleDateString()}</span>
+                                            {isSuperAdmin && req.stats && (
+                                                <span className="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-100 dark:border-indigo-500/20">
+                                                    {req.stats.submitted} / {req.stats.total} Submissions Received
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -388,17 +392,33 @@ export default function Reports() {
                                             Submit Now
                                         </button>
                                     ) : req.submission_status === 'submitted' ? (
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-3">
                                             <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
                                                 Submitted
                                             </span>
-                                            <button 
-                                                onClick={() => handleSubmissionDownload(req.id)} // Assuming req.id matches submission logic or enriched
-                                                className="p-2 text-slate-400 hover:text-indigo-500 transition-colors"
-                                                title="Download PDF"
-                                            >
-                                                <FiDownload />
-                                            </button>
+                                            <div className="flex gap-1 border-l border-slate-200 dark:border-slate-700 pl-3 ml-1">
+                                                <button 
+                                                    onClick={() => handleSubmissionDownload(req.submission_id, 'pdf')}
+                                                    className="p-1.5 text-slate-400 hover:text-red-600 transition-colors"
+                                                    title="Download PDF"
+                                                >
+                                                    <FaFilePdf />
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleSubmissionDownload(req.submission_id, 'excel')}
+                                                    className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
+                                                    title="Download Excel"
+                                                >
+                                                    <FaFileExcel />
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleSubmissionDownload(req.submission_id, 'word')}
+                                                    className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors"
+                                                    title="Download Word"
+                                                >
+                                                    <FaFileWord />
+                                                </button>
+                                            </div>
                                         </div>
                                     ) : (
                                         <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
