@@ -248,6 +248,11 @@ def download_export():
         if not submission_id:
             return jsonify({'error': 'Submission ID required for this type'}), 400
             
+        try:
+            submission_id = int(submission_id)
+        except (TypeError, ValueError):
+            pass # SQLAlchemy might handle it or it's a string ID
+            
         submission = ReportSubmission.query.get(submission_id)
         if not submission:
             return jsonify({'error': 'Submission not found'}), 404
@@ -256,13 +261,18 @@ def download_export():
         if user.role != 'super_admin' and submission.workspace_id != user.workspace_id:
             return jsonify({'error': 'Unauthorized access to this report'}), 403
             
-        report_data = submission.data
-        if isinstance(report_data, str):
+        if not report_data:
+            report_data = {}
+        elif isinstance(report_data, str):
             import json
             try:
                 report_data = json.loads(report_data)
             except Exception as e:
                 print(f"Error parsing report data: {e}")
+                report_data = {}
+        
+        if not isinstance(report_data, dict):
+            report_data = {}
         
         title = f"Report: {submission.request.title if submission.request else 'Institutional Snapshot'}"
     else:

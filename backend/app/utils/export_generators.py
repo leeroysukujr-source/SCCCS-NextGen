@@ -167,8 +167,10 @@ def generate_excel_report(data, title="Institutional Report"):
     ws = wb.active
     ws.title = "Executive Summary"
     
-    metadata = data.get('metadata', {})
-    metrics = data.get('metrics', {})
+    if not isinstance(data, dict):
+        data = {}
+    metadata = data.get('metadata') if isinstance(data.get('metadata'), dict) else {}
+    metrics = data.get('metrics') if isinstance(data.get('metrics'), dict) else {}
     
     # Branding Header
     header_fill = PatternFill(start_color="4F46E5", end_color="4F46E5", fill_type="solid")
