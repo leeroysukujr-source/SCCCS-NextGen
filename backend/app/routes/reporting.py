@@ -39,7 +39,7 @@ def create_report_request():
     db.session.flush() # Get ID
     
     # --- Advanced Notification Logic ---
-    from app.models import Notification
+    from app.models.notifications import Notification
     
     # 1. Identify Target Admins
     target_admins = []
