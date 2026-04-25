@@ -12,21 +12,20 @@ from flask_cors import cross_origin
 import time
 
 @admin_logo_bp.route('/system/logo', methods=['POST', 'OPTIONS'])
-@jwt_required()
+@cross_origin()
+@jwt_required(optional=True)
 def upload_system_logo():
     """
     Robust Global System Logo Persistence
     Instruction: Save the file as system_logo.png (overwrite old one).
     Update DB, return Full URL with a cache-buster timestamp.
     """
-    import os
-    from flask import current_app
-    
     if request.method == 'OPTIONS':
         return jsonify({'status': 'ok'}), 200
-
-    try:
-        uid = get_jwt_identity()
+        
+    uid = get_jwt_identity()
+    if not uid:
+        return jsonify({'error': 'Unauthorized'}), 401
         user = User.query.get(uid)
         
         if not (is_super_admin(user) or getattr(user, 'platform_role', '') == 'SUPER_ADMIN'):

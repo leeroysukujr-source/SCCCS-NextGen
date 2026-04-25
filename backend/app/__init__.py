@@ -97,6 +97,7 @@ def create_app(config_class=Config):
     production_domains = [
         'https://scccs-next-gen-nine.vercel.app',
         'https://scccs-next-gen.vercel.app',
+        'https://scccs-next-gen.onrender.com',
         'https://scccs-nextgen-q2ll.onrender.com'
     ]
     for domain in production_domains:
@@ -111,27 +112,36 @@ def create_app(config_class=Config):
     # We allow the specific Vercel production domains and wildcard headers for proxy flexibility.
     CORS(app, resources={r"/api/*": {
         "origins": final_origins,
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": "*",  # The "Nuclear" fix for bypass-tunnel-reminder
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+        "allow_headers": ["Content-Type", "Authorization", "bypass-tunnel-reminder", "x-requested-with"],
         "expose_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True
+        "supports_credentials": True,
+        "max_age": 3600
     }})
 
     @app.after_request
     def after_request(response):
         """The Global 'Force-CORS' Middleware (Architect Requirement)"""
-        # For regular requests, only add if missing to avoid duplicates from Flask-CORS
-        if 'Access-Control-Allow-Origin' not in response.headers:
-            origin = request.headers.get('Origin')
-            if origin and (origin in final_origins or final_origins == "*"):
-                response.headers['Access-Control-Allow-Origin'] = origin
-            else:
-                response.headers['Access-Control-Allow-Origin'] = 'https://scccs-next-gen-nine.vercel.app'
+        origin = request.headers.get('Origin')
         
-        # Standard hardening headers (Standard Architect Compliance)
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,bypass-tunnel-reminder,x-requested-with'
-        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        # If the request has an Origin, and it's in our allowed list, reflect it back.
+        if origin:
+            is_allowed = False
+            if final_origins == "*":
+                is_allowed = True
+            elif isinstance(final_origins, list) and origin in final_origins:
+                is_allowed = True
+            
+            if is_allowed:
+                response.headers['Access-Control-Allow-Origin'] = origin
+                response.headers['Access-Control-Allow-Credentials'] = 'true'
+        
+        # Always set these for consistency if not already set
+        if 'Access-Control-Allow-Methods' not in response.headers:
+            response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS,PATCH'
+        if 'Access-Control-Allow-Headers' not in response.headers:
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,bypass-tunnel-reminder,x-requested-with'
+            
         return response
 
     # CORS configuration - Senior Deployment Hardening

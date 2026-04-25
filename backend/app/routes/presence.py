@@ -20,10 +20,15 @@ from flask import current_app
 
 @presence_bp.route('/update', methods=['POST', 'OPTIONS'])
 @cross_origin()
-@jwt_required()
+@jwt_required(optional=True)
 def update_presence():
     """Update user presence - Asynchronous and strictly non-blocking"""
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'ok'}), 200
+        
     current_user_id = get_jwt_identity()
+    if not current_user_id:
+        return jsonify({'error': 'Unauthorized'}), 401
     data = request.get_json() or {}
     
     # Grab app object to pass to background thread

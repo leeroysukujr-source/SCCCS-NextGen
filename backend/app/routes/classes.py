@@ -136,8 +136,9 @@ def get_class(class_id):
         return jsonify(class_obj.to_dict()), 200
     
     # For teachers/admins, check if user is a member or creator
+    is_admin = user.role in ['admin', 'super_admin']
     member = ClassMember.query.filter_by(class_id=class_id, user_id=current_user_id).first()
-    if not member and class_obj.teacher_id != current_user_id:
+    if not is_admin and not member and class_obj.teacher_id != current_user_id:
         return jsonify({'error': 'Not a member'}), 403
     
     return jsonify(class_obj.to_dict()), 200

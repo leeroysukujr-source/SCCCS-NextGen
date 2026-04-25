@@ -61,10 +61,11 @@ def get_lessons(class_id):
         return jsonify([lesson.to_dict() for lesson in lessons]), 200
     
     # For teachers/admins, check if user is a member or creator
+    is_admin = user.role in ['admin', 'super_admin']
     member = ClassMember.query.filter_by(class_id=class_id, user_id=current_user_id).first()
     class_obj = Class.query.get(class_id)
     
-    if not member and (not class_obj or class_obj.teacher_id != current_user_id):
+    if not is_admin and not member and (not class_obj or class_obj.teacher_id != current_user_id):
         return jsonify({'error': 'Not a member'}), 403
     
     lessons = Lesson.query.filter_by(class_id=class_id).order_by(Lesson.created_at.desc()).all()
@@ -89,10 +90,11 @@ def get_lesson(lesson_id):
         return jsonify(lesson.to_dict()), 200
     
     # For teachers/admins, check if user is a member or creator
+    is_admin = user.role in ['admin', 'super_admin']
     member = ClassMember.query.filter_by(class_id=lesson.class_id, user_id=current_user_id).first()
     class_obj = Class.query.get(lesson.class_id)
     
-    if not member and (not class_obj or class_obj.teacher_id != current_user_id):
+    if not is_admin and not member and (not class_obj or class_obj.teacher_id != current_user_id):
         return jsonify({'error': 'Not a member'}), 403
     
     return jsonify(lesson.to_dict()), 200
@@ -167,9 +169,10 @@ def get_lesson_materials(lesson_id):
         pass  # Allow access
     else:
         # For teachers/admins, check if user is a member or creator
+        is_admin = user.role in ['admin', 'super_admin']
         member = ClassMember.query.filter_by(class_id=lesson.class_id, user_id=current_user_id).first()
         class_obj = Class.query.get(lesson.class_id)
-        if not member and (not class_obj or class_obj.teacher_id != current_user_id):
+        if not is_admin and not member and (not class_obj or class_obj.teacher_id != current_user_id):
             return jsonify({'error': 'Not a member'}), 403
     
     # Get all files attached to this lesson

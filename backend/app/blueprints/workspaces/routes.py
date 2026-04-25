@@ -9,7 +9,8 @@ from flask import current_app
 workspaces_logo_bp = Blueprint('workspaces_logo', __name__)
 
 @workspaces_logo_bp.route('/<int:workspace_id>/logo', methods=['POST', 'OPTIONS'])
-@jwt_required()
+@cross_origin()
+@jwt_required(optional=True)
 def upload_workspace_logo(workspace_id):
     """
     Robust Workspace Logo Jurisdiction (The Tenant Brand)
@@ -17,9 +18,10 @@ def upload_workspace_logo(workspace_id):
     """
     if request.method == 'OPTIONS':
         return jsonify({'status': 'ok'}), 200
-
-    try:
-        uid = get_jwt_identity()
+        
+    uid = get_jwt_identity()
+    if not uid:
+        return jsonify({'error': 'Unauthorized'}), 401
         user = User.query.get(uid)
         
         if not user:
