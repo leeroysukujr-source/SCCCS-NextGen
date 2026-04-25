@@ -307,19 +307,28 @@ const SuperAdminDashboard = () => {
             // Handle Logo Upload if file exists
             if (wsForm.logoFile && wsId) {
                 try {
-                    // Upload to Supabase
-                    const fileExt = wsForm.logoFile.name.split('.').pop();
-                    const fileName = `${wsId}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-                    const filePath = `logos/${fileName}`;
-                    
-                    const publicUrl = await uploadToSupabase(wsForm.logoFile, 'workspace-logo', wsId);
-                    
-                    // Update backend with the URL
-                    await apiClient.post(`/workspaces/${wsId}/logo`, { logo_url: publicUrl });
-                    notify('Logo uploaded to cloud storage', 'success');
-                } catch (uploadErr) {
-                    console.error("Supabase upload failed:", uploadErr);
-                    notify('Workspace created, but logo upload failed', 'warning');
+                    // Attempt 1: Direct Upload to Supabase (Preferred)
+                    try {
+                        const publicUrl = await uploadToSupabase(wsForm.logoFile, 'workspace-logo', wsId);
+                        
+                        // Update backend with the URL
+                        await apiClient.post(`/workspace/${wsId}/logo`, { logo_url: publicUrl });
+                        notify('Logo uploaded to cloud storage', 'success');
+                    } catch (supabaseErr) {
+                        console.warn('⚠️ Supabase upload failed during workspace creation, falling back to backend...', supabaseErr);
+                        
+                        // Attempt 2: Fallback to Backend Multipart Upload
+                        const formData = new FormData();
+                        formData.append('file', wsForm.logoFile);
+                        
+                        await apiClient.post(`/workspace/${wsId}/logo`, formData, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+                        notify('Workspace created with local storage fallback', 'success');
+                    }
+                } catch (finalErr) {
+                    console.error("❌ Final logo upload failure:", finalErr);
+                    notify('Workspace created, but logo upload failed completely', 'warning');
                 }
             }
 

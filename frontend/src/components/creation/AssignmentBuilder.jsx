@@ -201,7 +201,15 @@ const AssignmentBuilder = ({ docId, onBack }) => {
     };
 
     const handleSave = async (statusArg = 'draft') => {
-        if (!title.trim()) return alert("Please add a title");
+        // Governance: Prevent dummy information
+        if (!title.trim() || title.toLowerCase().includes('new assignment') || title.toLowerCase().includes('untitled')) {
+            const newTitle = prompt("Please provide a descriptive title for this assignment to ensure accuracy in the Creation Hub:", title);
+            if (!newTitle || !newTitle.trim() || newTitle.toLowerCase().includes('untitled')) {
+                alert("A valid descriptive title is required to save content to the Creation Hub.");
+                return;
+            }
+            setTitle(newTitle);
+        }
 
         try {
             setSaving(true);

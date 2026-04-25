@@ -40,17 +40,26 @@ export const authAPI = {
   },
 
   uploadAvatar: async (file) => {
-    const { uploadToSupabase } = await import('../utils/supabase');
-    
-    // We need the user ID for naming the avatar, but since we use 'id' as param in helper:
-    // We can just use 'avatar' type and let the helper handle it.
-    // authStore.user.id would be ideal but we'll try to get it from context if possible
-    const publicUrl = await uploadToSupabase(file, 'avatar');
-    
-    const response = await client.post('users/me/avatar', {
-      avatar_url: publicUrl
-    });
-    return response.data
+    try {
+      const { uploadToSupabase } = await import('../utils/supabase');
+      // Attempt direct cloud upload
+      const publicUrl = await uploadToSupabase(file, 'avatar');
+      
+      const response = await client.post('users/me/avatar', {
+        avatar_url: publicUrl
+      });
+      return response.data;
+    } catch (err) {
+      console.warn("Supabase upload failed, falling back to backend storage:", err);
+      // Fallback: Upload directly to backend
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await client.post('users/me/avatar/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return response.data;
+    }
   },
 
   getOAuthUrl: async (provider) => {

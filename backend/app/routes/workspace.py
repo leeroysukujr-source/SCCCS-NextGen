@@ -7,6 +7,7 @@ from datetime import datetime
 from app.models.security import AuditLog
 from app.utils.middleware import platform_super_admin_required, workspace_required
 import json
+from app.utils.uploads import save_logo
 
 workspace_bp = Blueprint('workspace', __name__)
 
@@ -327,6 +328,41 @@ def update_workspace(ws_id):
         
     db.session.commit()
     return jsonify({'message': 'Workspace updated successfully', 'workspace': workspace.to_dict()}), 200
+
+@workspace_bp.route('/<int:ws_id>/logo', methods=['POST'])
+@jwt_required()
+@workspace_access_required
+def upload_workspace_logo(ws_id):
+    """Upload logo for a specific workspace with cloud-to-local fallback"""
+    workspace = Workspace.query.get(ws_id)
+    if not workspace:
+        return jsonify({'error': 'Workspace not found'}), 404
+        
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+        
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+        
+    try:
+        # Use centralized save_logo which handles S3 vs Local fallback
+        logo_url = save_logo(file, folder='workspaces', filename=f'logo_ws_{ws_id}.png')
+        
+        if not logo_url:
+            return jsonify({'error': 'Failed to save logo'}), 500
+            
+        workspace.logo_url = logo_url
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Workspace logo updated successfully',
+            'logo_url': logo_url,
+            'workspace': workspace.to_dict()
+        }), 200
+    except Exception as e:
+        print(f"WORKSPACE LOGO UPLOAD ERROR: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 
 

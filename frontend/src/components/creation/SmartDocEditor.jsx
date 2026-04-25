@@ -37,6 +37,17 @@ const SmartDocEditor = ({ docId, tool, onBack, onSuccess, onShare }) => {
 
     const handleSave = async () => {
         if (!editor) return;
+        
+        // Governance: Prevent dummy information
+        if (!title.trim() || title.toLowerCase().includes('new document') || title.toLowerCase().includes('untitled')) {
+            const newTitle = prompt("Please provide a descriptive title for this document to ensure accuracy in the Creation Hub:", title);
+            if (!newTitle || !newTitle.trim() || newTitle.toLowerCase().includes('untitled')) {
+                alert("A valid descriptive title is required to save content to the Creation Hub.");
+                return;
+            }
+            setTitle(newTitle);
+        }
+
         setSaving(true);
         const content = editor.getHTML();
         const payload = { title, content, doc_type: 'smart_doc', visibility: 'private' };
@@ -46,10 +57,16 @@ const SmartDocEditor = ({ docId, tool, onBack, onSuccess, onShare }) => {
             } else {
                 const res = await apiClient.post('/documents/', payload);
                 if (onSuccess) onSuccess(res.data);
+                // Update URL if it was 'new'
+                if (window.history.replaceState) {
+                    const newUrl = window.location.pathname + '?id=' + res.data.id;
+                    window.history.replaceState({path: newUrl}, '', newUrl);
+                }
             }
             setLastSaved(new Date());
         } catch (err) {
             console.error("Failed to save", err);
+            alert("Save failed. Please check your connection.");
         } finally {
             setSaving(false);
         }

@@ -131,6 +131,46 @@ def update_avatar_url():
         print(f"[Avatar Update ERROR] {str(e)}")
         return jsonify({'error': str(e), 'success': False}), 500
 
+@users_bp.route('/me/avatar/upload', methods=['POST', 'OPTIONS'])
+@cross_origin()
+@jwt_required()
+def upload_avatar_file():
+    """Fallback: Handle multipart avatar upload when Supabase fails"""
+    try:
+        from app.utils.uploads import save_logo # Use same utility
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+            
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+
+        # Save using the robust utility
+        avatar_url = save_logo(file, f"avatar_{user.id}")
+        
+        if not avatar_url:
+            return jsonify({'error': 'Failed to save avatar'}), 500
+
+        user.avatar_url = avatar_url
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'avatar_url': avatar_url,
+            'user': user.to_dict()
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"[Avatar Upload ERROR] {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 # Route removed and moved to top for reliability
 
 @users_bp.route('/search', methods=['GET'])

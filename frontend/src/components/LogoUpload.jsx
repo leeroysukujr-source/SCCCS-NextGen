@@ -35,39 +35,69 @@ const LogoUpload = ({ initialLogo, uploadUrl, onUploadSuccess, label = "Upload L
         setError(null);
 
         try {
-            // Step 1: Direct Upload to Supabase Storage
-            // We determine the type based on the uploadUrl pattern
-            let uploadType = 'workspace-logo';
-            let id = null;
-            
-            if (uploadUrl.includes('/system/logo')) {
-                uploadType = 'system-logo';
-            } else if (uploadUrl.includes('/workspaces/')) {
-                const parts = uploadUrl.split('/');
-                id = parts[parts.indexOf('workspaces') + 1];
-                uploadType = 'workspace-logo';
-            } else if (uploadUrl.includes('/profile/avatar')) {
-                uploadType = 'avatar';
-            }
+            // Attempt 1: Direct Upload to Supabase Storage (Preferred)
+            try {
+                // Determine the type based on the uploadUrl pattern
+                let uploadType = 'workspace-logo';
+                let id = null;
+                
+                if (uploadUrl.includes('/system/logo')) {
+                    uploadType = 'system-logo';
+                } else if (uploadUrl.includes('/workspaces/')) {
+                    const parts = uploadUrl.split('/');
+                    id = parts[parts.indexOf('workspaces') + 1];
+                    uploadType = 'workspace-logo';
+                } else if (uploadUrl.includes('/profile/avatar')) {
+                    uploadType = 'avatar';
+                }
 
-            const { uploadToSupabase } = await import('../utils/supabase');
-            const publicUrl = await uploadToSupabase(selectedFile, uploadType, id);
-            
-            // Step 2: Synchronize URL with Backend API
-            const response = await apiClient.post(uploadUrl, {
-                logo_url: publicUrl
-            });
-            
-            if (onUploadSuccess) {
-                onUploadSuccess(response.data.logo_url);
-            }
-            setSelectedFile(null);
-            
-            if (response.data.logo_url) {
-                setPreview(response.data.logo_url);
+                const { uploadToSupabase } = await import('../utils/supabase');
+                const publicUrl = await uploadToSupabase(selectedFile, uploadType, id);
+                
+                // Step 2: Synchronize URL with Backend API
+                const response = await apiClient.post(uploadUrl, {
+                    logo_url: publicUrl
+                });
+                
+                if (onUploadSuccess) {
+                    onUploadSuccess(response.data.logo_url);
+                }
+                setSelectedFile(null);
+                
+                if (response.data.logo_url) {
+                    setPreview(response.data.logo_url);
+                }
+            } catch (supabaseErr) {
+                console.warn('⚠️ Supabase upload failed, falling back to backend storage...', supabaseErr);
+                
+                // Attempt 2: Fallback to Backend Multipart Upload
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                
+                // We need to target the logo-specific endpoint, not the settings-update endpoint
+                // If the URL is /api/workspace/1/settings, we try /api/workspace/1/logo
+                let fallbackUrl = uploadUrl;
+                if (uploadUrl.endsWith('/settings')) {
+                    fallbackUrl = uploadUrl.replace('/settings', '/logo');
+                } else if (uploadUrl.endsWith('/config')) {
+                    fallbackUrl = uploadUrl.replace('/config', '/logo');
+                }
+
+                const response = await apiClient.post(fallbackUrl, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+
+                if (onUploadSuccess) {
+                    onUploadSuccess(response.data.logo_url);
+                }
+                setSelectedFile(null);
+                
+                if (response.data.logo_url) {
+                    setPreview(response.data.logo_url);
+                }
             }
         } catch (err) {
-            console.error('Logo upload failed:', err);
+            console.error('❌ Logo upload failed completely:', err);
             setError(err.response?.data?.error || err.message || 'Upload failed. Please try again.');
         } finally {
             setUploading(false);
@@ -142,9 +172,14 @@ const LogoUpload = ({ initialLogo, uploadUrl, onUploadSuccess, label = "Upload L
                     <div>
                         <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Recommended: 512×512px SVG or PNG</p>
                         {error && <p className="text-xs text-red-400 mt-2 flex items-center gap-1 font-bold animate-pulse"><FiX /> {error}</p>}
-                        {selectedFile && !uploading && (
+                        {!error && !uploading && selectedFile && (
                             <p className="text-xs text-amber-400 mt-1 font-medium flex items-center gap-1">
-                                <FiInfo size={12} /> Click Save to change logo globally
+                                <FiInfo size={12} /> Click Save to apply branding
+                            </p>
+                        )}
+                        {!error && !uploading && !selectedFile && preview && (
+                            <p className="text-[9px] text-slate-500 mt-1 font-bold uppercase flex items-center gap-1">
+                                <FiCheck size={10} className="text-emerald-500" /> Branding Active
                             </p>
                         )}
                     </div>
