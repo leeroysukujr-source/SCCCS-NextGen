@@ -97,7 +97,8 @@ def create_app(config_class=Config):
     production_domains = [
         'https://scccs-next-gen-nine.vercel.app',
         'https://scccs-next-gen.vercel.app',
-        'https://scccs-next-gen.onrender.com',
+        'https://scccs-next-gen-git-main-leeroysukujr-6311s-projects.vercel.app',
+        'https://scccs-next-gen-leeroysukujr-source-projects.vercel.app',
         'https://scccs-nextgen-q2ll.onrender.com'
     ]
     for domain in production_domains:

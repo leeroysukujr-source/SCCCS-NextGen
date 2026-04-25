@@ -10,7 +10,14 @@ def get_s3_client():
     try:
         endpoint = current_app.config.get('S3_ENDPOINT')
         if endpoint:
+            # 💡 DevOps Hardening: Ensure endpoint doesn't have trailing slashes
+            # and supports both standard and supabase-specific formats
             endpoint = endpoint.rstrip('/')
+            if 'supabase.co' in endpoint and '/storage/v1/s3' not in endpoint:
+                # Append canonical S3 suffix if missing (prevents 403/404)
+                if endpoint.endswith('/v1/s3'): pass
+                elif endpoint.endswith('/v1'): endpoint += '/s3'
+                else: endpoint += '/storage/v1/s3'
             
         access_key = current_app.config.get('S3_ACCESS_KEY')
         secret_key = current_app.config.get('S3_SECRET_KEY')
