@@ -87,7 +87,8 @@ export default function TeacherDashboard() {
     ).length,
     activeMeetings: rooms.filter(r => r.is_active).length,
     pendingSubmissions: assignments.reduce((sum, a) => sum + (a.pending_count || 0), 0),
-    totalSubmissions: assignments.reduce((sum, a) => sum + (a.submission_count || 0), 0)
+    totalSubmissions: assignments.reduce((sum, a) => sum + (a.submission_count || 0), 0),
+    myChannels: channels.filter(ch => ch.owner_id === user?.id || ch.creator_id === user?.id).length
   }
 
   const upcomingMeetings = rooms
@@ -265,6 +266,7 @@ export default function TeacherDashboard() {
             stats={[
               { value: stats.myClasses, label: 'My Classes', icon: <FiBook />, trend: 'Active', iconColor: '#6366f1' },
               { value: stats.totalStudents, label: 'Total Students', icon: <FiUsers />, trend: 'Enrolled', iconColor: '#8b5cf6' },
+              { value: stats.myChannels, label: 'My Channels', icon: <FiMessageSquare />, trend: 'Created', iconColor: '#ec4899' },
               { value: stats.pendingSubmissions, label: 'Pending Grades', icon: <FiZap />, trend: 'Needs Action', iconColor: '#f59e0b' },
               { value: stats.totalSubmissions, label: 'Submissions', icon: <FiCheckCircle />, trend: 'Collected', iconColor: '#10b981' }
             ]}

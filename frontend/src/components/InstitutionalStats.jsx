@@ -31,21 +31,21 @@ const InstitutionalStats = ({ workspaceId }) => {
         <div className="relative group mb-10">
             {/* Animated Neon Border Beam */}
             <div className="absolute -inset-[1px] rounded-[24px] overflow-hidden pointer-events-none">
-                <div className="absolute inset-[-1000%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,transparent_0%,#6366f1_20%,transparent_40%,#a855f7_60%,transparent_80%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                <div className="absolute inset-[-1000%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,transparent_0%,#3b82f6_20%,transparent_40%,#fbbf24_60%,transparent_80%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
             </div>
 
             {/* Main Content Container */}
             <div className="relative overflow-hidden bg-[#02040a] border border-white/10 rounded-[23px] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl">
                 {/* Background Accent Gradients */}
-                <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-600/5 rounded-full blur-[100px] pointer-events-none group-hover:bg-indigo-600/10 transition-all duration-700"></div>
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-600/5 rounded-full blur-[100px] pointer-events-none group-hover:bg-purple-600/10 transition-all duration-700"></div>
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/5 rounded-full blur-[100px] pointer-events-none group-hover:bg-blue-600/10 transition-all duration-700"></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-amber-600/5 rounded-full blur-[100px] pointer-events-none group-hover:bg-amber-600/10 transition-all duration-700"></div>
 
                 <div className="relative z-10">
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div>
+                            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
                             <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-2">
-                                <FiShield className="text-indigo-500" />
+                                <FiShield className="text-blue-500" />
                                 Institutional Oversight
                             </h2>
                         </div>
