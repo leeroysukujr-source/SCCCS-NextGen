@@ -564,7 +564,23 @@ export default function Reports() {
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 duration-200">
                         <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">New Report Request</h3>
-                        <div className="space-y-4">
+                        <form 
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                console.log('Form submitted', { newRequestTitle, newRequestDate });
+                                if (!newRequestTitle || !newRequestDate) {
+                                    alert("Please enter a Title and a Due Date before sending the request.");
+                                    return;
+                                }
+                                createRequestMutation.mutate({
+                                    title: newRequestTitle,
+                                    description: newRequestDesc,
+                                    due_date: newRequestDate,
+                                    workspace_id: newRequestWorkspace || null
+                                });
+                            }}
+                            className="space-y-4"
+                        >
                             <div>
                                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Target Workspace</label>
                                 <select
@@ -616,25 +632,14 @@ export default function Reports() {
                                     Cancel
                                 </button>
                                 <button
-                                    type="button"
-                                    onClick={() => {
-                                        if (!newRequestTitle || !newRequestDate) {
-                                            alert("Please enter a Title and a Due Date before sending the request.");
-                                            return;
-                                        }
-                                        createRequestMutation.mutate({
-                                            title: newRequestTitle,
-                                            description: newRequestDesc,
-                                            due_date: newRequestDate,
-                                            workspace_id: newRequestWorkspace || null
-                                        });
-                                    }}
-                                    className="px-6 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-500 transition-all active:scale-95 shadow-lg shadow-indigo-900/30 cursor-pointer relative z-[60]"
+                                    type="submit"
+                                    disabled={createRequestMutation.isLoading}
+                                    className="px-8 py-2.5 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-500 transition-all active:scale-95 shadow-lg shadow-indigo-900/30 cursor-pointer relative z-[9999] pointer-events-auto"
                                 >
                                     {createRequestMutation.isLoading ? 'Sending...' : 'Send Request'}
                                 </button>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             )}
@@ -653,73 +658,81 @@ export default function Reports() {
                             </div>
                         </div>
 
-                        <div className="space-y-4 mb-8">
-                            <label className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all cursor-pointer group">
-                                <input 
-                                    type="checkbox" 
-                                    className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                                    checked={checklist.userMetrics}
-                                    onChange={e => setChecklist({...checklist, userMetrics: e.target.checked})}
-                                />
-                                <div className="flex-1">
-                                    <h4 className="font-bold text-slate-900 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">User Demographics</h4>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400">Student enrollment, faculty counts, and administrative roles.</p>
-                                </div>
-                            </label>
-
-                            <label className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all cursor-pointer group">
-                                <input 
-                                    type="checkbox" 
-                                    className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                                    checked={checklist.activityTrends}
-                                    onChange={e => setChecklist({...checklist, activityTrends: e.target.checked})}
-                                />
-                                <div className="flex-1">
-                                    <h4 className="font-bold text-slate-900 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Activity Trends</h4>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400">Daily active users, messaging volume, and meeting statistics.</p>
-                                </div>
-                            </label>
-
-                            <label className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all cursor-pointer group">
-                                <input 
-                                    type="checkbox" 
-                                    className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                                    checked={checklist.academicPerformance}
-                                    onChange={e => setChecklist({...checklist, academicPerformance: e.target.checked})}
-                                />
-                                <div className="flex-1">
-                                    <h4 className="font-bold text-slate-900 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Academic Performance</h4>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400">Course throughput, assignment submission rates, and grade averages.</p>
-                                </div>
-                            </label>
-
-                            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-4 rounded-xl flex items-start gap-3 mt-4">
-                                <FiActivity className="text-amber-600 dark:text-amber-400 mt-1" />
-                                <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">
-                                    System will capture a real-time snapshot of selected metrics upon submission. This action cannot be undone.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex justify-end gap-3">
-                            <button
-                                onClick={() => setIsSubmitModalOpen(false)}
-                                className="px-6 py-2.5 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={() => submitReportMutation.mutate({ 
+                        <form 
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                submitReportMutation.mutate({ 
                                     requestId: activeRequestId, 
                                     notes: 'Institutional Snapshot Submission',
                                     checklist: checklist
-                                })}
-                                disabled={submitReportMutation.isLoading}
-                                className="px-8 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-900/30 flex items-center gap-2 disabled:opacity-50"
-                            >
-                                {submitReportMutation.isLoading ? 'Generating...' : 'Confirm & Submit'}
-                            </button>
-                        </div>
+                                });
+                            }}
+                        >
+                            <div className="space-y-4 mb-8">
+                                <label className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all cursor-pointer group">
+                                    <input 
+                                        type="checkbox" 
+                                        className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                        checked={checklist.userMetrics}
+                                        onChange={e => setChecklist({...checklist, userMetrics: e.target.checked})}
+                                    />
+                                    <div className="flex-1">
+                                        <h4 className="font-bold text-slate-900 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">User Demographics</h4>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">Student enrollment, faculty counts, and administrative roles.</p>
+                                    </div>
+                                </label>
+
+                                <label className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all cursor-pointer group">
+                                    <input 
+                                        type="checkbox" 
+                                        className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                        checked={checklist.activityTrends}
+                                        onChange={e => setChecklist({...checklist, activityTrends: e.target.checked})}
+                                    />
+                                    <div className="flex-1">
+                                        <h4 className="font-bold text-slate-900 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Activity Trends</h4>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">Daily active users, messaging volume, and meeting statistics.</p>
+                                    </div>
+                                </label>
+
+                                <label className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all cursor-pointer group">
+                                    <input 
+                                        type="checkbox" 
+                                        className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                        checked={checklist.academicPerformance}
+                                        onChange={e => setChecklist({...checklist, academicPerformance: e.target.checked})}
+                                    />
+                                    <div className="flex-1">
+                                        <h4 className="font-bold text-slate-900 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Academic Performance</h4>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">Course throughput, assignment submission rates, and grade averages.</p>
+                                    </div>
+                                </label>
+
+                                <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-4 rounded-xl flex items-start gap-3 mt-4">
+                                    <FiActivity className="text-amber-600 dark:text-amber-400 mt-1" />
+                                    <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                                        System will capture a real-time snapshot of selected metrics upon submission. This action cannot be undone.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsSubmitModalOpen(false)}
+                                    className="px-6 py-2.5 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={submitReportMutation.isLoading}
+                                    className="px-8 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-500 transition-all active:scale-95 shadow-lg shadow-indigo-900/30 flex items-center gap-2 disabled:opacity-50 cursor-pointer relative z-[9999] pointer-events-auto"
+                                >
+                                    {submitReportMutation.isLoading ? 'Generating...' : 'Confirm & Submit'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}
