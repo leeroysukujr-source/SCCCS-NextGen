@@ -555,8 +555,8 @@ def get_share_link(channel_id):
 
 @channels_bp.route('/<int:channel_id>/avatar', methods=['POST'])
 @jwt_required()
-def upload_channel_avatar(channel_id):
-    """Upload channel avatar - Only admins"""
+def update_channel_avatar_url(channel_id):
+    """Update channel avatar URL (Transition to Supabase Direct)"""
     current_user_id = get_jwt_identity()
     channel = Channel.query.get(channel_id)
     
@@ -564,39 +564,30 @@ def upload_channel_avatar(channel_id):
         return jsonify({'error': 'Channel not found'}), 404
     
     # Check if user is admin
+    user = User.query.get(current_user_id)
     is_creator = channel.created_by == current_user_id
     member = ChannelMember.query.filter_by(channel_id=channel_id, user_id=current_user_id).first()
-    is_admin = member and member.role in ['admin', 'co-admin']
+    is_channel_admin = (member and member.role in ['admin', 'co-admin']) or (user and user.role == 'admin')
     
-    if not is_creator and not is_admin:
-        return jsonify({'error': 'Only channel admins can upload avatars'}), 403
+    if not is_creator and not is_channel_admin:
+        return jsonify({'error': 'Only channel admins can update avatars'}), 403
     
-    if 'avatar' not in request.files:
-        return jsonify({'error': 'No file provided'}), 400
+    # Parse JSON payload
+    data = request.get_json()
+    avatar_url = data.get('avatar_url')
     
-    file = request.files['avatar']
-    if file.filename == '':
-        return jsonify({'error': 'No file selected'}), 400
-    
-    # Validate file type
-    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
-    if '.' not in file.filename or file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
-        return jsonify({'error': 'Invalid file type. Allowed: PNG, JPG, JPEG, GIF, WEBP'}), 400
-    
-    # Save file
-    filename = secure_filename(f"{channel_id}_{uuid.uuid4().hex}.{file.filename.rsplit('.', 1)[1].lower()}")
-    upload_folder = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'uploads', 'avatars')
-    os.makedirs(upload_folder, exist_ok=True)
-    file_path = os.path.join(upload_folder, filename)
-    file.save(file_path)
-    
+    if not avatar_url:
+        return jsonify({'error': 'Missing avatar_url in request body'}), 400
+
+    print(f"📢 Updating Channel {channel_id} avatar to: {avatar_url}")
+
     # Update channel avatar URL
-    channel.avatar_url = f"/uploads/avatars/{filename}"
+    channel.avatar_url = avatar_url
     db.session.commit()
     
     return jsonify({
         'avatar_url': channel.avatar_url,
-        'message': 'Avatar uploaded successfully'
+        'message': 'Channel avatar updated successfully'
     }), 200
 
 @channels_bp.route('/join/<share_code>', methods=['POST'])

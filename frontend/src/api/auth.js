@@ -40,9 +40,16 @@ export const authAPI = {
   },
 
   uploadAvatar: async (file) => {
-    const formData = new FormData()
-    formData.append('file', file)
-    const response = await client.post('users/me/avatar', formData)
+    const { uploadToSupabase } = await import('../utils/supabase');
+    
+    // We need the user ID for naming the avatar, but since we use 'id' as param in helper:
+    // We can just use 'avatar' type and let the helper handle it.
+    // authStore.user.id would be ideal but we'll try to get it from context if possible
+    const publicUrl = await uploadToSupabase(file, 'avatar');
+    
+    const response = await client.post('users/me/avatar', {
+      avatar_url: publicUrl
+    });
     return response.data
   },
 

@@ -85,14 +85,14 @@ export const channelsAPI = {
     return response.data
   },
 
-  uploadAvatar: async (channelId, file) => {
-    const formData = new FormData()
-    formData.append('avatar', file)
-    const response = await client.post(`/channels/${channelId}/avatar`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+  uploadAvatar: async (channel_id, file) => {
+    const { uploadToSupabase } = await import('../utils/supabase');
+    // Using 'avatar' type for channel avatars as well, or we could add a 'channel-avatar' type
+    const publicUrl = await uploadToSupabase(file, 'avatar', `channel_${channel_id}`);
+    
+    const response = await client.post(`/channels/${channel_id}/avatar`, {
+      avatar_url: publicUrl
+    });
     return response.data
   },
 

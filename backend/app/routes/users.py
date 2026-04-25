@@ -97,8 +97,8 @@ def update_current_user():
 @users_bp.route('/me/avatar', methods=['POST', 'OPTIONS'])
 @cross_origin()
 @jwt_required()
-def upload_avatar():
-    """Upload profile picture for current user"""
+def update_avatar_url():
+    """Update profile picture URL (Transition to Supabase Direct)"""
     try:
         current_user_id = get_jwt_identity()
         user = User.query.get(current_user_id)
@@ -106,120 +106,30 @@ def upload_avatar():
         if not user:
             return jsonify({'error': 'User not found'}), 404
         
-        file_url = None
-        unique_filename = None
-        file_extension = None
-        file_content = None
-
-        import base64
-        import imghdr
-        import io
-        import os
-
-        # Check for FileStorage (multipart/form-data)
-        if 'file' in request.files:
-            file = request.files['file']
-            if file.filename != '':
-                # Check size before reading into memory (5MB limit)
-                file.seek(0, os.SEEK_END)
-                if file.tell() > 5 * 1024 * 1024:
-                    return jsonify({'error': 'File too large. Maximum size is 5MB.', 'success': False}), 400
-                file.seek(0)
-                
-                filename = secure_filename(file.filename)
-                file_extension = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'jpg'
-                unique_filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S_')}{current_user_id}.{file_extension}"
-                file_content = file.read()
+        # Parse JSON payload
+        data = request.get_json()
+        avatar_url = data.get('avatar_url')
         
-        # Check for base64 JSON payload
-        elif request.is_json:
-            # First check content length from headers to avoid parsing massive JSON
-            content_length = request.headers.get('Content-Length')
-            if content_length and int(content_length) > 7 * 1024 * 1024: # 7MB for base64 overhead
-                return jsonify({'error': 'Payload too large. Maximum size is 5MB.', 'success': False}), 400
-                
-            data = request.get_json()
-            if 'image' in data or 'avatar' in data:
-                b64_data = data.get('image') or data.get('avatar')
-                if ',' in b64_data:
-                    b64_data = b64_data.split(',')[1]
-                
-                file_content = base64.b64decode(b64_data)
-                if len(file_content) > 5 * 1024 * 1024:
-                    return jsonify({'error': 'File too large. Maximum size is 5MB.', 'success': False}), 400
-                
-                # Determine extension from content
-                file_extension = imghdr.what(None, h=file_content) or 'jpg'
-                unique_filename = f"b64_{datetime.now().strftime('%Y%m%d_%H%M%S_')}{current_user_id}.{file_extension}"
+        if not avatar_url:
+            return jsonify({'error': 'Missing avatar_url in request body'}), 400
 
-        if not file_content:
-            return jsonify({'error': 'No image data provided. Support multipart/form-data or base64 JSON.'}), 400
+        print(f"👤 Updating User {user.username} avatar to: {avatar_url}")
 
-        # Security Enforcement: Validate using mimetype or extension instead of dangerous imghdr
-        if 'file' in request.files and file.mimetype:
-            if not file.mimetype.startswith('image/'):
-                return jsonify({'error': 'Invalid format. Only images allowed.', 'success': False}), 400
-        else:
-            valid_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic']
-            if file_extension not in valid_extensions:
-                return jsonify({'error': 'Unsupported image format.', 'success': False}), 400
-
-        # Storage Selection Logic
-        from app.utils.storage import upload_fileobj, get_public_url
-        from flask import current_app
-        
-        # Cloud Storage Path (S3)
-        if current_app.config.get('S3_ENDPOINT') and current_app.config.get('S3_BUCKET'):
-            key = f"avatars/{unique_filename}"
-            try:
-                if upload_fileobj(io.BytesIO(file_content), key):
-                    file_url = get_public_url(key)
-                    print(f"[Avatar Upload] Successfully uploaded to cloud: {file_url}")
-                else:
-                    print(f"[Avatar Upload] S3 upload_fileobj returned False for key: {key}")
-            except Exception as s3_err:
-                print(f"[Avatar Upload] S3 error: {str(s3_err)}")
-                # Continue to local fallback
-                
-        # Fallback to local
-        if not file_url:
-            # We target the absolute static_folder defined in create_app
-            avatars_folder = os.path.join(current_app.static_folder, 'uploads', 'avatars')
-            os.makedirs(avatars_folder, exist_ok=True)
-            
-            file_path = os.path.join(avatars_folder, unique_filename)
-            with open(file_path, 'wb') as f:
-                f.write(file_content)
-            
-            # Save as absolute URL for maximum compatibility (as requested)
-            host = request.host_url.rstrip('/')
-            file_url = f"{host}/api/files/avatar/{unique_filename}"
-        
         # Update user's avatar URL
-        user.avatar_url = file_url
+        user.avatar_url = avatar_url
         db.session.commit()
-        
-        print(f"[Avatar Upload] Success for user {user.username}. URL: {file_url}")
         
         return jsonify({
             'success': True,
-            'message': 'Avatar uploaded successfully',
-            'avatar_url': file_url,
-            'full_url': file_url, # Standardized key
+            'message': 'Avatar updated successfully',
+            'avatar_url': avatar_url,
             'user': user.to_dict()
         }), 200
 
     except Exception as e:
-        db.session.rollback() # CRITICAL: prevent transaction lock in production
-        import traceback
-        print(f"[Avatar Upload ERROR] Unexpected failure: {str(e)}")
-        traceback.print_exc()
-        return jsonify({
-            'error': 'An unexpected error occurred during avatar upload',
-            'details': str(e),
-            'success': False,
-            'transaction': 'rolled_back'
-        }), 500
+        db.session.rollback()
+        print(f"[Avatar Update ERROR] {str(e)}")
+        return jsonify({'error': str(e), 'success': False}), 500
 
 # Route removed and moved to top for reliability
 

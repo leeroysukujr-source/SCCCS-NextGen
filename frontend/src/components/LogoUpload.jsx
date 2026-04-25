@@ -31,29 +31,44 @@ const LogoUpload = ({ initialLogo, uploadUrl, onUploadSuccess, label = "Upload L
     const handleUpload = async () => {
         if (!selectedFile) return;
 
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-
         setUploading(true);
         setError(null);
 
         try {
-            const response = await apiClient.post(uploadUrl, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+            // Step 1: Direct Upload to Supabase Storage
+            // We determine the type based on the uploadUrl pattern
+            let uploadType = 'workspace-logo';
+            let id = null;
+            
+            if (uploadUrl.includes('/system/logo')) {
+                uploadType = 'system-logo';
+            } else if (uploadUrl.includes('/workspaces/')) {
+                const parts = uploadUrl.split('/');
+                id = parts[parts.indexOf('workspaces') + 1];
+                uploadType = 'workspace-logo';
+            } else if (uploadUrl.includes('/profile/avatar')) {
+                uploadType = 'avatar';
+            }
+
+            const { uploadToSupabase } = await import('../utils/supabase');
+            const publicUrl = await uploadToSupabase(selectedFile, uploadType, id);
+            
+            // Step 2: Synchronize URL with Backend API
+            const response = await apiClient.post(uploadUrl, {
+                logo_url: publicUrl
             });
             
             if (onUploadSuccess) {
                 onUploadSuccess(response.data.logo_url);
             }
-            setSelectedFile(null); // Clear selected state after success
+            setSelectedFile(null);
             
-            // Re-sync preview with server response URL to ensure consistency
             if (response.data.logo_url) {
                 setPreview(response.data.logo_url);
             }
         } catch (err) {
             console.error('Logo upload failed:', err);
-            setError(err.response?.data?.error || 'Upload failed. Please try again.');
+            setError(err.response?.data?.error || err.message || 'Upload failed. Please try again.');
         } finally {
             setUploading(false);
         }

@@ -32,30 +32,23 @@ export const workspaceAPI = {
     },
 
     uploadLogo: async (wsId, file) => {
-        const formData = new FormData()
-        formData.append('file', file)
+        const { uploadToSupabase } = await import('../utils/supabase');
+        const publicUrl = await uploadToSupabase(file, 'workspace-logo', wsId);
         
-        // Instruction: Ensure the axios call is sending the file as multipart/form-data 
-        // and that the Authorization header is correctly attached (handled by client interceptor).
-        // Update URL to match workspaces_logo_bp registered at /api/workspaces
-        const response = await client.post(`/workspaces/${wsId}/logo`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                'bypass-tunnel-reminder': 'true' // Architect Requirement: satisfy local browser checks
-            }
-        })
+        const response = await client.post(`/workspaces/${wsId}/logo`, {
+            logo_url: publicUrl
+        });
         return response.data
     },
 
     uploadSystemLogo: async (file) => {
-        const formData = new FormData()
-        formData.append('file', file)
-        const response = await client.post('/settings/system/logo', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                'bypass-tunnel-reminder': 'true' // Architect Requirement: satisfy local browser checks
-            }
-        })
+        const { uploadToSupabase } = await import('../utils/supabase');
+        const publicUrl = await uploadToSupabase(file, 'system-logo');
+        
+        // Match the endpoint registered in backend/app/__init__.py under /api/settings
+        const response = await client.post('/settings/system/logo', {
+            logo_url: publicUrl
+        });
         return response.data
     },
 
