@@ -2,8 +2,13 @@ import { createClient } from '@supabase/supabase-js'
 
 // Supabase Configuration - Senior Cloud Architect Architecture
 // Note: Project ID derived from backend S3 endpoint pdlnxbacrcqgghqfhnxy
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://pdlnxbacrcqgghqfhnxy.supabase.co'
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'REPLACE_WITH_YOUR_SUPABASE_ANON_KEY'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://YOUR_PROJECT_ID.supabase.co'
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+
+// Validation Check
+if (supabaseUrl.includes('YOUR_PROJECT_ID') || !supabaseKey) {
+    console.warn('⚠️ [Supabase] Project Configuration is incomplete. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
@@ -12,6 +17,9 @@ export const supabase = createClient(supabaseUrl, supabaseKey)
  * Instruction: Transition from Multipart Upload to Direct Storage Upload.
  */
 export const uploadToSupabase = async (file, type = 'workspace-logo', id = null) => {
+    if (supabaseUrl.includes('YOUR_PROJECT_ID') || !supabaseKey) {
+        throw new Error('Supabase project ID or Anon Key is missing. Please check your .env configuration.');
+    }
     try {
         let bucket = ''
         let path = ''
