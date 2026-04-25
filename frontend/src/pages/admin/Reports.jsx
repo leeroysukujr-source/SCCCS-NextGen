@@ -20,10 +20,10 @@ import {
     FiGrid
 } from 'react-icons/fi';
 import {
-    BsFileEarmarkPdf,
-    BsFileEarmarkSpreadsheet,
-    BsFileEarmarkWord
-} from 'react-icons/bs';
+    FaFilePdf,
+    FaFileExcel,
+    FaFileWord
+} from 'react-icons/fa';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -445,27 +445,27 @@ export default function Reports() {
                                         <div className="flex justify-end gap-3">
                                             <button 
                                                 onClick={() => handleSubmissionDownload(sub.id, 'pdf')}
-                                                className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all group flex flex-col items-center gap-1"
+                                                className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all group flex flex-col items-center gap-1"
                                                 title="Download PDF"
                                             >
-                                                <BsFileEarmarkPdf className="text-xl" />
+                                                <FaFilePdf className="text-xl" />
                                                 <span className="text-[10px] font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity">PDF</span>
                                             </button>
                                             <button 
                                                 onClick={() => handleSubmissionDownload(sub.id, 'excel')}
-                                                className="p-2.5 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all group flex flex-col items-center gap-1"
+                                                className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all group flex flex-col items-center gap-1"
                                                 title="Download Excel"
                                             >
-                                                <BsFileEarmarkSpreadsheet className="text-xl" />
-                                                <span className="text-[10px] font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity">XL</span>
+                                                <FaFileExcel className="text-xl" />
+                                                <span className="text-[10px] font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity">EXCEL</span>
                                             </button>
                                             <button 
                                                 onClick={() => handleSubmissionDownload(sub.id, 'word')}
-                                                className="p-2.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all group flex flex-col items-center gap-1"
+                                                className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all group flex flex-col items-center gap-1"
                                                 title="Download Word"
                                             >
-                                                <BsFileEarmarkWord className="text-xl" />
-                                                <span className="text-[10px] font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity">Doc</span>
+                                                <FaFileWord className="text-xl" />
+                                                <span className="text-[10px] font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity">WORD</span>
                                             </button>
                                         </div>
                                     </td>

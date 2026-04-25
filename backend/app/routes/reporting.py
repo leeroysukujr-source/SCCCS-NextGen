@@ -257,6 +257,13 @@ def download_export():
             return jsonify({'error': 'Unauthorized access to this report'}), 403
             
         report_data = submission.data
+        if isinstance(report_data, str):
+            import json
+            try:
+                report_data = json.loads(report_data)
+            except Exception as e:
+                print(f"Error parsing report data: {e}")
+        
         title = f"Report: {submission.request.title if submission.request else 'Institutional Snapshot'}"
     else:
         # Basic logic to populate report_data based on role
