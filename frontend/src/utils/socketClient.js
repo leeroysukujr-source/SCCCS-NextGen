@@ -3,14 +3,9 @@ import { io } from 'socket.io-client'
 export function createSocket(socketUrl, token) {
   if (!socketUrl) throw new Error('socketUrl required')
   
-  // Strategy: Allow both polling and websocket in all environments for maximum resilience.
-  // We prioritize polling to ensure immediate connection, then upgrade to websocket.
-  let transports = ['polling', 'websocket']
-  
-  try {
-    const sys = JSON.parse(localStorage.getItem('system_settings') || '{}')
-    if (sys && sys.wsPollingOnly) transports = ['polling']
-  } catch (e) { /* ignore */ }
+  // Strategy: Force WebSocket transport exclusively (Senior Architect Requirement).
+  // Polling often causes CORS handshaking issues behind cloud proxies like Render.
+  let transports = ['websocket']
 
   const socket = io(socketUrl, {
     auth: { token },

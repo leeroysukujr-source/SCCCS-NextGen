@@ -9,12 +9,6 @@ from flask import current_app
 workspaces_logo_bp = Blueprint('workspaces_logo', __name__)
 
 @workspaces_logo_bp.route('/<int:workspace_id>/logo', methods=['POST', 'OPTIONS'])
-@cross_origin(
-    origins=["https://scccs-next-gen-nine.vercel.app", "https://scccs-next-gen.vercel.app", "https://scccs-nextgen-q2ll.onrender.com"],
-    allow_headers="*",
-    methods=["POST", "OPTIONS"],
-    supports_credentials=True
-)
 @jwt_required()
 def upload_workspace_logo(workspace_id):
     """

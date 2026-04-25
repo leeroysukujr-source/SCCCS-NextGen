@@ -12,12 +12,6 @@ from flask_cors import cross_origin
 import time
 
 @admin_logo_bp.route('/system/logo', methods=['POST', 'OPTIONS'])
-@cross_origin(
-    origins=["https://scccs-next-gen-nine.vercel.app", "https://scccs-next-gen.vercel.app", "https://scccs-nextgen-q2ll.onrender.com"],
-    allow_headers="*",
-    methods=["POST", "OPTIONS"],
-    supports_credentials=True
-)
 @jwt_required()
 def upload_system_logo():
     """

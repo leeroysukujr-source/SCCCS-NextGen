@@ -41,6 +41,9 @@ def create_app(config_class=Config):
     app = Flask(__name__, static_folder=abs_static_path)
     app.config.from_object(config_class)
     
+    # Force Disable Strict Slashes (Prevents Redirect-during-Preflight errors)
+    app.url_map.strict_slashes = False
+    
     # Initialize extensions
     db.init_app(app)
     
@@ -117,13 +120,19 @@ def create_app(config_class=Config):
     @app.after_request
     def after_request(response):
         """The Global 'Force-CORS' Middleware (Architect Requirement)"""
-        # Ensure we don't duplicate headers if already set by Flask-CORS
-        if 'Access-Control-Allow-Origin' not in response.headers:
-            response.headers.add('Access-Control-Allow-Origin', 'https://scccs-next-gen-nine.vercel.app')
+        origin = request.headers.get('Origin')
         
-        response.headers.add('Access-Control-Allow-Headers', '*')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        # If the origin is in our allowed list, use it explicitly (required for supports_credentials)
+        if origin and (origin in final_origins or final_origins == "*"):
+            response.headers['Access-Control-Allow-Origin'] = origin
+        elif 'Access-Control-Allow-Origin' not in response.headers:
+            # Fallback to primary production domain
+            response.headers['Access-Control-Allow-Origin'] = 'https://scccs-next-gen-nine.vercel.app'
+        
+        # Always inject headers to ensure reliability
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response
 
     # CORS configuration - Senior Deployment Hardening
@@ -140,7 +149,7 @@ def create_app(config_class=Config):
     preferred_async = app.config.get('SOCKETIO_ASYNC_MODE') or os.environ.get('SOCKETIO_ASYNC_MODE')
     async_mode = _choose_async_mode(preferred_async)
     init_kwargs = dict(
-        cors_allowed_origins=final_origins, # Match HTTP CORS exactly
+        cors_allowed_origins="*", # Architect requirement: maximum compatibility
         logger=False,
         engineio_logger=False,
         message_queue=message_queue if message_queue else None,
