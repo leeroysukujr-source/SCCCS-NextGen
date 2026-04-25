@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/authStore'
 import './CreateChatroomModal.css'
 import { useNotify } from './NotificationProvider'
 
-export default function CreateChatroomModal({ isOpen, onClose, onCreate }) {
+export default function CreateChatroomModal({ isOpen, onClose, onCreate, isCreating }) {
   const { user } = useAuthStore()
   const notify = useNotify()
   const [name, setName] = useState('')
@@ -243,8 +243,18 @@ export default function CreateChatroomModal({ isOpen, onClose, onCreate }) {
           <button className="btn btn-secondary" onClick={onClose}>
             Cancel
           </button>
-          <button className="btn btn-primary" onClick={handleCreate}>
-            <FiPlus /> Create Chatroom
+          <button 
+            className="btn btn-primary" 
+            onClick={handleCreate}
+            disabled={isCreating}
+          >
+            {isCreating ? (
+              <>Creating...</>
+            ) : (
+              <>
+                <FiPlus /> Create Chatroom
+              </>
+            )}
           </button>
         </div>
       </div>

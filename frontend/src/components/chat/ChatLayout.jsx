@@ -4,6 +4,8 @@ import ChatViewport from './ChatViewport';
 import CreateChatroomModal from '../CreateChatroomModal';
 import StartChatModal from './StartChatModal';
 import DiscoverChannelsModal from './DiscoverChannelsModal';
+import { channelsAPI } from '../../api/channels';
+import { useNotify } from '../NotificationProvider';
 import './ChatLayout.css';
 
 const ChatLayout = () => {
@@ -12,6 +14,8 @@ const ChatLayout = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showStartDMModal, setShowStartDMModal] = useState(false);
   const [showDiscoverModal, setShowDiscoverModal] = useState(false);
+  const notify = useNotify();
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -36,6 +40,21 @@ const ChatLayout = () => {
       setShowCreateModal(true);
     } else {
       setShowStartDMModal(true);
+    }
+  };
+
+  const handleCreateChannel = async (channelData) => {
+    setIsCreating(true);
+    try {
+      await channelsAPI.createChannel(channelData);
+      notify('success', 'Chatroom created successfully!');
+      setShowCreateModal(false);
+      // Trigger a refresh or just wait for interval
+    } catch (error) {
+      console.error('Error creating channel:', error);
+      notify('error', error.response?.data?.error || 'Failed to create chatroom');
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -96,10 +115,8 @@ const ChatLayout = () => {
       <CreateChatroomModal 
         isOpen={showCreateModal} 
         onClose={() => setShowCreateModal(false)}
-        onSuccess={() => {
-          setShowCreateModal(false);
-          // Sidebar fetches data on interval, but we could trigger it here if needed
-        }}
+        onCreate={handleCreateChannel}
+        isCreating={isCreating}
       />
 
       <StartChatModal 
