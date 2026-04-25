@@ -106,14 +106,14 @@ const FeatureLab = () => {
 
     return (
         <div className="p-6 max-w-6xl mx-auto space-y-6">
-            <header className="flex items-center justify-between bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+            <header className="flex items-center justify-between bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700">
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-100">
+                    <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-900/20">
                         <FiBox size={24} />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Feature Lab</h1>
-                        <p className="text-sm text-slate-500">Advanced module configuration & runtime tuning</p>
+                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Feature Lab</h1>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Advanced module configuration & runtime tuning</p>
                     </div>
                 </div>
                 <button
@@ -132,12 +132,12 @@ const FeatureLab = () => {
                             key={feature.id}
                             onClick={() => handleFeatureSelect(feature)}
                             className={`w-full flex items-center gap-3 p-4 rounded-2xl transition-all border ${activeFeature?.id === feature.id
-                                ? 'bg-white border-indigo-200 shadow-md shadow-indigo-50 ring-1 ring-indigo-50'
-                                : 'bg-slate-50 border-transparent hover:bg-white hover:border-slate-200 text-slate-600'}`}
+                                ? 'bg-white dark:bg-slate-800 border-indigo-200 dark:border-indigo-500/30 shadow-md shadow-indigo-900/10 ring-1 ring-indigo-500/20'
+                                : 'bg-slate-50 dark:bg-slate-900/50 border-transparent hover:bg-white dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-700 text-slate-600 dark:text-slate-400'}`}
                         >
                             <span className="text-xl">{getIcon(feature.name)}</span>
                             <div className="text-left">
-                                <div className={`text-sm font-bold capitalize ${activeFeature?.id === feature.id ? 'text-slate-900' : 'text-slate-700'}`}>
+                                <div className={`text-sm font-bold capitalize ${activeFeature?.id === feature.id ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                                     {feature.name.replace(/_/g, ' ')}
                                 </div>
                                 <div className="text-[10px] text-slate-400 flex items-center gap-1">
@@ -152,23 +152,23 @@ const FeatureLab = () => {
                 {/* Main Content: Config Editor */}
                 <div className="md:col-span-3">
                     {activeFeature ? (
-                        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden min-h-[500px] flex flex-col">
-                            <div className="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden min-h-[500px] flex flex-col">
+                            <div className="p-6 border-b border-slate-50 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
                                 <div className="flex items-center gap-3">
-                                    <span className="text-2xl p-2 bg-white rounded-xl shadow-sm">{getIcon(activeFeature.name)}</span>
+                                    <span className="text-2xl p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm">{getIcon(activeFeature.name)}</span>
                                     <div>
-                                        <h2 className="text-lg font-bold text-slate-900 capitalize">{activeFeature.name.replace(/_/g, ' ')} Tuning</h2>
-                                        <p className="text-xs text-slate-500">{activeFeature.description || 'Configure advanced parameters for this module'}</p>
+                                        <h2 className="text-lg font-bold text-slate-900 dark:text-white capitalize">{activeFeature.name.replace(/_/g, ' ')} Tuning</h2>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">{activeFeature.description || 'Configure advanced parameters for this module'}</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={handleSave}
                                     disabled={status.type === 'saving'}
                                     className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg ${status.type === 'success'
-                                        ? 'bg-green-600 text-white shadow-green-100'
+                                        ? 'bg-green-600 text-white shadow-green-900/20'
                                         : status.type === 'error'
-                                            ? 'bg-red-600 text-white shadow-red-100'
-                                            : 'bg-indigo-600 text-white hover:bg-black shadow-indigo-100 active:scale-95'}`}
+                                            ? 'bg-red-600 text-white shadow-red-900/20'
+                                            : 'bg-indigo-600 text-white hover:bg-black dark:hover:bg-indigo-500 shadow-indigo-900/20 active:scale-95'}`}
                                 >
                                     {status.type === 'saving' ? <FiRefreshCw className="animate-spin" /> : status.type === 'success' ? <FiCheckCircle /> : status.type === 'error' ? <FiAlertCircle /> : <FiSave />}
                                     {status.type === 'saving' ? 'Applying...' : status.type === 'success' ? 'Applied' : 'Save Changes'}
@@ -183,17 +183,17 @@ const FeatureLab = () => {
                                 />
                             </div>
 
-                            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500 font-mono">
                                 <FiCpu />
                                 <span>RUNTIME_ID: {activeFeature.id} | LAST_STABLE_CONFIG_SYNC: {new Date().toISOString()}</span>
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-white rounded-3xl border-2 border-dashed border-slate-100 h-full flex flex-col items-center justify-center p-20 text-center">
-                            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-200 mb-4">
+                        <div className="bg-white dark:bg-slate-800 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-700 h-full flex flex-col items-center justify-center p-20 text-center">
+                            <div className="w-20 h-20 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center text-slate-200 dark:text-slate-700 mb-4">
                                 <FiBox size={40} />
                             </div>
-                            <h3 className="text-slate-400 font-medium">Select a module to tune</h3>
+                            <h3 className="text-slate-400 dark:text-slate-500 font-medium">Select a module to tune</h3>
                         </div>
                     )}
                 </div>
@@ -208,11 +208,11 @@ const ModuleSpecificConfig = ({ name, config, onChange }) => {
         const val = config[key] !== undefined ? config[key] : (type === 'bool' ? false : (type === 'number' ? 0 : ''));
 
         return (
-            <div className="group bg-white p-5 rounded-2xl border border-slate-100 hover:border-indigo-100 transition-all hover:shadow-sm">
+            <div className="group bg-white dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-indigo-100 dark:hover:border-indigo-500/30 transition-all hover:shadow-sm">
                 <div className="flex items-center justify-between gap-4">
                     <div className="max-w-md">
-                        <label className="text-sm font-bold text-slate-800 block mb-0.5">{label}</label>
-                        <p className="text-[11px] text-slate-400 leading-relaxed">{description}</p>
+                        <label className="text-sm font-bold text-slate-800 dark:text-slate-200 block mb-0.5">{label}</label>
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">{description}</p>
                     </div>
 
                     <div className="min-w-[140px] flex justify-end">

@@ -322,10 +322,20 @@ export default function Reports() {
                         </button>
 
                         {isExportOpen && (
-                            <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 p-2 animate-in fade-in zoom-in-95 duration-200">
-                                <button onClick={() => handleDownload('pdf')} className="w-full text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 font-medium hover:text-slate-900 dark:hover:text-white">Download as PDF</button>
-                                <button onClick={() => handleDownload('excel')} className="w-full text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 font-medium hover:text-slate-900 dark:hover:text-white">Download as Excel</button>
-                                <button onClick={() => handleDownload('word')} className="w-full text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 font-medium hover:text-slate-900 dark:hover:text-white">Download as Word</button>
+                            <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 z-50 p-3 animate-in fade-in zoom-in-95 duration-200">
+                                <div className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-4 py-2 mb-1">Select Format</div>
+                                <button onClick={() => handleDownload('pdf')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl text-sm text-slate-600 dark:text-slate-300 font-bold hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                                    <FaFilePdf className="text-lg text-red-500" />
+                                    <span>Portable Document (PDF)</span>
+                                </button>
+                                <button onClick={() => handleDownload('excel')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 rounded-xl text-sm text-slate-600 dark:text-slate-300 font-bold hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                                    <FaFileExcel className="text-lg text-emerald-500" />
+                                    <span>Microsoft Excel (XLSX)</span>
+                                </button>
+                                <button onClick={() => handleDownload('word')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50 dark:hover:bg-blue-900/10 rounded-xl text-sm text-slate-600 dark:text-slate-300 font-bold hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                    <FaFileWord className="text-lg text-blue-500" />
+                                    <span>Microsoft Word (DOCX)</span>
+                                </button>
                             </div>
                         )}
                     </div>

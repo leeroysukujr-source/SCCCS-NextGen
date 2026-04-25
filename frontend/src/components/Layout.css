@@ -312,6 +312,13 @@
     display: none;
 }
 
+.nav-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.3s ease;
+}
+
 .sidebar.collapsed .nav-item {
     justify-content: center;
     padding: 0.85rem 0;
@@ -385,6 +392,8 @@
   .sidebar.mobile-open .nav-text,
   .sidebar.mobile-open .sidebar-footer-btn span {
     display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 
   .sidebar.mobile-open .nav-item {

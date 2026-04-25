@@ -411,11 +411,13 @@ export default function ManageUsers() {
                     </td>
                     <td data-label="Status">
                       {onlineUserIds.has(u.id) ? (
-                        <span className="status-badge active" style={{ backgroundColor: '#10b981', color: 'white' }}>
+                        <span className="status-badge bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 w-fit">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                           Online
                         </span>
                       ) : (
-                        <span className="status-badge inactive" style={{ opacity: 0.7 }}>
+                        <span className="status-badge bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-500 border border-slate-200 dark:border-slate-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 w-fit opacity-70">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-600"></span>
                           Offline
                         </span>
                       )}
@@ -470,52 +472,57 @@ export default function ManageUsers() {
 
       {/* Role Update Modal */}
       {showRoleModal && selectedUser && (
-        <div className="modal-overlay" onClick={() => setShowRoleModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Update User Role</h2>
-              <button className="modal-close" onClick={() => setShowRoleModal(false)}>
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setShowRoleModal(false)}>
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Update User Role</h2>
+              <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-500 transition-colors" onClick={() => setShowRoleModal(false)}>
                 <FiX />
               </button>
             </div>
             <form onSubmit={handleRoleUpdate}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>Selected User</label>
-                  <p className="form-info-text"><strong>{selectedUser.first_name} {selectedUser.last_name}</strong> ({selectedUser.email})</p>
+              <div className="p-6 space-y-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Selected User</label>
+                  <p className="text-slate-900 dark:text-slate-200 font-bold">
+                    {selectedUser.first_name} {selectedUser.last_name} 
+                    <span className="block text-sm font-normal text-slate-500">{selectedUser.email}</span>
+                  </p>
                 </div>
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label>Current Role</label>
-                    <div className={`role-badge role-${selectedUser.role}`}>{selectedUser.role}</div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Current Role</label>
+                    <div className={`px-3 py-1 rounded-lg text-xs font-bold w-fit uppercase tracking-widest role-badge role-${selectedUser.role}`}>{selectedUser.role}</div>
                   </div>
-                  <div className="form-group">
-                    <label>Assigned To</label>
-                    <p className="form-info-text">Production / Main Office</p>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Domain</label>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Institutional Main</p>
                   </div>
                 </div>
-                <div className="form-group">
-                  <label>New Role *</label>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">New Designation *</label>
                   <select
                     required
                     value={selectedUser.role}
                     onChange={(e) => setSelectedUser({ ...selectedUser, role: e.target.value })}
-                    className="role-select"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:border-indigo-500 outline-none transition-all"
                   >
                     <option value="admin">Admin - Full system access</option>
-                    <option value="teacher">Teacher - Can manage classes and students</option>
-                    <option value="student">Student - Basic access</option>
-                    <option value="staff">Staff - Support and operations</option>
+                    <option value="teacher">Teacher - Classroom management</option>
+                    <option value="student">Student - Learning resources</option>
+                    <option value="staff">Staff - Operations support</option>
                   </select>
-                  <p className="form-hint">
-                    Role changes take effect upon the user's next navigation or refresh.
+                  <p className="text-[10px] text-slate-400 italic">
+                    Role transitions are synchronized across all nodes in real-time.
                   </p>
                 </div>
               </div>
-              <div className="modal-footer">
+              <div className="p-6 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3">
                 <button
                   type="button"
-                  className="btn-secondary"
+                  className="px-4 py-2 text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                   onClick={() => {
                     setShowRoleModal(false)
                     setSelectedUser(null)
@@ -525,10 +532,10 @@ export default function ManageUsers() {
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary"
+                  className="px-6 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-900/20"
                   disabled={updateRoleMutation.isLoading || selectedUser.id === user?.id}
                 >
-                  {updateRoleMutation.isLoading ? 'Updating...' : 'Update Role'}
+                  {updateRoleMutation.isLoading ? 'Processing...' : 'Apply Changes'}
                 </button>
               </div>
             </form>

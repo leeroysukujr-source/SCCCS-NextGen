@@ -147,7 +147,7 @@ const CreationPolicyManager = () => {
                                             <input
                                                 value={val}
                                                 onChange={(e) => updateNestedConfig(feature.id, prop, e.target.value)}
-                                                className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 w-32 text-center"
+                                                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 w-32 text-center text-slate-900 dark:text-white"
                                             />
                                         )}
                                     </div>

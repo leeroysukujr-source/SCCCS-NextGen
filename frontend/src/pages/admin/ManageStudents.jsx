@@ -212,33 +212,30 @@ export default function ManageStudents() {
       </div>
 
       {isError && (
-        <div className="admin-error" style={{ margin: '1rem', padding: '1rem', background: '#fee2e2', color: '#dc2626', borderRadius: '0.5rem' }}>
-          <strong>Error loading students:</strong> {error?.response?.status === 403 ? 'Access Denied' : (error?.message || 'Unknown error')}
-          <br />
+        <div className="mx-6 my-4 p-4 bg-red-500/10 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-xl text-red-600 dark:text-red-400">
+          <div className="flex items-center gap-2 mb-2">
+            <FiX className="text-xl" />
+            <strong className="font-bold">Error loading students:</strong> 
+            <span className="text-sm font-medium">{error?.response?.status === 403 ? 'Access Denied' : (error?.message || 'Unknown error')}</span>
+          </div>
+          
           {error?.response?.status === 403 && (
-            <div style={{ marginTop: '0.5rem' }}>
-              <p>Your session may have expired or you do not have permission.</p>
+            <div className="mt-2 space-y-3">
+              <p className="text-xs opacity-80">Your session may have expired or you do not have permission to view this resource.</p>
               <button
                 onClick={() => {
                   localStorage.removeItem('auth-storage');
                   window.location.href = '/login';
                 }}
-                style={{
-                  background: '#dc2626',
-                  color: 'white',
-                  border: 'none',
-                  padding: '4px 12px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  marginTop: '5px'
-                }}
+                className="px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-lg transition-colors shadow-lg shadow-red-900/20"
               >
                 Log Out & Retry
               </button>
             </div>
           )}
-          <br />
-          <small>Technical details: {JSON.stringify(error?.response?.data || error?.message)}</small>
+          <div className="mt-3 pt-3 border-t border-red-500/10">
+            <small className="text-[10px] font-mono opacity-60">ID: {JSON.stringify(error?.response?.data || error?.message)}</small>
+          </div>
         </div>
       )}
 
@@ -270,11 +267,13 @@ export default function ManageStudents() {
                     <td>{student.first_name} {student.last_name}</td>
                     <td>
                       {onlineUserIds.has(student.id) ? (
-                        <span className="status-badge active" style={{ backgroundColor: '#10b981', color: 'white' }}>
+                        <span className="status-badge bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 w-fit">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                           Online
                         </span>
                       ) : (
-                        <span className="status-badge inactive" style={{ opacity: 0.7 }}>
+                        <span className="status-badge bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-500 border border-slate-200 dark:border-slate-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 w-fit opacity-70">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-600"></span>
                           Offline
                         </span>
                       )}

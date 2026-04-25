@@ -67,13 +67,15 @@ export default function ManageClasses() {
   if (user?.role !== 'admin' && user?.role !== 'super_admin') {
     return (
       <div className="admin-page">
-        <div className="admin-container">
-          <div className="error-message">
-            <FiX size={48} />
-            <h2>Access Denied</h2>
-            <p>You do not have permission to access this page.</p>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100 dark:border-red-500/20">
+            <FiX size={32} />
           </div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Access Denied</h2>
+          <p className="text-slate-500 dark:text-slate-400">You do not have administrative privileges to manage global courses.</p>
         </div>
+      </div>
       </div>
     )
   }
@@ -181,26 +183,26 @@ export default function ManageClasses() {
         </div>
 
         {/* Stats */}
-        <div className="admin-stats">
-          <div className="stat-card">
-            <span className="stat-label">Total Courses</span>
-            <span className="stat-value">{classes.length}</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] block mb-1">Total Courses</span>
+            <span className="text-3xl font-bold text-slate-900 dark:text-white">{classes.length}</span>
           </div>
-          <div className="stat-card">
-            <span className="stat-label">Total Members</span>
-            <span className="stat-value">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] block mb-1">Total Members</span>
+            <span className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
               {classes.reduce((sum, c) => sum + (c.member_count || 0), 0)}
             </span>
           </div>
-          <div className="stat-card">
-            <span className="stat-label">Total Lessons</span>
-            <span className="stat-value">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] block mb-1">Total Lessons</span>
+            <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
               {classes.reduce((sum, c) => sum + (c.lesson_count || 0), 0)}
             </span>
           </div>
-          <div className="stat-card">
-            <span className="stat-label">Filtered</span>
-            <span className="stat-value">{filteredClasses.length}</span>
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] block mb-1">Matching Results</span>
+            <span className="text-3xl font-bold text-slate-900 dark:text-white">{filteredClasses.length}</span>
           </div>
         </div>
       </div>

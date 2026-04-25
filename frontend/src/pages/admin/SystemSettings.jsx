@@ -85,8 +85,8 @@ export default function SystemSettings() {
   // Tab Content Renderers
   const renderGeneralTab = () => (
     <div className="settings-tab-content fade-in">
-      <div className="settings-card border-amber-900/30 bg-amber-950/10">
-        <div className="card-header border-b border-amber-900/30 pb-4 mb-4">
+      <div className="settings-card border-amber-500/20 dark:border-amber-900/30 bg-amber-500/5 dark:bg-amber-950/10 shadow-sm shadow-amber-500/5">
+        <div className="card-header border-b border-amber-500/10 dark:border-amber-900/30 pb-4 mb-4">
           <FiShield className="card-icon text-amber-500" />
           <div>
             <h3>System Operational Status</h3>
@@ -94,10 +94,10 @@ export default function SystemSettings() {
           </div>
         </div>
         <div className="card-body">
-           <div className="flex items-center justify-between bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+           <div className="flex items-center justify-between bg-slate-100/50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
              <div className="space-y-1">
-               <span className="text-sm font-bold text-slate-200">MAINTENANCE MODE</span>
-               <p className="text-xs text-slate-400">When active, only Super Admins can access the platform.</p>
+                <span className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-tight">MAINTENANCE MODE</span>
+                <p className="text-xs text-slate-500 dark:text-slate-400">When active, only Super Admins can access the platform.</p>
              </div>
              <div className="switch-wrapper scale-125 origin-right">
                 <SettingSwitch
@@ -145,8 +145,8 @@ export default function SystemSettings() {
 
   const renderUIUXTab = () => (
     <div className="settings-tab-content fade-in">
-      <div className="settings-card bg-slate-900/40 border-slate-800">
-        <div className="card-header border-b border-slate-800/50 pb-4 mb-6">
+      <div className="settings-card bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800">
+        <div className="card-header border-b border-slate-200 dark:border-slate-800/50 pb-4 mb-6">
           <FiImage className="card-icon text-indigo-400" />
           <div>
             <h3>Global System Branding</h3>
@@ -168,7 +168,7 @@ export default function SystemSettings() {
              />
           </div>
 
-          <div className="divider border-slate-800"></div>
+          <div className="divider border-slate-200 dark:border-slate-800"></div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <SettingItem
@@ -218,7 +218,7 @@ export default function SystemSettings() {
             onSave={handleUpdateSetting}
           />
 
-          <div className="divider my-4 border-slate-800"></div>
+          <div className="divider my-4 border-slate-200 dark:border-slate-800"></div>
 
           <SettingItem
             setting={getS('max_upload_size_mb')}

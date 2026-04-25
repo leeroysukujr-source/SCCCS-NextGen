@@ -73,13 +73,15 @@ export default function ManageRooms() {
   if (user?.role !== 'admin') {
     return (
       <div className="admin-page">
-        <div className="admin-container">
-          <div className="error-message">
-            <FiX size={48} />
-            <h2>Access Denied</h2>
-            <p>You do not have permission to access this page.</p>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100 dark:border-red-500/20">
+            <FiX size={32} />
           </div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Access Denied</h2>
+          <p className="text-slate-500 dark:text-slate-400">You do not have administrative privileges to manage video conferences.</p>
         </div>
+      </div>
       </div>
     )
   }
@@ -108,27 +110,27 @@ export default function ManageRooms() {
               className="search-input"
             />
           </div>
-          <div className="filter-buttons">
+          <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
             <button
-              className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filterType === 'all' ? 'bg-white dark:bg-indigo-600 text-indigo-600 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
               onClick={() => setFilterType('all')}
             >
               All
             </button>
             <button
-              className={`filter-btn ${filterType === 'active' ? 'active' : ''}`}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filterType === 'active' ? 'bg-white dark:bg-indigo-600 text-indigo-600 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
               onClick={() => setFilterType('active')}
             >
               Active
             </button>
             <button
-              className={`filter-btn ${filterType === 'scheduled' ? 'active' : ''}`}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filterType === 'scheduled' ? 'bg-white dark:bg-indigo-600 text-indigo-600 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
               onClick={() => setFilterType('scheduled')}
             >
               Scheduled
             </button>
             <button
-              className={`filter-btn ${filterType === 'instant' ? 'active' : ''}`}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filterType === 'instant' ? 'bg-white dark:bg-indigo-600 text-indigo-600 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
               onClick={() => setFilterType('instant')}
             >
               Instant
@@ -231,22 +233,22 @@ export default function ManageRooms() {
         </div>
 
         {/* Stats */}
-        <div className="admin-stats">
-          <div className="stat-card">
-            <span className="stat-label">Total Rooms</span>
-            <span className="stat-value">{rooms.length}</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] block mb-1">Total Rooms</span>
+            <span className="text-3xl font-bold text-slate-900 dark:text-white">{rooms.length}</span>
           </div>
-          <div className="stat-card">
-            <span className="stat-label">Active Rooms</span>
-            <span className="stat-value">{rooms.filter(r => r.is_active).length}</span>
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] block mb-1">Active Now</span>
+            <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{rooms.filter(r => r.is_active).length}</span>
           </div>
-          <div className="stat-card">
-            <span className="stat-label">Scheduled</span>
-            <span className="stat-value">{rooms.filter(r => r.meeting_type === 'scheduled').length}</span>
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] block mb-1">Scheduled</span>
+            <span className="text-3xl font-bold text-blue-600 dark:text-blue-400">{rooms.filter(r => r.meeting_type === 'scheduled').length}</span>
           </div>
-          <div className="stat-card">
-            <span className="stat-label">Filtered</span>
-            <span className="stat-value">{filteredRooms.length}</span>
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] block mb-1">Filter Match</span>
+            <span className="text-3xl font-bold text-slate-900 dark:text-white">{filteredRooms.length}</span>
           </div>
         </div>
       </div>

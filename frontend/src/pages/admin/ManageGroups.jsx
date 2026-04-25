@@ -160,32 +160,32 @@ export default function ManageGroups() {
              { label: 'Synched Users', val: groups.reduce((s, g) => s + (g.member_count || 0), 0), icon: <FiUsers /> },
              { label: 'Filter Matches', val: filteredGroups.length, icon: <FiFilter /> }
            ].map((s, i) => (
-             <div key={i} className="nexus-card p-6 flex items-center gap-6 border-white/5 bg-white/2 hover:border-blue-500/30 transition-all">
+             <div key={i} className="nexus-card p-6 flex items-center gap-6 border-slate-200/50 dark:border-white/5 bg-white/50 dark:bg-white/2 hover:border-blue-500/30 transition-all shadow-sm">
                 <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl">{s.icon}</div>
                 <div>
                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{s.label}</div>
-                   <div className="text-2xl font-bold text-white">{s.val}</div>
+                   <div className="text-2xl font-bold text-slate-900 dark:text-white">{s.val}</div>
                 </div>
              </div>
            ))}
         </div>
 
         {/* Filters */}
-        <div className="nexus-card p-8 mb-8 border-white/5 bg-white/2 flex flex-col md:flex-row gap-6 items-center">
+        <div className="nexus-card p-8 mb-8 border-slate-200/50 dark:border-white/5 bg-white/50 dark:bg-white/2 flex flex-col md:flex-row gap-6 items-center shadow-sm">
           <div className="relative flex-1 group w-full">
             <FiSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
             <input
-              className="w-full bg-black/20 border border-white/10 rounded-2xl py-4 pl-16 pr-6 text-sm focus:border-blue-500 outline-none transition-all"
+              className="w-full bg-slate-100/50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-2xl py-4 pl-16 pr-6 text-sm text-slate-900 dark:text-white focus:border-blue-500 outline-none transition-all"
               placeholder="Query node by name or identifier..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex gap-2 p-2 bg-black/20 rounded-2xl border border-white/5">
+          <div className="flex gap-2 p-2 bg-slate-100/50 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/5">
             {['all', 'students', 'teachers', 'other'].map(cat => (
               <button
                 key={cat}
-                className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filterCategory === cat ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-500 hover:text-white'}`}
+                className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filterCategory === cat ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-500 hover:text-slate-700 dark:hover:text-white'}`}
                 onClick={() => setFilterCategory(cat)}
               >
                 {cat}
@@ -195,11 +195,11 @@ export default function ManageGroups() {
         </div>
 
         {/* Responsive Table */}
-        <div className="nexus-card overflow-hidden border-white/5 bg-white/2">
+        <div className="nexus-card overflow-hidden border-slate-200/50 dark:border-white/5 bg-white/50 dark:bg-white/2 shadow-sm">
           <div className="overflow-x-auto">
             <table className="nexus-table w-full">
               <thead>
-                <tr className="border-b border-white/5">
+                <tr className="border-b border-slate-200 dark:border-white/5">
                   <th className="px-8 py-6 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Node Identification</th>
                   <th className="px-8 py-6 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Protocol</th>
                   <th className="px-8 py-6 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Configuration</th>
@@ -212,37 +212,37 @@ export default function ManageGroups() {
                 {isLoading ? (
                   <tr><td colSpan="6" className="p-20 text-center"><div className="nexus-scanner mx-auto mb-4"></div><span className="text-[10px] font-black text-blue-500 tracking-widest uppercase animate-pulse">Scanning Network...</span></td></tr>
                 ) : filteredGroups.length === 0 ? (
-                  <tr><td colSpan="6" className="p-20 text-center space-y-4 opacity-30"><FiCpu size={48} className="mx-auto" /><h3>NODES NOT FOUND</h3></td></tr>
+                  <tr><td colSpan="6" className="p-20 text-center space-y-4 opacity-30 text-slate-500"><FiCpu size={48} className="mx-auto" /><h3>NODES NOT FOUND</h3></td></tr>
                 ) : filteredGroups.map((group) => (
-                  <tr key={group.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-all group">
+                  <tr key={group.id} className="border-b border-slate-200 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-all group">
                     <td className="px-8 py-6">
                       <div className="flex flex-col">
-                        <span className="font-bold text-white text-lg">{group.name}</span>
+                        <span className="font-bold text-slate-900 dark:text-white text-lg">{group.name}</span>
                         <span className="text-xs text-slate-500 mt-1 line-clamp-1 max-w-[300px]">{group.description || 'System generated collaboration cluster.'}</span>
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <span className="px-3 py-1 rounded-lg bg-slate-800 text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:bg-blue-600/10 group-hover:text-blue-500 transition-all border border-white/5">
+                      <span className="px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest group-hover:bg-blue-600/10 group-hover:text-blue-500 transition-all border border-slate-200 dark:border-white/5">
                         {group.category}
                       </span>
                     </td>
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-2">
                          {group.join_type === 'direct' ? <FiGlobe className="text-green-500" /> : <FiLock className="text-amber-500" />}
-                         <span className="text-xs font-bold text-slate-400 capitalize">{group.join_type}</span>
+                         <span className="text-xs font-bold text-slate-600 dark:text-slate-400 capitalize">{group.join_type}</span>
                       </div>
                     </td>
                     <td className="px-8 py-6">
                        <div className="flex items-center gap-3">
                           <div className="flex -space-x-3">
-                             {[1, 2, 3].map(i => <div key={i} className="w-8 h-8 rounded-full bg-slate-800 border-2 border-[#1e293b]"></div>)}
+                             {[1, 2, 3].map(i => <div key={i} className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 border-2 border-white dark:border-[#1e293b]"></div>)}
                           </div>
-                          <span className="text-sm font-bold text-white">{group.member_count || 0}</span>
+                          <span className="text-sm font-bold text-slate-900 dark:text-white">{group.member_count || 0}</span>
                        </div>
                     </td>
                     <td className="px-8 py-6">
-                       <span className={`flex items-center gap-2 text-[10px] font-black tracking-widest ${group.is_active ? 'text-green-500' : 'text-slate-600'}`}>
-                          <div className={`w-1.5 h-1.5 rounded-full ${group.is_active ? 'bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-slate-600'}`}></div>
+                       <span className={`flex items-center gap-2 text-[10px] font-black tracking-widest ${group.is_active ? 'text-green-500' : 'text-slate-400 dark:text-slate-600'}`}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${group.is_active ? 'bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-slate-400 dark:bg-slate-600'}`}></div>
                           {group.is_active ? 'OPERATIONAL' : 'OFFLINE'}
                        </span>
                     </td>
@@ -298,32 +298,32 @@ export default function ManageGroups() {
       {/* Requests Modal */}
       {selectedGroupRequests !== null && selectedGroup && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-black/80 backdrop-blur-xl animate-fadeIn">
-          <div className="nexus-card w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] animate-modalPop">
-             <div className="p-8 border-b border-white/5 flex justify-between items-center bg-black/20">
+          <div className="nexus-card bg-white dark:bg-slate-900 w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden border-slate-200 dark:border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] animate-modalPop">
+             <div className="p-8 border-b border-slate-200 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-black/20">
                 <div>
-                   <h2 className="text-xl font-bold text-white">Access Requests</h2>
+                   <h2 className="text-xl font-bold text-slate-900 dark:text-white">Access Requests</h2>
                    <p className="text-xs text-slate-500 mt-1 uppercase tracking-widest">{selectedGroup.name}</p>
                 </div>
-                <button className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-all" onClick={() => setSelectedGroupRequests(null)}>
+                <button className="w-10 h-10 rounded-full hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center text-slate-500 dark:text-white transition-all" onClick={() => setSelectedGroupRequests(null)}>
                   <FiX />
                 </button>
              </div>
-             <div className="flex-1 overflow-y-auto p-8 space-y-6">
+             <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-white dark:bg-slate-900">
                 {selectedGroupRequests.length === 0 ? (
-                  <div className="py-20 text-center opacity-30"><FiClock size={48} className="mx-auto mb-4" /><p className="font-black uppercase tracking-[0.2em]">Queue Clean</p></div>
+                   <div className="py-20 text-center opacity-30 text-slate-500 dark:text-white"><FiClock size={48} className="mx-auto mb-4" /><p className="font-black uppercase tracking-[0.2em]">Queue Clean</p></div>
                 ) : selectedGroupRequests.map((request) => (
-                  <div key={request.id} className="nexus-card p-6 bg-white/[0.02] border-white/5 flex items-center justify-between group hover:border-blue-500/30 transition-all">
+                  <div key={request.id} className="nexus-card p-6 bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 flex items-center justify-between group hover:border-blue-500/30 transition-all shadow-sm">
                     <div className="flex items-center gap-6">
                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-black text-white">{request.user?.username?.[0]?.toUpperCase()}</div>
                        <div>
-                          <div className="font-bold text-white">{request.user?.username}</div>
+                          <div className="font-bold text-slate-900 dark:text-white">{request.user?.username}</div>
                           <div className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">{new Date(request.created_at).toLocaleString()}</div>
-                          {request.message && <div className="mt-2 text-sm text-slate-400 italic">"{request.message}"</div>}
+                          {request.message && <div className="mt-2 text-sm text-slate-600 dark:text-slate-400 italic">"{request.message}"</div>}
                        </div>
                     </div>
                     <div className="flex gap-2">
-                       <button className="w-10 h-10 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all" onClick={() => handleApproveRequest(selectedGroup.id, request.id)}><FiCheck /></button>
-                       <button className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all" onClick={() => handleRejectRequest(selectedGroup.id, request.id)}><FiX /></button>
+                       <button className="w-10 h-10 rounded-xl bg-green-500/10 text-green-600 dark:text-green-500 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all" onClick={() => handleApproveRequest(selectedGroup.id, request.id)}><FiCheck /></button>
+                       <button className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 dark:text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all" onClick={() => handleRejectRequest(selectedGroup.id, request.id)}><FiX /></button>
                     </div>
                   </div>
                 ))}
@@ -338,54 +338,54 @@ export default function ManageGroups() {
 function GroupModal({ title, onClose, data, setData, onSubmit, isPending, isEdit, copyLink, linkCopied }) {
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-black/80 backdrop-blur-xl animate-fadeIn" onClick={onClose}>
-      <div className="nexus-card w-full max-w-xl border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] animate-modalPop" onClick={e => e.stopPropagation()}>
+      <div className="nexus-card bg-white dark:bg-slate-900 w-full max-w-xl border-slate-200 dark:border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] animate-modalPop" onClick={e => e.stopPropagation()}>
         <form onSubmit={onSubmit}>
-          <div className="p-8 border-b border-white/5 flex justify-between items-center bg-black/20">
-            <h2 className="text-xl font-bold text-white uppercase tracking-widest">{title}</h2>
-            <button type="button" className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-all" onClick={onClose}><FiX /></button>
+          <div className="p-8 border-b border-slate-200 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-black/20">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white uppercase tracking-widest">{title}</h2>
+            <button type="button" className="w-10 h-10 rounded-full hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center text-slate-500 dark:text-white transition-all" onClick={onClose}><FiX /></button>
           </div>
-          <div className="p-8 space-y-6">
+          <div className="p-8 space-y-6 bg-white dark:bg-slate-900">
              <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Node Designation</label>
-                <input required className="w-full bg-black/40 border border-white/10 rounded-xl px-6 py-3 text-white focus:border-blue-500 outline-none transition-all" value={data.name} onChange={e => setData({...data, name: e.target.value})} />
+                <input required className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-6 py-3 text-slate-900 dark:text-white focus:border-blue-500 outline-none transition-all" value={data.name} onChange={e => setData({...data, name: e.target.value})} />
              </div>
              <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Initialization Objective</label>
-                <textarea rows={3} className="w-full bg-black/40 border border-white/10 rounded-xl px-6 py-3 text-white focus:border-blue-500 outline-none transition-all" value={data.description || ''} onChange={e => setData({...data, description: e.target.value})} />
+                <textarea rows={3} className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-6 py-3 text-slate-900 dark:text-white focus:border-blue-500 outline-none transition-all" value={data.description || ''} onChange={e => setData({...data, description: e.target.value})} />
              </div>
              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Node Classification</label>
-                   <select className="w-full bg-black/40 border border-white/10 rounded-xl px-6 py-3 text-white focus:border-blue-500 outline-none transition-all appearance-none" value={data.category} onChange={e => setData({...data, category: e.target.value})}>
-                      <option value="students">Students</option>
-                      <option value="teachers">Teachers</option>
-                      <option value="other">Other</option>
+                   <select className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-6 py-3 text-slate-900 dark:text-white focus:border-blue-500 outline-none transition-all appearance-none" value={data.category} onChange={e => setData({...data, category: e.target.value})}>
+                      <option value="students" className="bg-white dark:bg-slate-900">Students</option>
+                      <option value="teachers" className="bg-white dark:bg-slate-900">Teachers</option>
+                      <option value="other" className="bg-white dark:bg-slate-900">Other</option>
                    </select>
                 </div>
                 <div className="space-y-2">
                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Link Protocol</label>
-                   <select className="w-full bg-black/40 border border-white/10 rounded-xl px-6 py-3 text-white focus:border-blue-500 outline-none transition-all appearance-none" value={data.join_type} onChange={e => setData({...data, join_type: e.target.value})}>
-                      <option value="direct">Auto-Accept</option>
-                      <option value="request">Manual Auth</option>
-                      <option value="link">Secure Token</option>
+                   <select className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-6 py-3 text-slate-900 dark:text-white focus:border-blue-500 outline-none transition-all appearance-none" value={data.join_type} onChange={e => setData({...data, join_type: e.target.value})}>
+                      <option value="direct" className="bg-white dark:bg-slate-900">Auto-Accept</option>
+                      <option value="request" className="bg-white dark:bg-slate-900">Manual Auth</option>
+                      <option value="link" className="bg-white dark:bg-slate-900">Secure Token</option>
                    </select>
                 </div>
              </div>
              {isEdit && data.join_type === 'link' && data.join_code && (
                 <div className="p-4 bg-blue-500/5 rounded-xl border border-blue-500/20 flex items-center justify-between">
-                   <div className="text-xs font-mono text-blue-400">JOIN_CODE: {data.join_code}</div>
-                   <button type="button" className="text-xs font-black uppercase text-blue-300 hover:text-white" onClick={() => copyLink(data)}>
+                   <div className="text-xs font-mono text-blue-600 dark:text-blue-400">JOIN_CODE: {data.join_code}</div>
+                   <button type="button" className="text-xs font-black uppercase text-blue-600 dark:text-blue-300 hover:text-blue-700 dark:hover:text-white" onClick={() => copyLink(data)}>
                       {linkCopied === data.id ? 'Copied' : 'Sync Link'}
                    </button>
                 </div>
              )}
              <div className="flex items-center gap-3">
-                <input type="checkbox" className="w-5 h-5 rounded-lg border-white/10 bg-black/40" checked={data.is_active} onChange={e => setData({...data, is_active: e.target.checked})} />
-                <span className="text-xs font-bold text-slate-400">Node Online</span>
+                <input type="checkbox" className="w-5 h-5 rounded-lg border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-black/40" checked={data.is_active} onChange={e => setData({...data, is_active: e.target.checked})} />
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Node Online</span>
              </div>
           </div>
-          <div className="p-8 border-t border-white/5 bg-black/20 flex gap-4">
-            <button type="button" className="flex-1 px-8 py-3 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5" onClick={onClose}>Abort</button>
+          <div className="p-8 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex gap-4">
+            <button type="button" className="flex-1 px-8 py-3 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white font-bold hover:bg-slate-100 dark:hover:bg-white/5" onClick={onClose}>Abort</button>
             <button type="submit" disabled={isPending} className="flex-2 px-8 py-3 rounded-xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all">{isPending ? 'Processing...' : (isEdit ? 'Save Changes' : 'Initialize Node')}</button>
           </div>
         </form>

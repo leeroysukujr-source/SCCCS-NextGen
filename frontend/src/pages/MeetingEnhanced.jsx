@@ -1927,18 +1927,18 @@ function MeetingShareModal({ isOpen, onClose, roomId, roomName }) {
 
   return (
     <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-2xl z-[2000] flex items-center justify-center p-4">
-      <div className="bg-[#0f172a] rounded-[3rem] border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.9)] max-w-lg w-full p-10 animate-modalPop relative overflow-hidden">
+      <div className="bg-white dark:bg-[#0f172a] rounded-[3rem] border border-slate-200 dark:border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.1)] dark:shadow-[0_50px_100px_rgba(0,0,0,0.9)] max-w-lg w-full p-10 animate-modalPop relative overflow-hidden">
         {/* Decorative background */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/10 blur-[100px] -mr-32 -mt-32"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/10 blur-[100px] -ml-32 -mb-32"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 dark:bg-indigo-600/10 blur-[100px] -mr-32 -mt-32"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/5 dark:bg-blue-600/10 blur-[100px] -ml-32 -mb-32"></div>
 
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-white font-black text-2xl tracking-tighter">Invite Participants</h2>
-              <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mt-1">Broadcast Link & QR Entry</p>
+              <h2 className="text-slate-900 dark:text-white font-black text-2xl tracking-tighter">Invite Participants</h2>
+              <p className="text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mt-1">Broadcast Link & QR Entry</p>
             </div>
-            <button onClick={onClose} className="w-10 h-10 rounded-2xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all border border-white/5">
+            <button onClick={onClose} className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all border border-slate-200 dark:border-white/5">
               <FaTimes size={18} />
             </button>
           </div>
@@ -1946,7 +1946,7 @@ function MeetingShareModal({ isOpen, onClose, roomId, roomName }) {
           <div className="space-y-8">
             {/* QR Code Section */}
             <div className="flex flex-col items-center gap-6">
-              <div className="p-4 bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-4 border-indigo-500/20">
+              <div className="p-4 bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-4 border-indigo-500/20">
                 <img src={qrUrl} alt="Meeting QR Code" className="w-48 h-48 sm:w-56 sm:h-56" />
               </div>
               <p className="text-slate-400 text-[10px] font-bold text-center uppercase tracking-widest leading-relaxed">

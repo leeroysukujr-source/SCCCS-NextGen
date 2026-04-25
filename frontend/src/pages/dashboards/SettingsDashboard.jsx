@@ -77,7 +77,7 @@ const SettingsDashboard = () => {
                 </div>
                 <button
                     onClick={() => fetchSystemSettings()}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm"
                 >
                     <FiRefreshCw className={loading ? 'animate-spin' : ''} />
                     Refresh
@@ -105,17 +105,17 @@ const SettingsDashboard = () => {
                 {/* Settings Content */}
                 <div className="flex-1 space-y-4">
                     {filteredSettings.length === 0 ? (
-                        <div className="bg-white dark:bg-slate-800/50 rounded-2xl p-12 text-center border border-slate-200 dark:border-slate-700/50 backdrop-blur-sm shadow-sm">
-                            <div className="inline-flex items-center justify-center w-12 h-12 bg-slate-100 dark:bg-slate-700/50 rounded-full mb-4">
-                                <FiSettings className="text-slate-400 dark:text-slate-400 text-xl" />
+                        <div className="bg-white dark:bg-slate-900/50 rounded-2xl p-12 text-center border border-slate-200 dark:border-slate-800 backdrop-blur-sm shadow-sm">
+                            <div className="inline-flex items-center justify-center w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full mb-4">
+                                <FiSettings className="text-slate-400 dark:text-slate-500 text-xl" />
                             </div>
-                            <p className="text-slate-500 dark:text-slate-500">No settings found in this category.</p>
+                            <p className="text-slate-500 dark:text-slate-400">No settings found in this category.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
                             {/* Global Logo Upload (Shown only in UI/UX category) */}
                             {activeCategory === 'ui_ux' && (
-                                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 mb-6">
+                                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 mb-6">
                                     <LogoUpload
                                         label="Global System Logo"
                                         initialLogo={getSettingValue('SYSTEM_LOGO_URL')}
@@ -127,7 +127,7 @@ const SettingsDashboard = () => {
                             )}
 
                             {filteredSettings.map(setting => (
-                                <div key={setting.key} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden hover:border-slate-300 dark:hover:border-slate-600 transition-colors">
+                                <div key={setting.key} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
                                     <div className="p-6">
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                             <div className="space-y-1">

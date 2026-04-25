@@ -467,7 +467,7 @@ const SuperAdminDashboard = () => {
                         <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm sm:text-base">Manage institutions, workspaces, and admins</p>
                     </div>
                     <div className="flex gap-3 w-full sm:w-auto">
-                        <div className="px-3 py-1.5 bg-white dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700 flex items-center gap-2 shadow-sm flex-1 sm:flex-none justify-center">
+                        <div className="px-3 py-1.5 bg-white dark:bg-slate-900/50 rounded-full border border-slate-200 dark:border-slate-800 flex items-center gap-2 shadow-sm flex-1 sm:flex-none justify-center">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                             <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">{new Date().toLocaleTimeString()}</span>
                         </div>
@@ -691,7 +691,7 @@ const SuperAdminDashboard = () => {
                                             >
                                                 <MoreVertical className="w-5 h-5" />
                                             </button>
-                                            <div className={`absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl transition-all z-10 flex flex-col p-1 ${openDropdownId === `ws-${ws.id}` ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2 pointer-events-none'}`}>
+                                            <div className={`absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl transition-all z-10 flex flex-col p-1 ${openDropdownId === `ws-${ws.id}` ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2 pointer-events-none'}`}>
                                                 <button onClick={(e) => { e.stopPropagation(); handleEditWs(ws); setOpenDropdownId(null); }} className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md w-full text-left">
                                                     <Edit className="w-4 h-4" /> Edit Info
                                                 </button>
