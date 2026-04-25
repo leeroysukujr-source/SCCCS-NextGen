@@ -22,6 +22,8 @@ def upload_workspace_logo(workspace_id):
     uid = get_jwt_identity()
     if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
+        
+    try:
         user = User.query.get(uid)
         
         if not user:
@@ -30,7 +32,7 @@ def upload_workspace_logo(workspace_id):
         # Tiered Jurisdiction Check
         is_super = user.role == "super_admin" or getattr(user, 'platform_role', '') == 'SUPER_ADMIN'
         if not is_super and int(user.workspace_id) != int(workspace_id):
-            return jsonify({'error': 'Jurisdiction Denied: Unauthorized access to this workspace branding', 'success': False}), 403
+            return jsonify({'error': 'Jurisdiction Denied', 'success': False}), 403
             
         workspace = Workspace.query.get(workspace_id)
         if not workspace:
@@ -43,19 +45,16 @@ def upload_workspace_logo(workspace_id):
         if file.filename == '':
             return jsonify({'error': 'No selected file', 'success': False}), 400
 
-        # Step A: Persistent Cloud Upload using save_logo utility
-        # This handles S3/Supabase vs Local fallback automatically
+        # Step A: Persistent Cloud Upload
         from app.utils.uploads import save_logo
         filename = f'logo_ws_{workspace_id}.png'
-        
-        # We must seek to 0 before saving to ensure full read
         file.seek(0)
         logo_url = save_logo(file, folder='workspaces', filename=filename)
         
         if not logo_url:
-            return jsonify({'error': 'Failed to save logo to storage', 'success': False}), 500
+            return jsonify({'error': 'Failed to save logo', 'success': False}), 500
 
-        # Step B: Persistent Backup in DB settings (survives disk wipes)
+        # Step B: Persistent Backup in DB settings
         try:
             import base64
             from PIL import Image
@@ -75,13 +74,12 @@ def upload_workspace_logo(workspace_id):
         except Exception as e:
             print(f"[Tenant Brand] Persistent backup warning: {e}")
 
-        # Step C: Update DB and Cache
+        # Step C: Update DB
         workspace.logo_url = logo_url
         db.session.commit()
         
         # Step D: Return the Full URL with cache-buster
         cache_buster = int(time.time())
-        # If logo_url is already absolute (cloud), append v. Otherwise construct it.
         if logo_url.startswith('http'):
             final_url = f"{logo_url}{'&' if '?' in logo_url else '?'}v={cache_buster}"
         else:
@@ -96,14 +94,11 @@ def upload_workspace_logo(workspace_id):
         return jsonify({
             'success': True,
             'message': 'Workspace logo updated successfully',
-            'logo_url': final_url,
-            'full_url': final_url
+            'logo_url': final_url
         }), 200
 
     except Exception as e:
         db.session.rollback()
         from app.utils.supabase import handle_supabase_error
-        import traceback
-        traceback.print_exc()
-        print(f"[Tenant Brand] CRITICAL CRASH in upload_workspace_logo: {e}")
+        print(f"[Tenant Brand] CRITICAL CRASH: {e}")
         return handle_supabase_error(e)

@@ -26,6 +26,8 @@ def upload_system_logo():
     uid = get_jwt_identity()
     if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
+        
+    try:
         user = User.query.get(uid)
         
         if not (is_super_admin(user) or getattr(user, 'platform_role', '') == 'SUPER_ADMIN'):
@@ -39,7 +41,6 @@ def upload_system_logo():
             return jsonify({'error': 'No selected file', 'success': False}), 400
 
         # Step A: Persistent Cloud Upload using save_logo utility
-        # Centralized logic handles S3/Supabase vs Local fallback
         filename = "system_logo.png"
         file.seek(0)
         logo_url = save_logo(file, folder='system', filename=filename)
@@ -47,17 +48,17 @@ def upload_system_logo():
         if not logo_url:
             return jsonify({'error': 'Failed to save logo to storage', 'success': False}), 500
 
-        # Step B: Update DB logic (Setting table where key='SYSTEM_LOGO_URL')
+        # Step B: Update DB logic
         try:
-            # We use SystemSetting model as found in the codebase
             SystemSetting.query.filter_by(key='SYSTEM_LOGO_URL').update({'value': logo_url})
             SystemSetting.query.filter_by(key='branding_logo_url').update({'value': logo_url})
             db.session.commit()
         except Exception as db_err:
+            db.session.rollback()
             print(f"[Master Brand] DB update failed: {db_err}")
             return jsonify({'error': f'Database update failed: {str(db_err)}', 'success': False}), 500
 
-        # Step C: Return the Full URL with a cache-buster timestamp
+        # Step C: Return the Full URL with cache-buster
         cache_buster = int(time.time())
         if logo_url.startswith('http'):
             final_url = f"{logo_url}{'&' if '?' in logo_url else '?'}v={cache_buster}"
@@ -65,8 +66,10 @@ def upload_system_logo():
             final_url = f"{request.host_url.rstrip('/')}{logo_url}?v={cache_buster}"
         
         # Invalidate Cache
-        try: cache_manager.delete('public_settings')
-        except: pass
+        try:
+            cache_manager.delete('public_settings')
+        except:
+            pass
         
         print(f"[Master Brand] Global system logo updated: {final_url}")
         
@@ -77,6 +80,7 @@ def upload_system_logo():
         }), 200
 
     except Exception as e:
+        db.session.rollback()
         from app.utils.supabase import handle_supabase_error
         print(f"[Master Brand] CRITICAL CRASH in upload_system_logo: {e}")
         return handle_supabase_error(e)
