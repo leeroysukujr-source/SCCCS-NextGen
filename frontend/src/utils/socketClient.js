@@ -8,14 +8,14 @@ export function createSocket(socketUrl, token) {
 
   const socket = io(socketUrl, {
     auth: { token },
-    transports: ['websocket'], // Force WebSocket exclusively
-    upgrade: false, // Prevent polling -> websocket upgrade attempt
+    transports: ['polling', 'websocket'], // Force polling first if websocket fails as per Senior Architect Task
+    upgrade: true, 
     reconnection: true,
-    reconnectionAttempts: Infinity,
-    reconnectionDelay: 1000,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 2000,
     reconnectionDelayMax: 10000,
     randomizationFactor: 0.5,
-    timeout: 45000, // Handle cold starts/latency
+    timeout: 20000, // Reduced to 20s for faster failover
     forceNew: false,
   })
 

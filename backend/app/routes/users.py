@@ -13,7 +13,7 @@ import mimetypes
 import io
 import json
 import base64
-import imghdr
+# imghdr removed in Python 3.13; using mimetypes fallback
 from app.utils.audit import log_audit_event
 from openpyxl import Workbook
 from reportlab.lib.pagesizes import letter
