@@ -106,7 +106,8 @@ def upload_workspace_logo(workspace_id):
 
     except Exception as e:
         db.session.rollback()
+        from app.utils.supabase import handle_supabase_error
         import traceback
         traceback.print_exc()
         print(f"[Tenant Brand] CRITICAL CRASH in upload_workspace_logo: {e}")
-        return jsonify({'error': str(e), 'success': False}), 500
+        return handle_supabase_error(e)

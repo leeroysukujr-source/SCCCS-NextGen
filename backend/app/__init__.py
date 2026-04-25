@@ -114,6 +114,18 @@ def create_app(config_class=Config):
         "supports_credentials": True
     }})
 
+    @app.after_request
+    def after_request(response):
+        """The Global 'Force-CORS' Middleware (Architect Requirement)"""
+        # Ensure we don't duplicate headers if already set by Flask-CORS
+        if 'Access-Control-Allow-Origin' not in response.headers:
+            response.headers.add('Access-Control-Allow-Origin', 'https://scccs-next-gen-nine.vercel.app')
+        
+        response.headers.add('Access-Control-Allow-Headers', '*')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response
+
     # CORS configuration - Senior Deployment Hardening
     # Flask-CORS handles OPTIONS preflight automatically for blueprints.
     # We allow the specific Vercel production domains and wildcard headers for proxy flexibility.
@@ -136,7 +148,7 @@ def create_app(config_class=Config):
         ping_interval=25, 
         ping_timeout=120, # Higher resilience for cloud handshakes
         max_http_buffer_size=1e7, # 10MB limit for file shares
-        transports=['polling', 'websocket']
+        transports=['websocket'] # Force upgrade to avoid Polling loop (Architect Requirement)
     )
     if async_mode == "threading":
         # Werkzeug cannot serve real WebSockets; disable upgrades to avoid 500s.

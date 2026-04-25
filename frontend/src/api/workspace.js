@@ -40,7 +40,8 @@ export const workspaceAPI = {
         // Update URL to match workspaces_logo_bp registered at /api/workspaces
         const response = await client.post(`/workspaces/${wsId}/logo`, formData, {
             headers: {
-                'Content-Type': 'multipart/form-data'
+                'Content-Type': 'multipart/form-data',
+                'bypass-tunnel-reminder': 'true' // Architect Requirement: satisfy local browser checks
             }
         })
         return response.data
@@ -51,7 +52,8 @@ export const workspaceAPI = {
         formData.append('file', file)
         const response = await client.post('/settings/system/logo', formData, {
             headers: {
-                'Content-Type': 'multipart/form-data'
+                'Content-Type': 'multipart/form-data',
+                'bypass-tunnel-reminder': 'true' // Architect Requirement: satisfy local browser checks
             }
         })
         return response.data

@@ -84,5 +84,6 @@ def upload_system_logo():
         }), 200
 
     except Exception as e:
+        from app.utils.supabase import handle_supabase_error
         print(f"[Master Brand] CRITICAL CRASH in upload_system_logo: {e}")
-        return jsonify({'error': str(e), 'success': False}), 500
+        return handle_supabase_error(e)
