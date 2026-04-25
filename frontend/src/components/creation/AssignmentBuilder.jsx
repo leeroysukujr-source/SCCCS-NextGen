@@ -211,6 +211,11 @@ const AssignmentBuilder = ({ docId, onBack }) => {
             setTitle(newTitle);
         }
 
+        if (instructions.trim().length < 20) {
+            alert("Please provide more detailed instructions (minimum 20 characters) to ensure student accuracy.");
+            return;
+        }
+
         try {
             setSaving(true);
             let currentAsgId = assignmentId;

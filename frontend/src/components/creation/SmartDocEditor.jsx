@@ -48,6 +48,13 @@ const SmartDocEditor = ({ docId, tool, onBack, onSuccess, onShare }) => {
             setTitle(newTitle);
         }
 
+        const textContent = editor.getText();
+        if (textContent.trim().length < 50) {
+            if (!confirm("This document seems very short (dummy info?). Are you sure you want to save it to the Creation Hub?")) {
+                return;
+            }
+        }
+
         setSaving(true);
         const content = editor.getHTML();
         const payload = { title, content, doc_type: 'smart_doc', visibility: 'private' };
