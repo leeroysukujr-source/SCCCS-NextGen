@@ -145,7 +145,7 @@ def _process_submission(user, data, request_id=None):
     # In a real system, we fetch these from the DB
     snapshot_data = {
         'metadata': {
-            'institution': user.workspace_name,
+            'institution': user.workspace_obj.name if user.workspace_obj else 'System',
             'submitted_by': f"{user.first_name} {user.last_name}",
             'date': datetime.utcnow().isoformat(),
             'checklist': checklist

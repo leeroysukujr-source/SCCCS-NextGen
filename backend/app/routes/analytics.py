@@ -118,7 +118,7 @@ def get_system_overview():
             'total_students': workspace_students,
             'total_teachers': workspace_teachers,
             'role': 'admin',
-            'workspace_name': user.workspace_name
+            'workspace_name': user.workspace_obj.name if user.workspace_obj else 'System'
         }
     
     # Get recent metrics (Placeholder logic for now, can be expanded)
