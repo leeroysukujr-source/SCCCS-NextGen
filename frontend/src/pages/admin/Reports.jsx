@@ -522,20 +522,27 @@ export default function Reports() {
                             </div>
                             <div className="flex justify-end gap-3 mt-6">
                                 <button
+                                    type="button"
                                     onClick={() => setIsRequestModalOpen(false)}
                                     className="px-4 py-2 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    disabled={!newRequestTitle || !newRequestDate || createRequestMutation.isLoading}
-                                    onClick={() => createRequestMutation.mutate({
-                                        title: newRequestTitle,
-                                        description: newRequestDesc,
-                                        due_date: newRequestDate,
-                                        workspace_id: newRequestWorkspace || null
-                                    })}
-                                    className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-900/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    type="button"
+                                    onClick={() => {
+                                        if (!newRequestTitle || !newRequestDate) {
+                                            alert("Please enter a Title and a Due Date before sending the request.");
+                                            return;
+                                        }
+                                        createRequestMutation.mutate({
+                                            title: newRequestTitle,
+                                            description: newRequestDesc,
+                                            due_date: newRequestDate,
+                                            workspace_id: newRequestWorkspace || null
+                                        });
+                                    }}
+                                    className="px-6 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-500 transition-all active:scale-95 shadow-lg shadow-indigo-900/30 cursor-pointer relative z-[60]"
                                 >
                                     {createRequestMutation.isLoading ? 'Sending...' : 'Send Request'}
                                 </button>
