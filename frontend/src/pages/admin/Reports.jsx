@@ -14,7 +14,8 @@ import {
     FiSend,
     FiFileText,
     FiCheckCircle,
-    FiClock
+    FiClock,
+    FiPlus
 } from 'react-icons/fi';
 import {
     Chart as ChartJS,
