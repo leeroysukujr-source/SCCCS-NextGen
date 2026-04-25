@@ -44,18 +44,38 @@ def get_s3_client():
 
 
 def ensure_bucket(bucket_name=None):
+    """
+    Point 2: Re-verify Bucket Existence (Post-Restoration Safety)
+    Ensures the target bucket exists in the Supabase/S3 project.
+    """
     bucket = bucket_name or current_app.config.get('S3_BUCKET')
     s3 = get_s3_client()
+    if not s3:
+        logger.warning(f"Could not initialize S3 client to verify bucket {bucket}")
+        return False
+        
     try:
         s3.head_bucket(Bucket=bucket)
+        logger.info(f"✅ S3 Bucket '{bucket}' verified.")
         return True
-    except ClientError:
-        try:
-            s3.create_bucket(Bucket=bucket)
-            return True
-        except Exception as e:
-            logger.exception('Failed to create bucket %s: %s', bucket, str(e))
-            return False
+    except ClientError as e:
+        error_code = e.response.get('Error', {}).get('Code')
+        if error_code == '404':
+            try:
+                logger.info(f"📦 Bucket '{bucket}' not found. Attempting auto-provisioning...")
+                s3.create_bucket(Bucket=bucket)
+                # Note: For Supabase, additional public access policy might be needed via SQL
+                # But creation is the first step.
+                logger.info(f"✅ Created bucket '{bucket}'.")
+                return True
+            except Exception as create_err:
+                logger.error(f"Failed to auto-create bucket {bucket}: {create_err}")
+                return False
+        logger.error(f"S3 Head Bucket Error ({error_code}): {e}")
+        return False
+    except Exception as e:
+        logger.exception('Failed to verify bucket %s: %s', bucket, str(e))
+        return False
 
 
 def upload_fileobj(fileobj, key, bucket=None, extra_args=None):

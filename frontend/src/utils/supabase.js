@@ -17,9 +17,13 @@ export const supabase = createClient(supabaseUrl, supabaseKey)
  * Instruction: Transition from Multipart Upload to Direct Storage Upload.
  */
 export const uploadToSupabase = async (file, type = 'workspace-logo', id = null) => {
-    if (supabaseUrl.includes('YOUR_PROJECT_ID') || !supabaseKey) {
-        throw new Error('Supabase project ID or Anon Key is missing. Please check your .env configuration.');
+    // Architectural Guard: Ensure Supabase is correctly initialized
+    if (!supabaseUrl || supabaseUrl.includes('YOUR_PROJECT_ID') || !supabaseKey) {
+        const errorMsg = '⚠️ [Supabase] Project ID or Anon Key is missing. Check VITE_SUPABASE_URL in .env.';
+        console.error(errorMsg);
+        throw new Error(errorMsg);
     }
+
     try {
         let bucket = ''
         let path = ''
@@ -42,7 +46,27 @@ export const uploadToSupabase = async (file, type = 'workspace-logo', id = null)
                 throw new Error('Unknown upload type')
         }
 
-        console.log(`🚀 [Supabase] Uploading to ${bucket}/${path}...`)
+        console.log(`🚀 [Supabase] Preparing upload for ${bucket}/${path}...`)
+
+        // DevOps Instruction 2: Re-verify Bucket Existence (Post-Restoration Safety)
+        try {
+            const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+            if (listError) throw listError;
+
+            if (!buckets.find(b => b.name === bucket)) {
+                console.info(`📦 [Supabase] Bucket '${bucket}' missing. Provisioning now...`);
+                const { error: createError } = await supabase.storage.createBucket(bucket, { 
+                    public: true,
+                    fileSizeLimit: 5242880, // 5MB limit
+                    allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml']
+                });
+                if (createError) throw createError;
+                console.log(`✅ [Supabase] Bucket '${bucket}' created successfully.`);
+            }
+        } catch (bucketErr) {
+            console.warn(`⚠️ [Supabase] Bucket verification failed (Permissions?):`, bucketErr.message);
+            // We continue anyway, as the bucket might exist but listBuckets is restricted
+        }
 
         // Step 1: Perform the Upload with Upsert (Overwrites existing file)
         const { data, error } = await supabase.storage
@@ -53,10 +77,15 @@ export const uploadToSupabase = async (file, type = 'workspace-logo', id = null)
                 contentType: file.type || 'image/png'
             })
 
-        if (error) throw error
+        if (error) {
+            // Point 3: Handle StorageUnknownError (Network/URL mismatch)
+            if (error.message?.includes('failed to fetch') || error.__type === 'StorageUnknownError') {
+                throw new Error(`CONNECTION_ERROR: Could not reach Supabase at ${supabaseUrl}. Ensure the URL is correct.`);
+            }
+            throw error;
+        }
 
         // Step 2: Construct the Public URL
-        // Instruction: We use the public URL format as buckets should be Publicly Readable.
         const { data: { publicUrl } } = supabase.storage
             .from(bucket)
             .getPublicUrl(path)
@@ -68,7 +97,7 @@ export const uploadToSupabase = async (file, type = 'workspace-logo', id = null)
         return finalUrl
 
     } catch (err) {
-        console.error(`❌ [Supabase] Upload failed:`, err)
+        console.error(`❌ [Supabase] Operation failed:`, err)
         throw err
     }
 }
