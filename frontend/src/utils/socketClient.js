@@ -5,18 +5,17 @@ export function createSocket(socketUrl, token) {
   
   // Strategy: Force WebSocket transport exclusively (Senior Architect Requirement).
   // Polling often causes CORS handshaking issues behind cloud proxies like Render.
-  let transports = ['websocket']
 
   const socket = io(socketUrl, {
     auth: { token },
-    transports,
+    transports: ['websocket'], // Force WebSocket exclusively
+    upgrade: false, // Prevent polling -> websocket upgrade attempt
     reconnection: true,
     reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
     reconnectionDelayMax: 10000,
     randomizationFactor: 0.5,
     timeout: 45000, // Handle cold starts/latency
-    upgrade: true, 
     forceNew: false,
   })
 

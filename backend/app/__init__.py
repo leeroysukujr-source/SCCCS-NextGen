@@ -157,7 +157,7 @@ def create_app(config_class=Config):
         ping_interval=25, 
         ping_timeout=120, # Higher resilience for cloud handshakes
         max_http_buffer_size=1e7, # 10MB limit for file shares
-        transports=['websocket'] # Force upgrade to avoid Polling loop (Architect Requirement)
+        transports=['polling', 'websocket'] # Allow both for transition; frontend will force websocket
     )
     if async_mode == "threading":
         # Werkzeug cannot serve real WebSockets; disable upgrades to avoid 500s.
