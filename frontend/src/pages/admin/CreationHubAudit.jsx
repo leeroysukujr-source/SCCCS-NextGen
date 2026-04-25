@@ -13,23 +13,53 @@ const CreationHubAudit = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Mocking audit data for the premium look
-        setTimeout(() => {
-            setLogs([
-                { id: 1, user: 'Dr. Sarah Smith', action: 'Created Rubric', target: 'Biology Q4 Rubric', time: '2 mins ago', type: 'create' },
-                { id: 2, user: 'John Doe', action: 'AI Summary', target: 'Lesson Plan: Photosynthesis', time: '15 mins ago', type: 'ai' },
-                { id: 3, user: 'Sarah Smith', action: 'Shared Document', target: 'Exams_Folder', time: '1 hour ago', type: 'share' },
-                { id: 4, user: 'System', action: 'Auto-saved version', target: 'Thesis_Final', time: '3 hours ago', type: 'system' },
-                { id: 5, user: 'Admin', action: 'Changed Permissions', target: 'Institution_Branding', time: 'Yesterday', type: 'security' },
-            ]);
-            setStats({
-                totalFiles: 1420,
-                aiCalls: 342,
-                shares: 89,
-                storageUsed: '4.5 GB'
-            });
-            setLoading(false);
-        }, 800);
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const [statsRes, logsRes] = await Promise.all([
+                    apiClient.get('/analytics/creation-hub/stats'),
+                    apiClient.get('/analytics/audit/logs?per_page=10')
+                ]);
+
+                if (statsRes.data) {
+                    setStats(statsRes.data);
+                }
+
+                if (logsRes.data && logsRes.data.logs) {
+                    // Map backend logs to frontend format
+                    const formattedLogs = logsRes.data.logs.map(log => {
+                        const date = new Date(log.created_at);
+                        const now = new Date();
+                        const diffMs = now - date;
+                        const diffMins = Math.floor(diffMs / (1000 * 60));
+                        const diffHours = Math.floor(diffMins / 60);
+                        const diffDays = Math.floor(diffHours / 24);
+
+                        let timeStr = 'Just now';
+                        if (diffDays > 0) timeStr = `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+                        else if (diffHours > 0) timeStr = `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+                        else if (diffMins > 0) timeStr = `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+
+                        return {
+                            id: log.id,
+                            user: log.username || 'System',
+                            action: log.action.replace(/_/g, ' '),
+                            target: `${log.resource_type} #${log.resource_id || ''}`,
+                            time: timeStr,
+                            type: log.action.toLowerCase().includes('ai') ? 'ai' : 
+                                  log.action.toLowerCase().includes('delete') || log.action.toLowerCase().includes('permission') ? 'security' : 'system'
+                        };
+                    });
+                    setLogs(formattedLogs);
+                }
+            } catch (error) {
+                console.error("Failed to fetch audit data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
     }, []);
 
     return (
@@ -89,32 +119,40 @@ const CreationHubAudit = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                            {logs.map((log) => (
-                                <tr key={log.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors">
-                                    <td className="p-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 font-bold flex items-center justify-center text-xs">{log.user[0]}</div>
-                                            <span className="font-bold text-slate-700 dark:text-slate-200">{log.user}</span>
-                                        </div>
-                                    </td>
-                                    <td className="p-6">
-                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${log.type === 'ai' ? 'bg-indigo-100 text-indigo-600' :
-                                                log.type === 'security' ? 'bg-red-100 text-red-600' :
-                                                    'bg-slate-100 text-slate-600'
-                                            }`}>
-                                            {log.action}
-                                        </span>
-                                    </td>
-                                    <td className="p-6 font-medium text-slate-600 dark:text-slate-400">{log.target}</td>
-                                    <td className="p-6 text-xs text-slate-400 font-bold">{log.time}</td>
-                                    <td className="p-6">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-green-600">Verified</span>
-                                        </div>
+                            {logs.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" className="p-12 text-center">
+                                        <p className="text-slate-400 font-bold tracking-widest uppercase text-xs">No activity recorded yet</p>
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                logs.map((log) => (
+                                    <tr key={log.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors">
+                                        <td className="p-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 font-bold flex items-center justify-center text-xs">{log.user[0]}</div>
+                                                <span className="font-bold text-slate-700 dark:text-slate-200">{log.user}</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-6">
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${log.type === 'ai' ? 'bg-indigo-100 text-indigo-600' :
+                                                    log.type === 'security' ? 'bg-red-100 text-red-600' :
+                                                        'bg-slate-100 text-slate-600'
+                                                }`}>
+                                                {log.action}
+                                            </span>
+                                        </td>
+                                        <td className="p-6 font-medium text-slate-600 dark:text-slate-400">{log.target}</td>
+                                        <td className="p-6 text-xs text-slate-400 font-bold">{log.time}</td>
+                                        <td className="p-6">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-green-600">Verified</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>

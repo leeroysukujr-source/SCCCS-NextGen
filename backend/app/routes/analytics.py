@@ -214,3 +214,51 @@ def get_activity_trends():
         ]
     }), 200
 
+
+@analytics_bp.route('/creation-hub/stats', methods=['GET'])
+@jwt_required()
+def get_creation_hub_stats():
+    """Get accurate stats for Creation Hub Governance"""
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if not user or (user.role != 'admin' and user.role != 'super_admin'):
+        return jsonify({'error': 'Admin access required'}), 403
+
+    workspace_id = user.workspace_id
+    from app.models import File, Document
+    from app.models.document import DocumentPermission
+    from app.models.security import AuditLog
+    
+    if user.role == 'super_admin':
+        total_files = File.query.count() + Document.query.count()
+        storage_used_bytes = db.session.query(func.sum(File.file_size)).scalar() or 0
+        ai_interactions = AuditLog.query.filter(AuditLog.action.ilike('%ai%')).count()
+        active_shares = DocumentPermission.query.count()
+    else:
+        total_files = File.query.filter_by(workspace_id=workspace_id).count() + \
+                      Document.query.filter_by(workspace_id=workspace_id).count()
+        storage_used_bytes = db.session.query(func.sum(File.file_size)).filter_by(workspace_id=workspace_id).scalar() or 0
+        
+        # Count AI interactions in this workspace
+        ai_interactions = AuditLog.query.filter(
+            and_(AuditLog.workspace_id == workspace_id, AuditLog.action.ilike('%ai%'))
+        ).count()
+        
+        # Count shares (Document permissions)
+        active_shares = db.session.query(DocumentPermission).join(Document).filter(Document.workspace_id == workspace_id).count()
+
+    # Format storage string (MB/GB)
+    if storage_used_bytes < 1024**2:
+        storage_str = f"{storage_used_bytes / 1024:.1f} KB"
+    elif storage_used_bytes < 1024**3:
+        storage_str = f"{storage_used_bytes / 1024**2:.1f} MB"
+    else:
+        storage_str = f"{storage_used_bytes / 1024**3:.1f} GB"
+
+    return jsonify({
+        'totalFiles': total_files,
+        'aiCalls': ai_interactions,
+        'shares': active_shares,
+        'storageUsed': storage_str
+    }), 200

@@ -4,8 +4,27 @@ from app import db
 from app.models.whiteboard import Whiteboard
 from app.models import User
 from datetime import datetime
+import json
 
 whiteboards_bp = Blueprint('whiteboards', __name__)
+
+def log_action(user_id, action, resource_id=None, metadata=None):
+    try:
+        from app.models.security import AuditLog
+        from app.models import User
+        user = User.query.get(user_id)
+        log = AuditLog(
+            user_id=user_id,
+            action=action.upper(),
+            resource_type='whiteboard',
+            resource_id=resource_id,
+            workspace_id=user.workspace_id if user else None,
+            details_data=json.dumps(metadata) if metadata else None
+        )
+        db.session.add(log)
+        db.session.commit()
+    except Exception as e:
+        print(f"Failed to log whiteboard action: {e}")
 
 @whiteboards_bp.route('/', methods=['GET'])
 @jwt_required()
@@ -41,6 +60,8 @@ def create_whiteboard():
     )
     
     db.session.add(new_board)
+    db.session.flush()
+    log_action(current_user_id, 'CREATE_WHITEBOARD', new_board.id, {'title': new_board.title})
     db.session.commit()
     
     return jsonify(new_board.to_dict()), 201
@@ -95,6 +116,7 @@ def delete_whiteboard(id):
     if board.owner_id != current_user_id:
         return jsonify({'error': 'Unauthorized'}), 403
         
+    log_action(current_user_id, 'DELETE_WHITEBOARD', board.id, {'title': board.title})
     db.session.delete(board)
     db.session.commit()
     

@@ -13,6 +13,25 @@ from app.utils.middleware import feature_required
 
 ai_study_bp = Blueprint('ai_study', __name__)
 
+
+def log_ai_action(user_id, action, resource_type=None, resource_id=None, metadata=None):
+    try:
+        from app.models.security import AuditLog
+        from app.models import User
+        user = User.query.get(user_id)
+        log = AuditLog(
+            user_id=user_id,
+            action=f"AI_{action.upper()}",
+            resource_type=resource_type or 'ai_hub',
+            resource_id=resource_id,
+            workspace_id=user.workspace_id if user else None,
+            details_data=json.dumps(metadata) if metadata else None
+        )
+        db.session.add(log)
+        db.session.commit()
+    except Exception as e:
+        print(f"Failed to log AI action: {e}")
+
 @ai_study_bp.before_request
 @feature_required('study_hub')
 def check_study_hub_enabled():
@@ -334,7 +353,9 @@ Current Lesson:
     if 'error' in result:
         return jsonify(result), 500
     
+    log_ai_action(current_user_id, 'chat', 'file' if file_id else 'lesson', file_id or lesson_id, {'prompt': prompt[:100]})
     return jsonify(result), 200
+
 
 @ai_study_bp.route('/upload-file', methods=['POST'])
 @jwt_required()
@@ -524,7 +545,9 @@ Provide notes in a clear, hierarchical format that facilitates learning and revi
     if 'error' in result:
         return jsonify(result), 500
     
+    log_ai_action(current_user_id, 'generate_notes', 'lesson', lesson_id, {'focus': focus_areas})
     return jsonify(result), 200
+
 
 @ai_study_bp.route('/generate-quiz', methods=['POST'])
 @jwt_required()
@@ -642,7 +665,9 @@ Return as a JSON array of question objects. Use plain text in questions and expl
         # If parsing fails, return raw response
         pass
     
+    log_ai_action(current_user_id, 'generate_quiz', 'lesson', lesson_id, {'num_questions': num_questions})
     return jsonify(result), 200
+
 
 @ai_study_bp.route('/summarize-document', methods=['POST'])
 @jwt_required()
@@ -739,7 +764,9 @@ Connect the summary to the course context when relevant. Ensure the summary is:
     if 'error' in result:
         return jsonify(result), 500
     
+    log_ai_action(current_user_id, 'summarize', 'file' if file_id else 'lesson', file_id or lesson_id, {'type': summary_type})
     return jsonify(result), 200
+
 
 @ai_study_bp.route('/explain-concept', methods=['POST'])
 @jwt_required()
