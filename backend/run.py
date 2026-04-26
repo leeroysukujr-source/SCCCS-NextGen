@@ -172,12 +172,20 @@ def application(environ, start_response):
         return collab_ws_handler(environ, start_response)
     return socketio_app(environ, start_response)
 
-# Self-Bootstrapping Seeder
-try:
-    from seeders import run_all_seeders
-    run_all_seeders(app)
-except Exception as e:
-    print(f"[run.py] Seeding status: {e}")
+# Self-Bootstrapping Seeder - Background Execution to avoid Port Binding timeouts
+def _run_background_seeding():
+    try:
+        # Give the server a moment to bind to the port first
+        eventlet.sleep(2)
+        from seeders import run_all_seeders
+        print("[run.py] 🚀 Starting Background Seeding Engine...")
+        run_all_seeders(app)
+        print("[run.py] ✅ Background Seeding Complete.")
+    except Exception as e:
+        print(f"[run.py] ⚠️ Background Seeding status: {e}")
+
+# Spawn the seeder in a background thread (greenlet)
+eventlet.spawn(_run_background_seeding)
 
 if __name__ == '__main__':
     print(f"[run.py] Starting Unified Real-Time Server on {Config.SERVER_HOST}:{Config.SERVER_PORT}")
