@@ -15,7 +15,7 @@ export function createSocket(socketUrl, token) {
     reconnectionDelay: 2000,
     reconnectionDelayMax: 10000,
     randomizationFactor: 0.5,
-    timeout: 20000, // Reduced to 20s for faster failover
+    timeout: 60000, // Increased to 60s to account for Render spin-up
     forceNew: false,
   })
 
