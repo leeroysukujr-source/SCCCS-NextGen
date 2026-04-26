@@ -49,11 +49,11 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_size': 3,
-        'max_overflow': 2,
-        'pool_recycle': 300,
+        'pool_size': 10,
+        'max_overflow': 20,
+        'pool_recycle': 120,
         'pool_pre_ping': True,
-        'pool_timeout': 10,
+        'pool_timeout': 30,
     }
     
     # CORS

@@ -414,4 +414,8 @@ def create_app(config_class=Config):
     # Flask-CORS automatically adds headers, so we don't need to add them manually
     # This prevents duplicate CORS headers which cause browser errors
     
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        db.session.remove()
+
     return app
