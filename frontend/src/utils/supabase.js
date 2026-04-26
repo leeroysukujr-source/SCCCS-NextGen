@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Supabase Configuration - Senior Cloud Architect Architecture
-// Note: Project ID derived from backend S3 endpoint pdlnxbacrcqgghqfhnxy
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://YOUR_PROJECT_ID.supabase.co'
+// Supabase Configuration - Senior Cloud Architect Architecture
+// Note: Project ID updated to pfyyxvtuqiphktwslllw
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://pfyyxvtuqiphktwslllw.supabase.co'
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
 // Validation Check
