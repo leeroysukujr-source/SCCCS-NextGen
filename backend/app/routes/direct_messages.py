@@ -190,18 +190,18 @@ def get_conversation(other_user_id):
                 continue
         
         # Mark messages as read (only mark messages sent to current user)
-        if not (current_user and current_user.role == 'admin'):
-            unread_messages = DirectMessage.query.filter(
-                DirectMessage.sender_id == other_user_id,
-                DirectMessage.recipient_id == current_user_id,
-                DirectMessage.is_read == False
-            ).all()
-            
-            if unread_messages:
-                for msg in unread_messages:
-                    msg.is_read = True
-                    msg.read_at = datetime.utcnow()
-                db.session.commit()
+        # Any user (even admin) should mark their own received messages as read
+        unread_messages = DirectMessage.query.filter(
+            DirectMessage.sender_id == other_user_id,
+            DirectMessage.recipient_id == current_user_id,
+            DirectMessage.is_read == False
+        ).all()
+        
+        if unread_messages:
+            for msg in unread_messages:
+                msg.is_read = True
+                msg.read_at = datetime.utcnow()
+            db.session.commit()
         
         # Return messages
         return jsonify(messages_dict), 200
@@ -220,104 +220,58 @@ def get_conversations():
         if not current_user:
             return jsonify({'error': 'User not found'}), 404
         
-        # Admins can see ALL conversations in the system
-        if current_user.role == 'admin':
-            # Get all unique conversations (all pairs of users who have messaged)
-            all_conversations = {}
-            all_messages = DirectMessage.query.order_by(DirectMessage.created_at.desc()).all()
+        # Regular users AND Admins now only see their own personal conversations by default
+        # to match expected "WhatsApp/Messenger" behavior and avoid duplicate/empty threads.
+        # Audit mode can be added separately if needed.
+        
+        # Regular users only see their own conversations
+        # Use model query directly - more reliable
+        try:
+            # Query messages where the current user is either sender or recipient
+            all_user_messages = DirectMessage.query.filter(
+                (DirectMessage.sender_id == current_user_id) | 
+                (DirectMessage.recipient_id == current_user_id)
+            ).order_by(DirectMessage.created_at.desc()).all()
             
-            # Process all messages for admin
-            
-            for msg in all_messages:
-                # Create consistent pair key (lower_id, higher_id)
-                pair_key = tuple(sorted([msg.sender_id, msg.recipient_id]))
+            # Group by conversation partner and get last message for each
+            conversation_last_msg = {}
+            for msg in all_user_messages:
+                # Determine the other user in this conversation
+                other_user_id = msg.recipient_id if msg.sender_id == current_user_id else msg.sender_id
                 
-                if pair_key not in all_conversations:
-                    all_conversations[pair_key] = msg
-                elif msg.created_at and all_conversations[pair_key].created_at:
-                    if msg.created_at > all_conversations[pair_key].created_at:
-                        all_conversations[pair_key] = msg
+                # Store the most recent message for this conversation
+                if other_user_id not in conversation_last_msg:
+                    conversation_last_msg[other_user_id] = msg
+                elif msg.created_at and conversation_last_msg[other_user_id].created_at:
+                    if msg.created_at > conversation_last_msg[other_user_id].created_at:
+                        conversation_last_msg[other_user_id] = msg
             
-            # Convert to list for processing - decrypt content for preview
+            # Convert to list format - decrypt content for preview
             last_messages = []
-            for pair_key, msg in all_conversations.items():
+            for other_user_id, msg in conversation_last_msg.items():
                 try:
-                    # Decrypt content for preview - try all methods (try old format first for backward compatibility)
                     preview_content = msg.content
                     if msg.content and msg.content != '[File]':
                         if msg.is_encrypted:
                             encryption_key, _ = get_e2e_key(msg.sender_id, msg.recipient_id)
-                            # Safe decryption with enhanced utility
                             preview_content = decrypt_message(msg.content, encryption_key)
-                            # Format for preview
                             preview_content = format_message_preview(str(preview_content))
                 
                     last_messages.append((
                         msg.id,
                         msg.sender_id,
                         msg.recipient_id,
-                        preview_content,  # Use decrypted content
+                        preview_content,
                         msg.created_at,
                         getattr(msg, 'is_read', False)
                     ))
                 except Exception as e:
-                    print(f"Error processing admin conversation message: {e}")
+                    print(f"Error processing conversation message: {e}")
                     continue
-        else:
-            # Regular users only see their own conversations
-            # Use model query directly - more reliable
-            try:
-                all_user_messages = DirectMessage.query.filter(
-                    (DirectMessage.sender_id == current_user_id) | 
-                    (DirectMessage.recipient_id == current_user_id)
-                ).order_by(DirectMessage.created_at.desc()).all()
-                
-                # Process messages for regular user
-                
-                # Group by conversation partner and get last message for each
-                conversation_last_msg = {}
-                for msg in all_user_messages:
-                    # Determine the other user in this conversation
-                    other_user_id = msg.recipient_id if msg.sender_id == current_user_id else msg.sender_id
-                    
-                    # Store the most recent message for this conversation
-                    if other_user_id not in conversation_last_msg:
-                        conversation_last_msg[other_user_id] = msg
-                    elif msg.created_at and conversation_last_msg[other_user_id].created_at:
-                        if msg.created_at > conversation_last_msg[other_user_id].created_at:
-                            conversation_last_msg[other_user_id] = msg
-                
-                # Convert to tuple format for consistency - decrypt content for preview
-                last_messages = []
-                for other_user_id, msg in conversation_last_msg.items():
-                    try:
-                        # Decrypt content for preview - try all methods (try old format first for backward compatibility)
-                        preview_content = msg.content
-                        if msg.content and msg.content != '[File]':
-                            if msg.is_encrypted:
-                                encryption_key, _ = get_e2e_key(msg.sender_id, msg.recipient_id)
-                                # Safe decryption with enhanced utility
-                                preview_content = decrypt_message(msg.content, encryption_key)
-                                # Format for preview
-                                preview_content = format_message_preview(str(preview_content))
-                    
-                        last_messages.append((
-                            msg.id,
-                            msg.sender_id,
-                            msg.recipient_id,
-                            preview_content,  # Use decrypted content
-                            msg.created_at,
-                            getattr(msg, 'is_read', False)
-                        ))
-                    except Exception as e:
-                        print(f"Error processing user conversation message: {e}")
-                    continue
-                
-                # Conversations processed
-                
-            except Exception:
-                # Error querying - return empty list
-                last_messages = []
+            
+        except Exception as e:
+            print(f"Error querying user messages: {e}")
+            last_messages = []
         
         # Group by conversation partner
         conversations = {}
@@ -326,31 +280,20 @@ def get_conversations():
             return jsonify([]), 200
         
         for msg_id, sender_id, recipient_id, content, created_at, is_read in last_messages:
-            # For admins viewing all conversations, show both users in the pair
-            # For regular users, show the other user
-            if current_user and current_user.role == 'admin':
-                # For admins, show the other user (not the admin themselves if admin is in the conversation)
-                if sender_id == current_user_id:
-                    other_user_id = recipient_id
-                elif recipient_id == current_user_id:
-                    other_user_id = sender_id
-                else:
-                    # Admin is viewing conversation between two other users - show recipient as "other"
-                    other_user_id = recipient_id
-            else:
-                other_user_id = recipient_id if sender_id == current_user_id else sender_id
+            # Determine the other user in this conversation
+            other_user_id = recipient_id if sender_id == current_user_id else sender_id
             
-            # Create unique key for conversation (use pair for admins to avoid duplicates)
-            conv_key = other_user_id if not (current_user and current_user.role == 'admin') else f"{min(sender_id, recipient_id)}_{max(sender_id, recipient_id)}"
+            # Create unique key for conversation
+            conv_key = other_user_id
             
             if conv_key not in conversations:
                 conversations[conv_key] = {
-                    'user_id': other_user_id,  # Show the other user's ID
+                    'user_id': other_user_id,
                     'sender_id': sender_id,
                     'recipient_id': recipient_id,
                     'last_message': {
                         'id': msg_id,
-                        'content': content,  # Content is already decrypted and formatted in preview_content
+                        'content': content,
                         'created_at': created_at.isoformat() if created_at else None,
                         'is_read': bool(is_read) if recipient_id == current_user_id else True,
                         'is_sent': sender_id == current_user_id
@@ -360,58 +303,23 @@ def get_conversations():
         
         # Count unread messages for each conversation
         for conv_key, conv_data in conversations.items():
-            if current_user and current_user.role == 'admin':
-                # For admins, count unread messages in this conversation pair
-                sender_id = conv_data['sender_id']
-                recipient_id = conv_data['recipient_id']
-                unread_count = DirectMessage.query.filter(
-                    ((DirectMessage.sender_id == sender_id) & (DirectMessage.recipient_id == recipient_id)) |
-                    ((DirectMessage.sender_id == recipient_id) & (DirectMessage.recipient_id == sender_id)),
-                    DirectMessage.is_read == False
-                ).count()
-            else:
-                user_id = conv_data['user_id']
-                unread_count = DirectMessage.query.filter(
-                    DirectMessage.sender_id == user_id,
-                    DirectMessage.recipient_id == current_user_id,
-                    DirectMessage.is_read == False
-                ).count()
+            user_id = conv_data['user_id']
+            unread_count = DirectMessage.query.filter(
+                DirectMessage.sender_id == user_id,
+                DirectMessage.recipient_id == current_user_id,
+                DirectMessage.is_read == False
+            ).count()
             conversations[conv_key]['unread_count'] = unread_count
         
         # Get user details for each conversation
         conversation_list = []
-        seen_users = set()
         for conv_key, conv_data in conversations.items():
-            # For admins viewing all conversations, show both users
-            if current_user and current_user.role == 'admin':
-                # Get both users in the conversation
-                sender = User.query.get(conv_data['sender_id'])
-                recipient = User.query.get(conv_data['recipient_id'])
-                
-                # Show the conversation with both users' info
-                if sender and recipient:
-                    # Don't show duplicate conversations
-                    pair_key = tuple(sorted([conv_data['sender_id'], conv_data['recipient_id']]))
-                    if pair_key not in seen_users:
-                        seen_users.add(pair_key)
-                        conversation_list.append({
-                            'user_id': conv_data['user_id'],
-                            'sender_id': conv_data['sender_id'],
-                            'recipient_id': conv_data['recipient_id'],
-                            'sender': sender.to_dict(),
-                            'recipient': recipient.to_dict(),
-                            'user': recipient.to_dict() if recipient.id != current_user_id else sender.to_dict(),
-                            'last_message': conv_data['last_message'],
-                            'unread_count': conv_data['unread_count']
-                        })
-            else:
-                # Regular users see the other user
-                user = User.query.get(conv_data['user_id'])
-                if user:
-                    conversation_list.append({
-                        **conv_data,
-                        'user': user.to_dict()
-                    })
+            user = User.query.get(conv_data['user_id'])
+            if user:
+                conversation_list.append({
+                    **conv_data,
+                    'user': user.to_dict()
+                })
         
         # Sort by last message time
         conversation_list.sort(
