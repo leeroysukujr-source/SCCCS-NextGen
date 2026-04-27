@@ -20,6 +20,9 @@ def update_system_logo_url():
         from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
         verify_jwt_in_request()
         uid = get_jwt_identity()
+    except Exception as e:
+        return jsonify({'error': 'Authentication failed', 'details': str(e)}), 401
+        
     if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
         
