@@ -64,11 +64,8 @@ class CORSMiddleware(object):
             custom_start_response('500 Internal Server Error', [('Content-Type', 'text/plain')])
             return [f"Internal Server Error: {str(e)}".encode('utf-8')]
 
-# 1. Create the base Socket.IO WSGI app
-socketio_app = socketio.WSGIApp(socketio, flask_app)
-
-# 2. Wrap it in our Master CORS Shield
-app = CORSMiddleware(socketio_app)
+# 1. Wrap the Flask app (which already contains Socket.IO) in our Master CORS Shield
+app = CORSMiddleware(flask_app)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
