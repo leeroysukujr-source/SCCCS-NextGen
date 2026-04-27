@@ -17,6 +17,7 @@ import { useSettingsStore } from '../store/settingsStore'
 import { useFeatureStore } from '../store/featureStore'
 import { useBranding } from '../contexts/BrandingContext'
 import { useChatStore } from '../store/chatStore'
+import MeetingMiniPlayer from './chat/MeetingMiniPlayer'
 
 export default function Layout() {
   const { user, logout, refreshUser } = useAuthStore()
@@ -292,6 +293,7 @@ export default function Layout() {
       <main className="main-content">
         <NotificationCenter />
         <PresenceManager />
+        <MeetingMiniPlayer />
         <div className="content-container">
           <Suspense fallback={<div className="loading-spinner-container"><div className="spinner"></div></div>}>
             <Outlet />

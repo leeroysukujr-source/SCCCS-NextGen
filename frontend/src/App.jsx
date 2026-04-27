@@ -69,6 +69,7 @@ import SocketProvider from './contexts/SocketProvider'
 import ErrorBoundary from './components/ErrorBoundary'
 import SystemSettingsBootstrapper from './components/SystemSettingsBootstrapper'
 import { BrandingProvider } from './contexts/BrandingContext'
+import { MeetingProvider } from './contexts/MeetingContext'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -138,8 +139,9 @@ function App() {
     <ErrorBoundary>
       <SystemSettingsBootstrapper />
       <BrandingProvider>
-        <QueryClientProvider client={queryClient}>
-        <Router
+        <MeetingProvider>
+          <QueryClientProvider client={queryClient}>
+          <Router
           future={{
             v7_startTransition: true,
             v7_relativeSplatPath: true,
@@ -488,6 +490,7 @@ function App() {
           </Routes>
         </Router>
       </QueryClientProvider>
+      </MeetingProvider>
     </BrandingProvider>
   </ErrorBoundary>
   )

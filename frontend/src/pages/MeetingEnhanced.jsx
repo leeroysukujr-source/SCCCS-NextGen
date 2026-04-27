@@ -35,9 +35,11 @@ import LiveCaptions from '../components/LiveCaptions';
 import Whiteboard from './video-buddy/Whiteboard';
 import apiClient from '../api/client';
 import { roomsAPI } from '../api/rooms';
+import { useMeeting } from '../contexts/MeetingContext';
 import BreakoutRoomManager from './video-buddy/BreakoutRoomManager';
 
 export default function MeetingEnhanced({ roomId: propRoomId, onReady }) {
+    const { activeMeeting, joinMeeting, leaveMeeting, setMinimized } = useMeeting();
   const { roomId: paramRoomId } = useParams();
   const roomId = propRoomId || paramRoomId;
   const navigate = useNavigate();
@@ -51,6 +53,12 @@ export default function MeetingEnhanced({ roomId: propRoomId, onReady }) {
   const [preJoinChoices, setPreJoinChoices] = useState({ videoEnabled: true, audioEnabled: true });
   const [roomInfo, setRoomInfo] = useState(null);
   const [mainRoomId, setMainRoomId] = useState(null);
+
+  useEffect(() => {
+    if (roomId && !activeMeeting) {
+      joinMeeting(roomId);
+    }
+  }, [roomId, activeMeeting, joinMeeting]);
 
   useEffect(() => {
     if (shouldJoin && onReady) {
@@ -248,9 +256,10 @@ export default function MeetingEnhanced({ roomId: propRoomId, onReady }) {
             <PremiumRoomInner 
               roomId={roomId} 
               roomInfo={roomInfo} 
-              onLeave={() => navigate('/dashboard')} 
+              onLeave={() => { leaveMeeting(); navigate('/dashboard'); }} 
               preJoinChoices={preJoinChoices}
               onSwitchRoom={handleSwitchRoom}
+              onMinimize={() => { setMinimized(true); navigate('/dashboard'); }}
             />
           </LayoutContextProvider>
         </LiveKitRoom>
@@ -261,7 +270,8 @@ export default function MeetingEnhanced({ roomId: propRoomId, onReady }) {
 }
 
 // ============= PREMIUM ROOM INNER =============
-function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchRoom }) {
+function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchRoom, onMinimize }) {
+  const { setMinimized } = useMeeting();
   const [sidebarView, setSidebarView] = useState(null);
   const [recordingActive, setRecordingActive] = useState(false);
   const [layoutMode, setLayoutMode] = useState('grid');
@@ -481,22 +491,14 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
   }, [selectedCamera, selectedAudio]);
 
 
-  const getGridLayout = () => {
-    const count = tracks.length;
-    if (count === 0) return { mode: 'grid', gridSize: 'grid-cols-1' };
-    const screenShareTrack = tracks.find(t => t.source === Track.Source.ScreenShare);
-    let focusId = speakingParticipant;
-    if (screenShareTrack) {
-        return { mode: 'presenter', focusIdentity: screenShareTrack.participant.identity, isScreenShare: true, gridCols: count - 1 <= 1 ? 'grid-cols-1' : count - 1 <= 4 ? 'grid-cols-2' : 'grid-cols-3' };
-    }
-    if (focusId && count > 1) {
-        return { mode: 'presenter', focusIdentity: focusId, isScreenShare: false, gridCols: count - 1 <= 1 ? 'grid-cols-1' : count - 1 <= 4 ? 'grid-cols-2' : 'grid-cols-3' };
-    }
-    const cols = count === 1 ? 'grid-cols-1' : count <= 2 ? 'grid-cols-1 sm:grid-cols-2' : count <= 4 ? 'grid-cols-2' : 'grid-cols-3';
-    return { mode: 'grid', gridSize: cols };
+  const getGridClasses = (count) => {
+    if (count <= 1) return 'grid-cols-1 h-full';
+    if (count <= 2) return 'grid-cols-1 sm:grid-cols-2 h-full';
+    if (count <= 4) return 'grid-cols-2 h-full';
+    if (count <= 6) return 'grid-cols-2 lg:grid-cols-3 h-full';
+    if (count <= 9) return 'grid-cols-3 h-full';
+    return 'grid-cols-3 lg:grid-cols-4 h-full';
   };
-
-  const layout = getGridLayout();
 
   return (
     <div className={`flex flex-col h-full overflow-hidden transition-all duration-700 ${isCinematic ? 'scale-[0.98] rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.8)]' : ''}`} style={{ background: 'var(--vb-bg-root)', color: 'var(--vb-text-primary)' }}>
@@ -528,32 +530,50 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
                  <Whiteboard roomId={roomId} onExit={() => setShowWhiteboard(false)} />
                </div>
              ) : (
-                  <div className="w-full h-full min-h-[50vh] animate-fadeIn flex-1">
-                   <VideoConference 
-                     className="premium-lk-grid h-full w-full"
-                    participantRenderer={(p) => (
-                      <div className={`w-full h-full p-2 relative group overflow-hidden rounded-[2.5rem] transition-all duration-500 ${p.isSpeaking ? 'speaking-active-bloom' : ''}`}>
-                        <ParticipantTile participant={p} className="lk-tile-custom" />
-                        
-                        {/* Hand raised indicator overlay */}
-                        {raisedHands[p.identity] && (
-                          <div className="absolute top-6 right-6 z-40 animate-modalPop">
-                            <div className="w-12 h-12 rounded-[1.25rem] bg-amber-500 shadow-[0_10px_30px_rgba(245,158,11,0.5)] flex items-center justify-center border border-white/30 backdrop-blur-xl">
-                              <FaHandPaper className="text-white text-xl animate-pulse" />
+                  <div className="w-full h-full animate-fadeIn flex-1 overflow-y-auto">
+                    <div className={`grid ${getGridClasses(tracks.length)} gap-4 p-4`}>
+                      {tracks.map((track) => (
+                        <div 
+                          key={`${track.participant.identity}-${track.source}`}
+                          className={`relative aspect-video rounded-[2.5rem] overflow-hidden bg-slate-900 border-2 transition-all duration-500 ${
+                            track.participant.isSpeaking ? 'border-indigo-500 shadow-[0_0_30px_rgba(79,70,229,0.4)] scale-[1.02]' : 'border-white/5'
+                          }`}
+                        >
+                          <ParticipantTile participant={track.participant} />
+                          
+                          {/* Hand raised indicator - Professional Overlay */}
+                          {raisedHands[track.participant.identity] && (
+                            <div className="absolute inset-0 z-40 bg-amber-500/10 backdrop-blur-[2px] flex items-center justify-center pointer-events-none animate-fadeIn">
+                              <div className="flex flex-col items-center gap-4 animate-bounce">
+                                <div className="w-20 h-20 rounded-[2.5rem] bg-amber-500 shadow-[0_20px_50px_rgba(245,158,11,0.6)] flex items-center justify-center border-4 border-white/40">
+                                  <FaHandPaper className="text-white text-4xl" />
+                                </div>
+                                <span className="bg-amber-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-xl">Hand Raised</span>
+                              </div>
                             </div>
+                          )}
+
+                          {/* Info Overlay */}
+                          <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between pointer-events-none z-20">
+                             <div className="bg-black/60 backdrop-blur-xl px-4 py-2 rounded-2xl border border-white/10 flex items-center gap-3">
+                                <span className="text-[10px] font-black uppercase text-white/90">{track.participant.name || track.participant.identity}</span>
+                                {track.participant.isSpeaking && (
+                                  <div className="flex gap-0.5">
+                                    {[1, 2, 3].map(i => <div key={i} className="w-1 h-3 bg-indigo-500 rounded-full animate-pulse" style={{ animationDelay: `${i * 0.1}s` }}></div>)}
+                                  </div>
+                                )}
+                             </div>
+                             <div className="flex gap-2">
+                                {!track.participant.isMicrophoneEnabled && (
+                                  <div className="w-8 h-8 rounded-xl bg-red-500/80 flex items-center justify-center backdrop-blur-md">
+                                    <FaMicrophoneSlash size={12} className="text-white" />
+                                  </div>
+                                )}
+                             </div>
                           </div>
-                        )}
-                        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between pointer-events-none z-20">
-                           <div className="bg-black/60 backdrop-blur-xl px-4 py-2 rounded-2xl border border-white/10 flex items-center gap-3">
-                              <span className="text-[10px] font-black uppercase text-white/90">{p.name || p.identity}</span>
-                           </div>
-                           <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                              {!p.isMicrophoneEnabled && <div className="w-8 h-8 rounded-xl bg-red-500/80 flex items-center justify-center"><FaMicrophoneSlash size={10} /></div>}
-                           </div>
                         </div>
-                      </div>
-                    )}
-                  />
+                      ))}
+                    </div>
                 </div>
              )}
           </div>
@@ -588,9 +608,10 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
               layoutMode={layoutMode}
               onLayoutChange={(l) => setLayoutMode(l)}
               onMuteAll={handleMuteAll}
-              onEndMeeting={handleEndMeeting}
+              onEndMeeting={onEndMeeting}
               onStatsToggle={() => setShowConnectionPanel(!showConnectionPanel)}
               onShareToggle={() => setShowShareModal(true)}
+              onMinimize={onMinimize}
             />
 
         </div>
@@ -1435,7 +1456,8 @@ function AdvancedControlBar({
   onMuteAll,
   onEndMeeting,
   onStatsToggle,
-  onShareToggle
+  onShareToggle,
+  onMinimize
 }) {
 
   const menuRef = useRef(null);
@@ -1464,21 +1486,8 @@ function AdvancedControlBar({
     }
   };
 
-  const handlePiP = async () => {
-    try {
-      const videoElement = document.querySelector('.lk-tile-custom video');
-      if (videoElement && document.pictureInPictureEnabled) {
-          if (document.pictureInPictureElement) {
-              await document.exitPictureInPicture();
-          } else {
-              await videoElement.requestPictureInPicture();
-          }
-      } else {
-          notify('info', 'Floating window (PiP) is not supported or no video found');
-      }
-    } catch (e) {
-      console.error("PiP error", e);
-    }
+  const handlePiP = () => {
+    if (onMinimize) onMinimize();
   };
 
   return (
