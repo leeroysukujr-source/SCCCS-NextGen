@@ -162,16 +162,28 @@ def collab_ws_handler(ws):
 flask_app = create_app(Config)
 
 # Unified Real-Time Wrapper (Senior DevOps Hardening)
-# We export the full WSGI stack as 'app' so that Gunicorn (Render) automatically
-# finds the complete system including Socket.IO and WebSockets.
 socketio_app = s_io.WSGIApp(socketio, flask_app)
 
 def application(environ, start_response):
     """Entry point for Gunicorn (Render) and local execution."""
     path = environ.get('PATH_INFO', '')
+    
+    # 1. Handle Collab (Raw WebSockets)
     if path.startswith('/collab'):
         return collab_ws_handler(environ, start_response)
-    return socketio_app(environ, start_response)
+    
+    # 2. Handle Socket.IO & API with Manual CORS Injection (Senior DevOps Requirement)
+    def cors_start_response(status, headers, exc_info=None):
+        origin = environ.get('HTTP_ORIGIN')
+        if origin:
+            # Force CORS headers even if Socket.IO engine misses them
+            headers.append(('Access-Control-Allow-Origin', origin))
+            headers.append(('Access-Control-Allow-Credentials', 'true'))
+            headers.append(('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE'))
+            headers.append(('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Workspace-ID'))
+        return start_response(status, headers, exc_info)
+
+    return socketio_app(environ, cors_start_response)
 
 # The MAGIC export for Render (run:app)
 app = application
