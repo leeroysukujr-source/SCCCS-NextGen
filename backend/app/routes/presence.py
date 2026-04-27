@@ -13,7 +13,7 @@ presence_bp = Blueprint('presence', __name__)
 from flask_cors import cross_origin
 from app.utils.logger import log_error
 
-from app import socketio
+
 
 import threading
 from flask import current_app
