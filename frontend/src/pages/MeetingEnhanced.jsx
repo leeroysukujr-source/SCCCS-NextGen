@@ -54,11 +54,8 @@ export default function MeetingEnhanced({ roomId: propRoomId, onReady }) {
   const [roomInfo, setRoomInfo] = useState(null);
   const [mainRoomId, setMainRoomId] = useState(null);
 
-  useEffect(() => {
-    if (roomId && !activeMeeting) {
-      joinMeeting(roomId);
-    }
-  }, [roomId, activeMeeting, joinMeeting]);
+  // Remove the automatic join loop that was causing server timeouts.
+  // Joining is now handled manually via handleJoinMeeting or auto-switch logic.
 
   useEffect(() => {
     if (shouldJoin && onReady) {
@@ -127,6 +124,19 @@ export default function MeetingEnhanced({ roomId: propRoomId, onReady }) {
       
       console.log(`[Meeting] 🚀 Joining with URL: ${serverUrl}`);
       setLivekitUrl(serverUrl);
+      
+      // Update global context so MiniPlayer and other components know we are in a meeting
+      if (typeof updateMeetingInfo === 'function') {
+          updateMeetingInfo({
+              roomId,
+              token: data.token,
+              url: serverUrl,
+              name: roomInfo?.name || `Meeting ${roomId}`,
+              roomInfo: roomInfo,
+              isMinimized: false
+          });
+      }
+
       setShouldJoin(true);
     } catch (err) {
       console.error(err);

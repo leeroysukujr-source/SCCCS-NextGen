@@ -43,7 +43,7 @@ export const MeetingProvider = ({ children }) => {
     }, []);
 
     const updateMeetingInfo = useCallback((updates) => {
-        setActiveMeeting(prev => prev ? { ...prev, ...updates } : null);
+        setActiveMeeting(prev => prev ? { ...prev, ...updates } : updates);
     }, []);
 
     return (
