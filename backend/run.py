@@ -191,9 +191,6 @@ def _run_background_tasks():
 # Spawn the maintenance tasks in a background greenlet (non-blocking)
 eventlet.spawn(_run_background_tasks)
 
-# Spawn the maintenance tasks in a background greenlet (non-blocking)
-eventlet.spawn(_run_background_tasks)
-
 if __name__ == '__main__':
     print(f"[run.py] Starting Unified Real-Time Server on {Config.SERVER_HOST}:{Config.SERVER_PORT}")
     eventlet.wsgi.server(eventlet.listen((Config.SERVER_HOST, Config.SERVER_PORT)), application)
