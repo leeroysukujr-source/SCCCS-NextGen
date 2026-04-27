@@ -2,7 +2,7 @@
 Notification Utilities
 """
 from datetime import datetime
-from app import db
+from app.extensions import db
 from app.models.notifications import Notification, NotificationPreference
 from app.models import User
 import json
@@ -34,7 +34,7 @@ def create_notification(user_id, notification_type, title, message,
         
         # Emit real-time notification via Socket.IO
         try:
-            from app import socketio
+            from app.extensions import socketio
             socketio.emit('new_notification', notification.to_dict(), room=f'user_{user_id}')
         except Exception as e:
             print(f"Error emitting notification: {e}")

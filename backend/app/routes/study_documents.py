@@ -1,7 +1,7 @@
 
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db
+from app.extensions import db
 from app.models.study_documents import StudyRoomDocument, StudyRoomDocumentCollaborator, StudyRoomDocumentVersion
 from app.models import User
 from datetime import datetime

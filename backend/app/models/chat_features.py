@@ -2,7 +2,7 @@
 Advanced chat features models
 """
 from datetime import datetime
-from app import db
+from app.extensions import db
 import json
 
 class MessageReaction(db.Model):

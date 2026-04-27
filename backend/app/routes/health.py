@@ -2,7 +2,7 @@
 Health check and system status endpoints
 """
 from flask import Blueprint, jsonify, current_app
-from app import db
+from app.extensions import db
 from app.models import User, Channel, Class, Room, Message
 from datetime import datetime
 import sys
@@ -115,7 +115,7 @@ def socket_health():
     includes a best-effort connected clients count when possible.
     """
     try:
-        from app import socketio
+        from app.extensions import socketio
         server = getattr(socketio, 'server', None)
         clients = None
         if server is not None:

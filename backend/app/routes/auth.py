@@ -6,7 +6,7 @@ import base64
 import io
 from app.models import DeviceSession
 from app.utils.crypto import encrypt_secret, decrypt_secret
-from app import limiter
+from app.extensions import limiter
 from app.models import TwoFactorAudit
 from sqlalchemy import func
 from datetime import datetime, timedelta
@@ -15,7 +15,7 @@ import string
 import requests
 import urllib.parse
 
-from app import db
+from app.extensions import db
 from app.models import User, PasswordResetToken, WorkspaceDomain, Invite, Workspace, StudentProfile, WorkspaceIdentityPolicy
 from config import Config
 from app.utils.logger import log_info, log_warning, log_error, log_debug

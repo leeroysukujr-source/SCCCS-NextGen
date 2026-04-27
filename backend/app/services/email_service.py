@@ -2,7 +2,7 @@ import os
 from threading import Thread
 from flask import current_app, render_template
 from flask_mail import Message
-from app import mail
+from app.extensions import mail
 from datetime import datetime
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail as SGMail

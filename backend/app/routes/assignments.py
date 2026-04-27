@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from app.utils.decorators import audit_logger
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db
+from app.extensions import db
 from app.models import User, Assignment, AssignmentGroup, AssignmentGroupMember, Workspace, Group, GroupMember, File, AssignmentSubmission, AssignmentGrade, Channel
 from datetime import datetime
 import json
@@ -103,7 +103,7 @@ def create_assignment():
     db.session.commit()
     
     # Secure Collaboration: Notify course/channel room via Socket.IO
-    from app import socketio
+    from app.extensions import socketio
     room_id = f"channel_{new_assignment.channel_id}" if new_assignment.channel_id else f"ws_{user.workspace_id}"
     socketio.emit('new_assignment', new_assignment.to_dict(), room=room_id)
     
@@ -1037,7 +1037,7 @@ def grade_submission(submission_id):
     db.session.commit()
     
     # Notifications & Distribution
-    from app import socketio
+    from app.extensions import socketio
     
     # 1. Notify individual/group
     msg_content = f"### Grade Published: {submission.assignment.title}\nScore: **{score}%**\nFeedback: {feedback}"

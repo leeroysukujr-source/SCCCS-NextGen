@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import request, jsonify, abort
 from flask_jwt_extended import get_jwt_identity
-from app import db
+from app.extensions import db
 from app.models.security import AuditLog
 from app.models import User
 import json

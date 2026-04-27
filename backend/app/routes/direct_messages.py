@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db
+from app.extensions import db
 from app.models import DirectMessage, DirectMessageFile, User, File
 from app.models.notifications import Notification
 from app.utils.encryption import encrypt_message, decrypt_message, derive_key_from_password
@@ -146,7 +146,7 @@ def send_direct_message(other_user_id):
     
     # Emit real-time message via Socket.IO
     try:
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('direct_message_received', message_dict, room=f'user_{other_user_id}')
         socketio.emit('direct_message_received', message_dict, room=f'user_{current_user_id}')
     except Exception:
@@ -401,7 +401,7 @@ def update_direct_message(message_id):
     
     # Emit update via Socket.IO
     try:
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('direct_message_updated', message_dict, room=f'user_{message.recipient_id}')
         socketio.emit('direct_message_updated', message_dict, room=f'user_{current_user_id}')
     except Exception:
@@ -429,7 +429,7 @@ def delete_direct_message(message_id):
     
     # Emit deletion via Socket.IO
     try:
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('direct_message_deleted', {
             'message_id': message_id,
             'recipient_id': message.recipient_id,
@@ -522,7 +522,7 @@ def initiate_call():
     
     # Emit call notification via socket (in addition to API response)
     try:
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('incoming_call', {
             'caller_id': current_user_id,
             'room_id': room.id,

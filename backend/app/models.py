@@ -1,6 +1,6 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db
+from app.extensions import db
 from sqlalchemy import event
 import json
 
@@ -1613,7 +1613,7 @@ def register_live_sync_listeners():
     
     def on_change(mapper, connection, target):
         try:
-            from app import socketio
+            from app.extensions import socketio
             from app.utils.socket_helpers import emit_system_update
             
             # Mapping tablenames to query keys used in frontend React Query

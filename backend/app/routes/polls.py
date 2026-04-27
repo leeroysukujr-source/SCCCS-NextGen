@@ -3,7 +3,7 @@ Polls routes for channels
 """
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db
+from app.extensions import db
 from app.models import Channel, ChannelMember, Message, User
 from app.models.chat_features import ChannelPoll, PollVote
 from app.utils.logger import log_info, log_error
@@ -82,7 +82,7 @@ def create_poll(channel_id):
     
     # Emit via Socket.IO
     try:
-        from app import socketio
+        from app.extensions import socketio
         message_dict = poll_message.to_dict()
         message_dict['poll'] = poll.to_dict()
         socketio.emit('message_received', message_dict, room=f'channel_{channel_id}')
@@ -172,7 +172,7 @@ def vote_on_poll(poll_id):
     
     # Emit via Socket.IO
     try:
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('poll_vote_updated', {
             'poll_id': poll_id,
             'message_id': poll.message_id,
@@ -277,7 +277,7 @@ def close_poll(poll_id):
     
     # Emit via Socket.IO
     try:
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('poll_closed', {
             'poll_id': poll_id,
             'message_id': poll.message_id

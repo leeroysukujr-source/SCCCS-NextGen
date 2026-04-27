@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import Role, Permission, User, Workspace, role_permissions
-from app import db
+from app.extensions import db
 from app.utils.scoping import scope_query, get_current_workspace_id
 from app.utils.decorators import permission_required
 from app.utils.logger import log_info, log_error

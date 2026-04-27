@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, url_for, send_file, make_response
 from app.utils.decorators import audit_logger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_cors import cross_origin
-from app import db
+from app.extensions import db
 from app.models import User
 from app.utils.scoping import scope_query, get_current_workspace_id
 from werkzeug.utils import secure_filename
@@ -460,7 +460,7 @@ def update_user_role(user_id):
     
     # Emit Socket.IO event to notify the user of role change
     try:
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('user_role_updated', {
             'user_id': user_id,
             'new_role': new_role,
@@ -526,7 +526,7 @@ def update_user_privileges(user_id):
     
     # Emit Socket.IO event to notify the user of privilege change
     try:
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('user_privileges_updated', {
             'user_id': user_id,
             'new_privileges': filtered_privileges,

@@ -1,6 +1,6 @@
 import json
 from flask import g
-from app import db
+from app.extensions import db
 from app.models import WorkspaceSetting, Workspace
 
 class SettingsService:
@@ -54,7 +54,7 @@ class SettingsService:
     def set_setting(self, workspace_id, key, value, user_id=None, is_super_admin=False):
         """Update a setting for a workspace. Enforces overridable schema."""
         from app.models import SystemSetting
-        from app import socketio
+        from app.extensions import socketio
         
         # Check if the setting exists in system and is overridable
         sys_setting = SystemSetting.query.filter_by(key=key).first()
@@ -161,7 +161,7 @@ class SettingsService:
                            description=None, is_public=False, admin_only=True, is_overridable=False):
         """Set or update a system setting"""
         from app.models import SystemSetting
-        from app import socketio
+        from app.extensions import socketio
 
         setting = SystemSetting.query.filter_by(key=key).first()
         

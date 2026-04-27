@@ -2,7 +2,7 @@
 Advanced Security Models
 """
 from datetime import datetime, timedelta
-from app import db
+from app.extensions import db
 import secrets
 import hashlib
 

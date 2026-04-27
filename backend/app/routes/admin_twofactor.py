@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import TwoFactorAudit, User
 from app.utils.roles import is_at_least_admin
-from app import db
+from app.extensions import db
 from functools import wraps
 
 admin_tf_bp = Blueprint('admin_twofactor', __name__)

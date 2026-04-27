@@ -3,7 +3,7 @@ Audit Logging Utilities
 """
 from datetime import datetime
 from flask import request
-from app import db
+from app.extensions import db
 from app.models.security import AuditLog, SecurityEvent
 import json
 

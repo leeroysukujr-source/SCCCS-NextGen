@@ -6,7 +6,7 @@ import hmac
 import hashlib
 import json
 from datetime import datetime
-from app import db
+from app.extensions import db
 from app.models.integrations import Webhook, WebhookDelivery
 
 
@@ -50,7 +50,7 @@ def trigger_webhook(webhook_id, event_type, payload):
         delivery.response_body = response.text[:1000]  # Limit response size
         # Emit real-time notification via Socket.IO
         try:
-            from app import socketio
+            from app.extensions import socketio
             socketio.emit('webhook_delivery', {'id': delivery.id, 'status': delivery.status})
         except Exception:
             pass

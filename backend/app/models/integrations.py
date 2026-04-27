@@ -2,7 +2,7 @@
 Integration and Webhook Models
 """
 from datetime import datetime
-from app import db
+from app.extensions import db
 import secrets
 import json
 

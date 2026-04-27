@@ -3,7 +3,7 @@ User Presence Routes
 """
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db
+from app.extensions import db
 from app.models import User
 from app.models.collaboration import Presence
 from datetime import datetime, timedelta
@@ -37,7 +37,7 @@ def update_presence():
     def async_db_update(app_context, user_id, payload):
         with app_context:
             try:
-                from app import db
+                from app.extensions import db
                 from app.models.collaboration import Presence
                 now = datetime.utcnow()
                 

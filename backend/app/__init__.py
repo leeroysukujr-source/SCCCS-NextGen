@@ -12,17 +12,7 @@ from flask_limiter.util import get_remote_address
 
 from flask_mail import Mail
 
-db = SQLAlchemy()
-jwt = JWTManager()
-# Initialize SocketIO - allow the library to auto-select the best async mode
-# (eventlet/gevent) when available. Forcing 'threading' prevents WebSocket
-# transport and can cause "Invalid frame header" / websocket handshake errors
-# with the JS client. If you prefer a specific async worker, set it via
-# environment or ensure the corresponding package (eventlet/gevent) is installed.
-socketio = SocketIO()
-migrate = Migrate()
-limiter = Limiter(key_func=get_remote_address)
-mail = Mail()
+from app.extensions import db, jwt, socketio, migrate, limiter, mail
 
 def _choose_async_mode(preferred: str | None = None) -> str:
     """Pick the best available async mode. Defaults to eventlet -> gevent -> threading."""
@@ -124,8 +114,25 @@ def create_app(config_class=Config):
 
     @app.after_request
     def after_request(response):
-        # We allow run.py's Master CORS Overrider to handle these headers 
-        # to prevent duplication errors on Render/Vercel.
+        origin = request.headers.get('Origin')
+        # Standardized Allowed Origins (Senior Deployment Cluster)
+        allowed = [
+            "https://scccs-next-gen-nine.vercel.app",
+            "https://scccs-next-gen.vercel.app",
+            "https://scccs-next-gen-git-main-leeroysukujr-6311s-projects.vercel.app",
+            "https://scccs-next-gen-leeroysukujr-source-projects.vercel.app",
+            "https://scccs-nextgen-q2ll.onrender.com",
+            "http://localhost:5173",
+            "http://localhost:3000"
+        ]
+        
+        if origin in allowed:
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Workspace-ID, X-Requested-With'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Max-Age'] = '3600'
+            
         return response
 
     # CORS configuration - Senior Deployment Hardening

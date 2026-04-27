@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db
+from app.extensions import db
 from app.models import User, GlobalFeatureFlag, WorkspaceFeatureOverride
 from app.services.feature_flags import get_effective_feature_config
 from app.utils.middleware import platform_super_admin_required

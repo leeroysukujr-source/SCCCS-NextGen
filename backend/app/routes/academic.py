@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.utils.decorators import audit_logger
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db
+from app.extensions import db
 from app.models import Document, Submission, User
 from datetime import datetime
 import json

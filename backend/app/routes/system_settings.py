@@ -90,7 +90,7 @@ def upload_system_logo():
     from app.utils.uploads import save_logo
     from app.utils.cache import cache_manager
     from app.models import SystemSetting
-    from app import db
+    from app.extensions import db
     
     try:
         # 1. Save file to absolute fixed path: 'static/uploads/system/logo.png'
@@ -137,7 +137,7 @@ def upload_system_logo():
         cache_manager.delete('public_settings')
         
         # 4. Global Real-time Notification
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('system_setting_updated', {
             'key': 'SYSTEM_LOGO_URL',
             'value': versioned_logo_url

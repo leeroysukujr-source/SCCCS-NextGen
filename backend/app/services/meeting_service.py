@@ -1,6 +1,6 @@
 import google.generativeai as genai
 from flask import current_app
-from app import db
+from app.extensions import db
 from app.models import Message, Channel, User
 from config import Config
 import json
@@ -53,7 +53,7 @@ class MeetingAIService:
                 
                 # Emit via Socket.IO
                 try:
-                    from app import socketio
+                    from app.extensions import socketio
                     socketio.emit('message_received', new_msg.to_dict(), room=f'channel_{room.channel_id}')
                 except:
                     pass

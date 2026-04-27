@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from functools import wraps
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db, socketio
+from app.extensions import db, socketio
 from app.models import User, Workspace, WorkspaceMembership, StudentProfile, WorkspaceIdentityPolicy
 from datetime import datetime
 from app.models.security import AuditLog

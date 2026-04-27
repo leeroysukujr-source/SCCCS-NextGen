@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db
+from app.extensions import db
 from app.models import Channel, ChannelMember, User
 from app.utils.encryption import generate_key
 from app.utils.channel_privacy import can_access_channel

@@ -14,7 +14,7 @@ def analytics_overview():
         return jsonify({'error': 'admin required'}), 403
 
     # Placeholder: return basic counts and sample metrics
-    from app import db
+    from app.extensions import db
     from app.models import User as UserModel
     user_count = UserModel.query.count()
     # Other metrics can be added here (messages, active users, storage usage)

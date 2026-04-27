@@ -1,6 +1,6 @@
 from flask_socketio import emit, join_room, leave_room
 from flask_jwt_extended import decode_token
-from app import db
+from app.extensions import db
 from app.models import Room, RoomParticipant, Channel, Message, User
 from app.models.notifications import Notification
 from datetime import datetime
@@ -1065,7 +1065,7 @@ def register_socketio_events(socketio):
     def handle_send_group_message(data):
         try:
             from app.models import GroupMessage, User
-            from app import db
+            from app.extensions import db
             from flask import request
             
             user_id = _get_user_id()

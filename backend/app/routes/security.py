@@ -3,7 +3,7 @@ Advanced Security Routes - 2FA, Sessions, Audit Logs
 """
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db
+from app.extensions import db
 from app.models import User
 from app.models.security import UserSession, TwoFactorAuth, AuditLog, SecurityEvent
 from app.utils.audit import log_audit_event, log_security_event

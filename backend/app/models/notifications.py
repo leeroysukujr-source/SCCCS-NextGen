@@ -2,7 +2,7 @@
 Advanced Notification System
 """
 from datetime import datetime
-from app import db
+from app.extensions import db
 import json
 
 class NotificationPreference(db.Model):

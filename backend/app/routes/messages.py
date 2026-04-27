@@ -3,7 +3,7 @@ import json
 import traceback
 from app.utils.logger import log_error
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db
+from app.extensions import db
 from app.models import Message, Channel, ChannelMember, File, User
 from app.models.notifications import Notification
 from app.utils.encryption import encrypt_message, decrypt_message
@@ -177,7 +177,7 @@ def create_message(channel_id):
 
         # Emit real-time message via Socket.IO
         try:
-            from app import socketio
+            from app.extensions import socketio
             socketio.emit('message_received', message_dict, room=f'channel_{channel_id}')
         except Exception:
             # Socket.IO emit failed - non-critical, continue
@@ -398,7 +398,7 @@ def update_message(message_id):
     
     # Emit message update via Socket.IO
     try:
-        from app import socketio
+        from app.extensions import socketio
         message_dict = message.to_dict()
         socketio.emit('message_updated', message_dict, room=f'channel_{message.channel_id}')
     except Exception:
@@ -430,7 +430,7 @@ def delete_message(message_id):
     
     # Emit message deletion via Socket.IO
     try:
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('message_deleted', {
             'message_id': message_id,
             'channel_id': channel_id

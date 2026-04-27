@@ -3,7 +3,7 @@ Channel administration routes
 """
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db
+from app.extensions import db
 from app.models import Channel, ChannelMember, User
 from app.models.chat_features import ChannelMute, PinnedMessage
 from app.utils.response import success_response, error_response
@@ -55,7 +55,7 @@ def update_member_role(channel_id, user_id):
     
     # Emit via Socket.IO
     try:
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('member_role_updated', {
             'channel_id': channel_id,
             'user_id': user_id,
@@ -99,7 +99,7 @@ def kick_member(channel_id, user_id):
     
     # Emit via Socket.IO
     try:
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('member_kicked', {
             'channel_id': channel_id,
             'user_id': user_id,
@@ -154,7 +154,7 @@ def mute_member(channel_id, user_id):
     
     # Emit via Socket.IO
     try:
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('member_muted', {
             'channel_id': channel_id,
             'user_id': user_id,
@@ -194,7 +194,7 @@ def unmute_member(channel_id, user_id):
     
     # Emit via Socket.IO
     try:
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('member_unmuted', {
             'channel_id': channel_id,
             'user_id': user_id
@@ -263,7 +263,7 @@ def update_channel_settings(channel_id):
     
     # Emit via Socket.IO
     try:
-        from app import socketio
+        from app.extensions import socketio
         socketio.emit('channel_settings_updated', {
             'channel_id': channel_id,
             'settings': channel.to_dict()

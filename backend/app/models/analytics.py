@@ -2,7 +2,7 @@
 Advanced Analytics Models for Enterprise Features
 """
 from datetime import datetime
-from app import db
+from app.extensions import db
 import json
 
 class UserActivity(db.Model):

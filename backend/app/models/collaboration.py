@@ -2,7 +2,7 @@
 Real-time Collaboration Features
 """
 from datetime import datetime
-from app import db
+from app.extensions import db
 import json
 
 class Presence(db.Model):

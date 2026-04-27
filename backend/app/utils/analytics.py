@@ -2,7 +2,7 @@
 Analytics Utilities for Enterprise Features
 """
 from datetime import datetime, timedelta
-from app import db
+from app.extensions import db
 from app.models.analytics import UserActivity, EngagementMetrics, SystemMetrics
 from app.models import User, Channel, Class, Message, File
 from sqlalchemy import func, and_
