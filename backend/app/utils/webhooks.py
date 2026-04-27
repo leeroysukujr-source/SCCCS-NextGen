@@ -8,7 +8,7 @@ import json
 from datetime import datetime
 from app import db
 from app.models.integrations import Webhook, WebhookDelivery
-from app import socketio
+
 
 def trigger_webhook(webhook_id, event_type, payload):
     """Trigger a webhook delivery"""
@@ -48,6 +48,12 @@ def trigger_webhook(webhook_id, event_type, payload):
         delivery.status = 'success' if response.status_code < 400 else 'failed'
         delivery.status_code = response.status_code
         delivery.response_body = response.text[:1000]  # Limit response size
+        # Emit real-time notification via Socket.IO
+        try:
+            from app import socketio
+            socketio.emit('webhook_delivery', {'id': delivery.id, 'status': delivery.status})
+        except Exception:
+            pass
         delivery.delivered_at = datetime.utcnow()
         delivery.attempt_count = 1
         
