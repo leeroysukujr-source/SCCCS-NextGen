@@ -549,7 +549,7 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
                             track.participant.isSpeaking ? 'border-indigo-500 shadow-[0_0_30px_rgba(79,70,229,0.4)] scale-[1.02]' : 'border-white/5'
                           }`}
                         >
-                          <ParticipantTile participant={track.participant} />
+                          <ParticipantTile trackRef={track} />
                           
                           {/* Hand raised indicator - Professional Overlay */}
                           {raisedHands[track.participant.identity] && (

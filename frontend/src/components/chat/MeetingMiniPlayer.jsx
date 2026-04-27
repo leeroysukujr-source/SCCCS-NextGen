@@ -61,7 +61,7 @@ const MiniPlayerContent = ({ onExpand, onClose }) => {
         <div className="mini-player-inner">
             <div className="mini-player-video">
                 {mainTrack && (
-                    <ParticipantTile participant={mainTrack.participant} />
+                    <ParticipantTile trackRef={mainTrack} />
                 )}
                 
                 <div className="mini-player-overlay">
