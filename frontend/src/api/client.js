@@ -79,7 +79,7 @@ if (typeof globalThis.__SCCCS_API_CLIENT__ === 'undefined') {
     headers: {
       'bypass-tunnel-reminder': 'true',
     },
-    timeout: 60000, // Increased to 60s to handle Render cold starts
+    timeout: 300000, // 5 minutes - safe for large uploads and AI processing on Render
   })
 
   // Ensure baseURL is set correctly and attempt to find working backend
