@@ -19,7 +19,7 @@ const StartChatModal = ({ isOpen, onClose, onSelectUser }) => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get(`/users/search?query=${search}`);
+      const response = await apiClient.get(`/users/search?q=${search}`);
       setUsers(response.data);
     } catch (err) {
       console.error('Failed to fetch users', err);
@@ -76,7 +76,9 @@ const StartChatModal = ({ isOpen, onClose, onSelectUser }) => {
                 </div>
                 <div className="text-left flex-1">
                   <p className="font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                    {user.first_name} {user.last_name}
+                    {user.first_name || user.last_name 
+                      ? `${user.first_name || ''} ${user.last_name || ''}`.trim() 
+                      : user.username}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">@{user.username}</p>
                 </div>

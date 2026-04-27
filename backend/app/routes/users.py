@@ -72,7 +72,6 @@ def get_user(user_id):
     return jsonify(user.to_dict()), 200
 
 @users_bp.route('/me', methods=['PUT', 'OPTIONS'])
-@cross_origin()
 @jwt_required()
 def update_current_user():
     current_user_id = get_jwt_identity()
@@ -95,7 +94,6 @@ def update_current_user():
     return jsonify(user.to_dict()), 200
 
 @users_bp.route('/me/avatar', methods=['POST', 'OPTIONS'])
-@cross_origin()
 @jwt_required()
 def update_avatar_url():
     """Update profile picture URL (Transition to Supabase Direct)"""
@@ -132,7 +130,6 @@ def update_avatar_url():
         return jsonify({'error': str(e), 'success': False}), 500
 
 @users_bp.route('/me/avatar/upload', methods=['POST', 'OPTIONS'])
-@cross_origin()
 @jwt_required()
 def upload_avatar_file():
     """Fallback: Handle multipart avatar upload when Supabase fails"""

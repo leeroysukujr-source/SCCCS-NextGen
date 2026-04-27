@@ -9,7 +9,7 @@ import './ChatSidebar.css';
 
 const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
   const { user: currentUser } = useAuthStore();
-  const { socket } = useSocket();
+  const { socket, status } = useSocket();
   const [activeTab, setActiveTab] = useState(window.location.pathname.includes('direct-messages') ? 'dms' : 'channels'); 
   const [channels, setChannels] = useState([]);
   const [dms, setDms] = useState([]);
@@ -163,7 +163,19 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
     <div className="chat-sidebar-container">
       <div className="sidebar-header-main">
         <div className="header-top">
-           <h2>{activeTab === 'channels' ? 'Channels' : 'Messages'}</h2>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+             <h2>{activeTab === 'channels' ? 'Channels' : 'Messages'}</h2>
+             <div 
+               title={`Real-time Status: ${status}`}
+               style={{ 
+                 width: '8px', 
+                 height: '8px', 
+                 borderRadius: '50%', 
+                 backgroundColor: status === 'connected' ? '#10b981' : status === 'connecting' ? '#f59e0b' : '#ef4444',
+                 boxShadow: status === 'connected' ? '0 0 8px #10b981' : 'none'
+               }} 
+             />
+           </div>
            <div className="chat-sidebar-header-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
              {activeTab === 'channels' && currentUser?.role === 'student' && (
                <button 

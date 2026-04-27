@@ -41,10 +41,19 @@ export function getApiBaseUrl() {
     return 'http://localhost:5000'
   }
 
-  // In production, if no VITE_API_URL is set, we assume the backend is on the same host
-  // but WITHOUT port 5000 (usually mapped to 80/443 in cloud environments)
+  // In production, if no VITE_API_URL is set, we use the known SCCCS production backend on Render
+  // as the primary source of truth, or fallback to the current host.
   if (import.meta.env.PROD) {
-    return `${window.location.protocol}//${hostname}`
+    // Priority 1: Known Render Backend (Hardcoded fallback for this specific deployment)
+    const knownBackend = 'https://scccs-nextgen-q2ll.onrender.com';
+    
+    // Only use the current hostname if we're not on Vercel, 
+    // or if the current hostname IS the backend host.
+    if (hostname.includes('vercel.app')) {
+      return knownBackend;
+    }
+    
+    return `${window.location.protocol}//${hostname}`;
   }
 
   return `http://${hostname}:5000`

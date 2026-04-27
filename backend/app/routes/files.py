@@ -37,7 +37,6 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @files_bp.route('/upload', methods=['POST', 'OPTIONS'])
-@cross_origin()
 def upload_file():
     if request.method == 'OPTIONS':
         return jsonify({'status': 'ok'}), 200
@@ -197,7 +196,6 @@ def upload_file():
 from flask_cors import cross_origin
 
 @files_bp.route('/avatar/<filename>', methods=['GET', 'OPTIONS'])
-@cross_origin()
 def get_avatar(filename):
     """Serve avatar images - PUBLIC ACCESS"""
     from flask import send_from_directory, current_app
@@ -230,7 +228,6 @@ def get_avatar(filename):
     return send_from_directory(avatars_folder, filename)
 
 @files_bp.route('/system/<filename>', methods=['GET'])
-@cross_origin()
 def get_system_file(filename):
     """Serve system assets (logos, etc) - PUBLIC ACCESS"""
     from flask import send_from_directory
@@ -258,7 +255,6 @@ def get_system_file(filename):
     return send_from_directory(system_folder, filename)
 
 @files_bp.route('/static/<path:filepath>', methods=['GET', 'OPTIONS'])
-@cross_origin()
 def serve_static_assets(filepath):
     """
     Precision Static Asset Mirror (Senior DevOps Requirement)
@@ -305,7 +301,6 @@ def serve_static_assets(filepath):
     return send_from_directory(static_folder, filepath)
 
 @files_bp.route('/serve/<path:filepath>', methods=['GET'])
-@cross_origin()
 def get_uploaded_file(filepath):
     """Generic route to serve any file from uploads directory - PUBLIC ACCESS"""
     from flask import send_from_directory
@@ -340,7 +335,6 @@ def get_uploaded_file(filepath):
 
 
 @files_bp.route('/<int:file_id>', methods=['GET', 'OPTIONS'])
-@cross_origin()
 def get_file(file_id):
     # Support token in query params for media elements (audio/video/img)
     token = request.args.get('token')

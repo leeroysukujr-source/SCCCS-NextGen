@@ -13,7 +13,7 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const { socket } = useSocket();
+  const { socket, status } = useSocket();
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -174,6 +174,19 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
 
   return (
     <div className="chat-viewport-container">
+      {status !== 'connected' && (
+        <div style={{ 
+          backgroundColor: '#fef2f2', 
+          color: '#b91c1c', 
+          padding: '8px', 
+          textAlign: 'center', 
+          fontSize: '0.8rem', 
+          fontWeight: '600',
+          borderBottom: '1px solid #fee2e2'
+        }}>
+          {status === 'connecting' ? '⚡ Connecting to real-time stream...' : '⚠️ Connection lost. Real-time updates paused.'}
+        </div>
+      )}
       <header className="viewport-header">
         {isMobile && (
           <button className="back-btn" onClick={onBack} aria-label="Go back">

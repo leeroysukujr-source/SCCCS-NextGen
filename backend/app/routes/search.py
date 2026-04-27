@@ -121,25 +121,31 @@ def global_search():
                 }
             })
     
-    # Search files
-    if not resource_type or resource_type == 'file':
-        files = File.query.filter(
-            File.original_filename.ilike(f'%{query}%')
-        ).limit(limit).all()
+    # Search users
+    if not resource_type or resource_type == 'user':
+        user_query = User.query.filter(
+            or_(
+                User.username.ilike(f'%{query}%'),
+                User.email.ilike(f'%{query}%'),
+                User.first_name.ilike(f'%{query}%'),
+                User.last_name.ilike(f'%{query}%')
+            )
+        )
         
-        for file in files:
+        # Security: Only admins can search across all workspaces, others stay in theirs
+        if user.role != 'super_admin':
+            user_query = user_query.filter(User.workspace_id == user.workspace_id)
+            
+        users = user_query.limit(limit).all()
+        
+        for u in users:
             results['results'].append({
-                'type': 'file',
-                'id': file.id,
-                'title': file.original_filename,
-                'description': f"{file.file_size} bytes",
-                'data': {
-                    'id': file.id,
-                    'filename': file.original_filename,
-                    'file_size': file.file_size,
-                    'mime_type': file.mime_type
-                }
+                'type': 'user',
+                'id': u.id,
+                'title': f"{u.first_name} {u.last_name}" if u.first_name else u.username,
+                'description': f"@{u.username} • {u.role}",
+                'data': u.to_dict()
             })
-    
+            
     return jsonify(results), 200
 

@@ -10,11 +10,7 @@ export const filesAPI = {
     if (messageId) formData.append('message_id', messageId)
     if (lessonId) formData.append('lesson_id', lessonId)
 
-    const response = await client.post('/files/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    const response = await client.post('/files/upload', formData)
     return response.data
   },
 
