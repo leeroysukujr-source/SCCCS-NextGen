@@ -1,10 +1,7 @@
 import threading
 import time
 from datetime import datetime
-from app import db, socketio
-from app.models.chat_features import ScheduledMessage
-from app.models import Message, User, Channel
-from app.models import File
+from app import db
 import json
 import traceback
 from datetime import timedelta
@@ -16,6 +13,10 @@ POLL_INTERVAL_SECONDS = 15
 def _process_due_messages(app):
     """Background loop that checks for due scheduled messages and sends them."""
     with app.app_context():
+        from app import socketio
+        from app.models.chat_features import ScheduledMessage
+        from app.models import Message, User, Channel, File
+        
         while True:
             try:
                 now = datetime.utcnow()
