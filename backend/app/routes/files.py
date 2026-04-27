@@ -38,9 +38,13 @@ def allowed_file(filename):
 
 @files_bp.route('/upload', methods=['POST', 'OPTIONS'])
 @cross_origin()
-@jwt_required()
 def upload_file():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'ok'}), 200
+        
     try:
+        from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+        verify_jwt_in_request()
         current_user_id = get_jwt_identity()
         
         if 'file' not in request.files:
