@@ -8,7 +8,7 @@ export function createSocket(socketUrl, token) {
 
   const socket = io(socketUrl, {
     auth: { token },
-    transports: ['websocket'], // Force WebSocket exclusively for maximum stability on Render/Vercel
+    transports: ['polling', 'websocket'], // Use polling first for reliability, then upgrade to websocket
     upgrade: true, 
     reconnection: true,
     reconnectionAttempts: 5,

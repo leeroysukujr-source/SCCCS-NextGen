@@ -15,7 +15,13 @@ export const initSocket = (token = null) => {
     if (token && !existingToken) {
       console.log('[Socket] Upgrading GUEST connection to AUTHENTICATED')
       socketInstance.auth = { token }
-      socketInstance.disconnect().connect()
+      
+      // If the socket is currently connecting or connected, reset it to pick up new auth
+      if (socketInstance.active || socketInstance.connected) {
+        socketInstance.disconnect().connect()
+      } else {
+        socketInstance.connect()
+      }
     } else if (socketInstance.disconnected) {
       socketInstance.connect()
     }

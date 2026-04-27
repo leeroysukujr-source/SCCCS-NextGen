@@ -144,7 +144,11 @@ const DirectMessageBubble = ({
                     {message.reply_to && (
                         <div className="reply-preview-display" onClick={() => {
                             const el = document.getElementById(`msg-${message.reply_to.id}`)
-                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                            if (el) {
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                            } else {
+                                console.warn(`[Chat] Reply target msg-${message.reply_to.id} not found in DOM`)
+                            }
                         }}>
                             <div style={{ fontWeight: 600, fontSize: '0.75rem', marginBottom: 2 }}>
                                 {message.reply_to.sender?.first_name || 'User'}
