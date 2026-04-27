@@ -28,22 +28,12 @@ health_bp = Blueprint('health', __name__)
 @health_bp.route('/health', methods=['GET'])
 @health_bp.route('/api/health', methods=['GET'])
 def health_check():
-    """Basic health check endpoint"""
-    try:
-        # Test database connection
-        db.session.execute(db.text('SELECT 1'))
-        
-        return jsonify({
-            'status': 'healthy',
-            'timestamp': datetime.utcnow().isoformat(),
-            'service': 'SCCCS Backend API'
-        }), 200
-    except Exception as e:
-        return jsonify({
-            'status': 'unhealthy',
-            'error': str(e),
-            'timestamp': datetime.utcnow().isoformat()
-        }), 503
+    """Instant health check endpoint for DevOps stability"""
+    return jsonify({
+        'status': 'online',
+        'timestamp': datetime.utcnow().isoformat(),
+        'service': 'SCCCS Backend API'
+    }), 200
 
 @health_bp.route('/status', methods=['GET'])
 def system_status():
