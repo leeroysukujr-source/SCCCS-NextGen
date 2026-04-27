@@ -122,21 +122,8 @@ def create_app(config_class=Config):
 
     @app.after_request
     def after_request(response):
-        """The Global 'Force-CORS' Middleware (Architect Requirement)"""
-        origin = request.headers.get('Origin')
-        
-        # If the request has an Origin, and it's in our allowed list, reflect it back.
-        if origin:
-            response.headers['Access-Control-Allow-Origin'] = origin
-            response.headers['Access-Control-Allow-Credentials'] = 'true'
-        else:
-            response.headers['Access-Control-Allow-Origin'] = '*'
-        
-        # Always set these for consistency
-        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS,PATCH'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,bypass-tunnel-reminder,x-requested-with'
-        response.headers['Access-Control-Max-Age'] = '3600'
-            
+        # We allow run.py's Master CORS Overrider to handle these headers 
+        # to prevent duplication errors on Render/Vercel.
         return response
 
     # CORS configuration - Senior Deployment Hardening
