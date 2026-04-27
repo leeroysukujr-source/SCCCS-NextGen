@@ -127,21 +127,15 @@ def create_app(config_class=Config):
         
         # If the request has an Origin, and it's in our allowed list, reflect it back.
         if origin:
-            is_allowed = False
-            if final_origins == "*":
-                is_allowed = True
-            elif isinstance(final_origins, list) and origin in final_origins:
-                is_allowed = True
-            
-            if is_allowed:
-                response.headers['Access-Control-Allow-Origin'] = origin
-                response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+        else:
+            response.headers['Access-Control-Allow-Origin'] = '*'
         
-        # Always set these for consistency if not already set
-        if 'Access-Control-Allow-Methods' not in response.headers:
-            response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS,PATCH'
-        if 'Access-Control-Allow-Headers' not in response.headers:
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,bypass-tunnel-reminder,x-requested-with'
+        # Always set these for consistency
+        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS,PATCH'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,bypass-tunnel-reminder,x-requested-with'
+        response.headers['Access-Control-Max-Age'] = '3600'
             
         return response
 
