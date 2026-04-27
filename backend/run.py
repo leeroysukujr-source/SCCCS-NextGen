@@ -176,11 +176,16 @@ def application(environ, start_response):
     def cors_start_response(status, headers, exc_info=None):
         origin = environ.get('HTTP_ORIGIN')
         if origin:
-            # Force CORS headers even if Socket.IO engine misses them
-            headers.append(('Access-Control-Allow-Origin', origin))
-            headers.append(('Access-Control-Allow-Credentials', 'true'))
-            headers.append(('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE'))
-            headers.append(('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Workspace-ID'))
+            # Check if CORS headers are already present to prevent duplication errors
+            existing_origins = [h[1] for h in headers if h[0].lower() == 'access-control-allow-origin']
+            
+            if not existing_origins:
+                headers.append(('Access-Control-Allow-Origin', origin))
+                headers.append(('Access-Control-Allow-Credentials', 'true'))
+                headers.append(('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH'))
+                headers.append(('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Workspace-ID, X-Requested-With'))
+                headers.append(('Access-Control-Max-Age', '3600'))
+            
         return start_response(status, headers, exc_info)
 
     return socketio_app(environ, cors_start_response)

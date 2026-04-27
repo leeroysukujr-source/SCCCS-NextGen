@@ -111,14 +111,16 @@ def create_app(config_class=Config):
 
     # Maximum Robustness CORS - Industry Standard Implementation
     # We allow the specific Vercel production domains and wildcard headers for proxy flexibility.
-    CORS(app, resources={r"/api/*": {
-        "origins": final_origins,
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-        "allow_headers": ["Content-Type", "Authorization", "bypass-tunnel-reminder", "x-requested-with"],
-        "expose_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True,
-        "max_age": 3600
-    }})
+    # CORS(app, resources={r"/api/*": {
+    #     "origins": final_origins,
+    #     "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    #     "allow_headers": ["Content-Type", "Authorization", "bypass-tunnel-reminder", "x-requested-with"],
+    #     "expose_headers": ["Content-Type", "Authorization"],
+    #     "supports_credentials": True,
+    #     "max_age": 3600
+    # }})
+    # CORS is now handled exclusively by the Master CORS Overrider in run.py
+    # to prevent duplication and 500 errors on Render/Vercel.
 
     @app.after_request
     def after_request(response):
