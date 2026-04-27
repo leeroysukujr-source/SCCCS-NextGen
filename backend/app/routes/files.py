@@ -112,29 +112,32 @@ def upload_file():
         
         # Cloud Storage Logic
         storage_url = None
-        from app.utils.storage import upload_fileobj, get_public_url
-        from flask import current_app
-        
-        if current_app.config.get('S3_ENDPOINT') and current_app.config.get('S3_BUCKET') and 'localhost' not in current_app.config.get('S3_ENDPOINT'):
-            # Upload to S3
-            file_stream = BytesIO(file_data)
-            folder = 'files'
-            if lesson_id: folder = 'materials'
-            elif channel_id: folder = f'channels/{channel_id}'
+        try:
+            from app.utils.storage import upload_fileobj, get_public_url
+            from flask import current_app
             
-            key = f"{folder}/{unique_filename}"
-            try:
-                if upload_fileobj(file_stream, key):
-                    storage_url = get_public_url(key)
-                    file_path = storage_url
-                    print(f"[Upload] Successfully uploaded to cloud: {storage_url}")
-            except Exception as e:
-                print(f"[Upload] Cloud storage upload failed: {str(e)}")
-                # Error will fallback to local save if not uploaded to cloud
+            if current_app.config.get('S3_ENDPOINT') and current_app.config.get('S3_BUCKET') and 'localhost' not in current_app.config.get('S3_ENDPOINT'):
+                # Upload to S3
+                file_stream = BytesIO(file_data)
+                folder = 'files'
+                if lesson_id: folder = 'materials'
+                elif channel_id: folder = f'channels/{channel_id}'
+                
+                key = f"{folder}/{unique_filename}"
+                try:
+                    if upload_fileobj(file_stream, key):
+                        storage_url = get_public_url(key)
+                        file_path = storage_url
+                        print(f"[Upload] Successfully uploaded to cloud: {storage_url}")
+                except Exception as e:
+                    print(f"[Upload] Cloud storage upload failed: {str(e)}")
+        except Exception as storage_err:
+            print(f"[Upload] Storage system error: {storage_err}")
 
         # Fallback to Local Save if not uploaded to cloud
         if not storage_url:
             print(f"[Upload] Saving locally to: {file_path}")
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
             with open(file_path, 'wb') as f:
                 f.write(file_data)
         
