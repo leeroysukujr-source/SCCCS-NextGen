@@ -12,16 +12,14 @@ admin_logo_bp = Blueprint('admin_logo', __name__)
 
 @admin_logo_bp.route('/system/logo', methods=['POST', 'OPTIONS'])
 @cross_origin()
-@jwt_required()
 def update_system_logo_url():
-    """
-    Refactored: Update URL endpoint (Transition to Supabase Direct)
-    Instruction: Accept JSON body with 'logo_url' for global branding.
-    """
     if request.method == 'OPTIONS':
         return jsonify({'status': 'ok'}), 200
         
-    uid = get_jwt_identity()
+    try:
+        from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+        verify_jwt_in_request()
+        uid = get_jwt_identity()
     if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
         
