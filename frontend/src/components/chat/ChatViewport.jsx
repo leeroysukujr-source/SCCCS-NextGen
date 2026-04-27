@@ -5,6 +5,7 @@ import { encryptionUtil } from '../../utils/encryption';
 import { channelsAPI } from '../../api/channels';
 import { directMessagesAPI } from '../../api/directMessages';
 import { messagesAPI } from '../../api/messages';
+import { useChatStore } from '../../store/chatStore';
 import { FiArrowLeft, FiSend, FiLock, FiShield, FiMoreVertical, FiSearch, FiMessageSquare } from 'react-icons/fi';
 import './ChatViewport.css';
 
@@ -14,6 +15,7 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const { socket, status } = useSocket();
+  const { fetchUnreadCounts } = useChatStore();
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -48,6 +50,8 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
       }));
       
       setMessages(decrypted);
+      // Update global unread counts since we've viewed this conversation
+      fetchUnreadCounts();
     } catch (err) {
       console.error('Failed to fetch messages', err);
     } finally {
@@ -74,6 +78,8 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
           const msgPartnerId = String(msg.sender_id) === String(user?.id) ? msg.recipient_id : msg.sender_id;
           if (String(msgPartnerId) === String(selectedChat.id)) {
             setMessages(prev => [...prev, msg]);
+            // If we are active in this DM, mark it as read globally
+            fetchUnreadCounts();
           }
         }
       };

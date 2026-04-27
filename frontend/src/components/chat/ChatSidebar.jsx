@@ -3,12 +3,14 @@ import { channelsAPI } from '../../api/channels';
 import { directMessagesAPI } from '../../api/directMessages';
 import { useSocket } from '../../contexts/SocketProvider';
 import { useAuthStore } from '../../store/authStore';
+import { useChatStore } from '../../store/chatStore';
 import { FiHash, FiLock, FiUser, FiSearch, FiMessageSquare, FiPlus, FiMessageCircle } from 'react-icons/fi';
 import { formatDistanceToNow } from 'date-fns';
 import './ChatSidebar.css';
 
 const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
   const { user: currentUser } = useAuthStore();
+  const { fetchUnreadCounts } = useChatStore();
   const { socket, status } = useSocket();
   const [activeTab, setActiveTab] = useState(window.location.pathname.includes('direct-messages') ? 'dms' : 'channels'); 
   const [channels, setChannels] = useState([]);
@@ -48,6 +50,8 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
       })));
 
       setError(null);
+      // Sync with global store
+      fetchUnreadCounts();
     } catch (err) {
       console.error('Failed to fetch chat list', err);
       setError('Could not load chats.');
@@ -129,13 +133,19 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
 
       socket.on('message_received', handleSocketMessage);
       socket.on('direct_message_received', handleSocketMessage);
+      
+      // Update global counts when messages arrive
+      socket.on('message_received', fetchUnreadCounts);
+      socket.on('direct_message_received', fetchUnreadCounts);
 
       return () => {
         socket.off('message_received', handleSocketMessage);
         socket.off('direct_message_received', handleSocketMessage);
+        socket.off('message_received', fetchUnreadCounts);
+        socket.off('direct_message_received', fetchUnreadCounts);
       };
     }
-  }, [socket, selectedId, selectedType, currentUser?.id]);
+  }, [socket, selectedId, selectedType, currentUser?.id, fetchUnreadCounts]);
 
   const currentItems = activeTab === 'channels' ? channels : dms;
   const filteredItems = currentItems.filter(item => 

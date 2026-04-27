@@ -16,12 +16,14 @@ import NotificationCenter from './NotificationCenter'
 import { useSettingsStore } from '../store/settingsStore'
 import { useFeatureStore } from '../store/featureStore'
 import { useBranding } from '../contexts/BrandingContext'
+import { useChatStore } from '../store/chatStore'
 
 export default function Layout() {
   const { user, logout, refreshUser } = useAuthStore()
   const { fetchSettings } = useSettingsStore()
   const { fetchFeatures, isFeatureEnabled } = useFeatureStore()
   const { getLogoUrl } = useBranding()
+  const { unreadChannels, unreadDMs, activeRooms, fetchUnreadCounts, fetchActiveRooms, initSocketListeners } = useChatStore()
   const navigate = useNavigate()
   const location = useLocation()
   const [showSearch, setShowSearch] = useState(false)
@@ -71,6 +73,18 @@ export default function Layout() {
     }
     fetchSettings()
     fetchFeatures(user?.workspace_id)
+    
+    // Initialize Chat/Room status
+    fetchUnreadCounts()
+    fetchActiveRooms()
+    initSocketListeners()
+
+    // Poll for active rooms periodically (every 30s)
+    const interval = setInterval(() => {
+        fetchActiveRooms()
+    }, 30000)
+    
+    return () => clearInterval(interval)
   }, [user?.role, user?.workspace_id, fetchFeatures, fetchSettings])
 
   const isSuperAdmin = () => user?.platform_role === 'SUPER_ADMIN' || user?.role === 'super_admin'
@@ -94,9 +108,27 @@ export default function Layout() {
     {
       title: 'Communication',
       items: [
-        { path: '/chat', icon: <FiMessageSquare />, text: 'Channels', feature: 'channels' },
-        { path: '/direct-messages', icon: <FiMessageCircle />, text: 'Messages', feature: 'messages' },
-        { path: '/video-room', icon: <FiVideo />, text: 'Video Room', feature: 'video_room' },
+        { 
+            path: '/chat', 
+            icon: <FiMessageSquare />, 
+            text: 'Channels', 
+            feature: 'channels',
+            badge: unreadChannels > 0 ? unreadChannels : null 
+        },
+        { 
+            path: '/direct-messages', 
+            icon: <FiMessageCircle />, 
+            text: 'Messages', 
+            feature: 'messages',
+            badge: unreadDMs > 0 ? unreadDMs : null
+        },
+        { 
+            path: '/video-room', 
+            icon: <FiVideo />, 
+            text: 'Video Room', 
+            feature: 'video_room',
+            isLive: activeRooms.length > 0
+        },
       ].filter(item => !item.feature || isFeatureEnabled(item.feature))
     }
   ]
@@ -226,6 +258,13 @@ export default function Layout() {
                     >
                       {item.icon}
                       <span className="nav-text">{item.text}</span>
+                      {item.badge && <span className="nav-badge">{item.badge}</span>}
+                      {item.isLive && (
+                        <span className="live-indicator-nav">
+                          <span className="live-dot-nav" />
+                          LIVE
+                        </span>
+                      )}
                     </NavLink>
                   )
                 ))}
