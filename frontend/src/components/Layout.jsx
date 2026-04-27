@@ -258,7 +258,11 @@ export default function Layout() {
                     >
                       {item.icon}
                       <span className="nav-text">{item.text}</span>
-                      {item.badge && <span className="nav-badge">{item.badge}</span>}
+                      {item.badge && (
+                        <span key={item.badge} className="nav-badge">
+                          {item.badge}
+                        </span>
+                      )}
                       {item.isLive && (
                         <span className="live-indicator-nav">
                           <span className="live-dot-nav" />
