@@ -33,10 +33,11 @@ CORS(flask_app,
 # (Already handled in app/__init__.py but we reinforce here for stability)
 # socketio.init_app is called inside create_app()
 
-# The entry point for Gunicorn (run:app)
+# The entry point for Gunicorn (run:app or run:application)
 # We use the flask_app directly because flask-socketio 
 # automatically handles the /socket.io path when running under eventlet.
 app = flask_app
+application = flask_app
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
