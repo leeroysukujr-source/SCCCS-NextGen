@@ -10,7 +10,7 @@ import {
 import { Track } from 'livekit-client';
 import { FaExpand, FaTimes, FaMicrophoneSlash, FaVideoSlash, FaHandPaper } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useMeeting } from '../contexts/MeetingContext';
+import { useMeeting } from '../../contexts/MeetingContext';
 import './MeetingMiniPlayer.css';
 
 const MeetingMiniPlayer = () => {
