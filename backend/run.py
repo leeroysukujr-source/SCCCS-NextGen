@@ -166,29 +166,42 @@ socketio_app = s_io.WSGIApp(socketio, flask_app)
 
 def application(environ, start_response):
     """Entry point for Gunicorn (Render) and local execution."""
-    path = environ.get('PATH_INFO', '')
-    
-    # 1. Handle Collab (Raw WebSockets)
-    if path.startswith('/collab'):
-        return collab_ws_handler(environ, start_response)
-    
-    # 2. Handle Socket.IO & API with Manual CORS Injection (Senior DevOps Requirement)
-    def cors_start_response(status, headers, exc_info=None):
-        origin = environ.get('HTTP_ORIGIN')
-        if origin:
-            # Check if CORS headers are already present to prevent duplication errors
-            existing_origins = [h[1] for h in headers if h[0].lower() == 'access-control-allow-origin']
-            
-            if not existing_origins:
+    try:
+        path = environ.get('PATH_INFO', '')
+        
+        # 1. Handle Collab (Raw WebSockets)
+        if path.startswith('/collab'):
+            return collab_ws_handler(environ, start_response)
+        
+        # 2. Unified Master CORS Guard (DevOps Hardening)
+        def cors_start_response(status, headers, exc_info=None):
+            origin = environ.get('HTTP_ORIGIN')
+            if origin:
+                # Remove any existing CORS headers to prevent 'Multiple Values' browser errors
+                headers = [h for h in headers if h[0].lower() not in [
+                    'access-control-allow-origin', 
+                    'access-control-allow-credentials',
+                    'access-control-allow-methods',
+                    'access-control-allow-headers'
+                ]]
+                
+                # Force inject clean, single-value headers
                 headers.append(('Access-Control-Allow-Origin', origin))
                 headers.append(('Access-Control-Allow-Credentials', 'true'))
                 headers.append(('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH'))
                 headers.append(('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Workspace-ID, X-Requested-With'))
                 headers.append(('Access-Control-Max-Age', '3600'))
-            
-        return start_response(status, headers, exc_info)
+                
+            return start_response(status, headers, exc_info)
 
-    return socketio_app(environ, cors_start_response)
+        return socketio_app(environ, cors_start_response)
+    except Exception as e:
+        import traceback
+        print(f"[CRITICAL] WSGI Stack Crash: {e}")
+        traceback.print_exc()
+        # Fallback response for 500 errors
+        start_response('500 Internal Server Error', [('Content-Type', 'text/plain')])
+        return [f"Internal Server Error: {str(e)}".encode('utf-8')]
 
 # The MAGIC export for Render (run:app)
 app = application
