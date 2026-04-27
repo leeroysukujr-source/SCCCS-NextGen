@@ -11,8 +11,21 @@ flask_app = create_app()
 
 # 2. Configure Global CORS (Pro-Standard Implementation)
 # This covers all REST API routes and prevents "Multiple Values" errors.
+# NOTE: origins="*" and supports_credentials=True are INCOMPATIBLE in browsers.
+allowed_origins = [
+    "https://scccs-next-gen-nine.vercel.app",
+    "https://scccs-next-gen.vercel.app",
+    "https://scccs-next-gen-git-main-leeroysukujr-6311s-projects.vercel.app",
+    "https://scccs-next-gen-leeroysukujr-source-projects.vercel.app",
+    "https://scccs-nextgen-q2ll.onrender.com",
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000"
+]
+
 CORS(flask_app, 
-     resources={r"/*": {"origins": "*"}}, 
+     resources={r"/*": {"origins": allowed_origins}}, 
      supports_credentials=True,
      expose_headers=["Content-Type", "Authorization", "X-Workspace-ID"])
 
