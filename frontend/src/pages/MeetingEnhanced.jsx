@@ -608,7 +608,7 @@ function PremiumRoomInner({ roomId, roomInfo, onLeave, preJoinChoices, onSwitchR
               layoutMode={layoutMode}
               onLayoutChange={(l) => setLayoutMode(l)}
               onMuteAll={handleMuteAll}
-              onEndMeeting={onEndMeeting}
+              onEndMeeting={handleEndMeeting}
               onStatsToggle={() => setShowConnectionPanel(!showConnectionPanel)}
               onShareToggle={() => setShowShareModal(true)}
               onMinimize={onMinimize}
