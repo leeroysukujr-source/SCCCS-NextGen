@@ -159,11 +159,12 @@ def collab_ws_handler(ws):
     finally:
         if ws in document_rooms[room_name]: document_rooms[room_name].remove(ws)
 
-app = create_app(Config)
+flask_app = create_app(Config)
 
-# Correctly wrap the Flask app with the SocketIO middleware at top level
-# This ensures gunicorn can find 'application' and that it handles Socket.IO correctly.
-socketio_app = s_io.WSGIApp(socketio, app)
+# Unified Real-Time Wrapper (Senior DevOps Hardening)
+# We export the full WSGI stack as 'app' so that Gunicorn (Render) automatically
+# finds the complete system including Socket.IO and WebSockets.
+socketio_app = s_io.WSGIApp(socketio, flask_app)
 
 def application(environ, start_response):
     """Entry point for Gunicorn (Render) and local execution."""
@@ -172,24 +173,27 @@ def application(environ, start_response):
         return collab_ws_handler(environ, start_response)
     return socketio_app(environ, start_response)
 
-# Self-Bootstrapping Seeder - Background Execution to avoid Port Binding timeouts
-def _run_background_seeding():
+# The MAGIC export for Render (run:app)
+app = application
+
+# Self-Bootstrapping Maintenance - Background Execution
+def _run_background_tasks():
     try:
         # Give the server a moment to bind to the port first
-        eventlet.sleep(2)
+        eventlet.sleep(5)
         from seeders import run_all_seeders
-        print("[run.py] 🚀 Starting Background Seeding Engine...")
-        run_all_seeders(app)
+        print("[run.py] 🚀 Starting Background Maintenance Engine...")
+        run_all_seeders(flask_app)
         print("[run.py] ✅ Background Seeding Complete.")
     except Exception as e:
-        print(f"[run.py] ⚠️ Background Seeding status: {e}")
+        print(f"[run.py] ⚠️ Background Task Status: {e}")
 
-# Spawn the seeder in a background thread (greenlet)
-eventlet.spawn(_run_background_seeding)
+# Spawn the maintenance tasks in a background greenlet (non-blocking)
+eventlet.spawn(_run_background_tasks)
+
+# Spawn the maintenance tasks in a background greenlet (non-blocking)
+eventlet.spawn(_run_background_tasks)
 
 if __name__ == '__main__':
     print(f"[run.py] Starting Unified Real-Time Server on {Config.SERVER_HOST}:{Config.SERVER_PORT}")
-    print(f"[run.py] - /socket.io -> Chat & Awareness (SocketIO)")
-    print(f"[run.py] - /collab    -> Document Synchronization (Yjs/Raw WS)")
-    
     eventlet.wsgi.server(eventlet.listen((Config.SERVER_HOST, Config.SERVER_PORT)), application)
