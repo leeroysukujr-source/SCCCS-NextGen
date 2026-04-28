@@ -126,12 +126,14 @@ def create_app(config_class=Config):
             "http://localhost:3000"
         ]
         
-        if origin in allowed:
-            response.headers['Access-Control-Allow-Origin'] = origin
+        if origin in allowed or not origin: # Allow internal/proxy requests
+            if origin:
+                response.headers['Access-Control-Allow-Origin'] = origin
             response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Workspace-ID, X-Requested-With'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Workspace-ID, X-Requested-With, bypass-tunnel-reminder'
             response.headers['Access-Control-Allow-Credentials'] = 'true'
             response.headers['Access-Control-Max-Age'] = '3600'
+            response.headers['Access-Control-Expose-Headers'] = 'Content-Type, Authorization, X-Workspace-ID'
             
         return response
 
