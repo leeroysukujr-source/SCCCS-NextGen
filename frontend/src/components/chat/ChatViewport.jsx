@@ -231,6 +231,11 @@ const ChatViewport = ({ selectedChat, onBack, isMobile }) => {
               className={`message-wrapper ${isOwnMessage(msg) ? 'own' : 'other'}`}
             >
               <div className="message-bubble">
+                {selectedChat?.type === 'channel' && (
+                  <div className="message-author">
+                    {isOwnMessage(msg) ? 'You' : (msg.author?.username || msg.sender?.username || 'User')}
+                  </div>
+                )}
                 <div className="message-content">
                   {renderMessageContent(msg.content)}
                 </div>
