@@ -114,27 +114,6 @@ def create_app(config_class=Config):
 
     @app.after_request
     def after_request(response):
-        origin = request.headers.get('Origin')
-        # Standardized Allowed Origins (Senior Deployment Cluster)
-        allowed = [
-            "https://scccs-next-gen-nine.vercel.app",
-            "https://scccs-next-gen.vercel.app",
-            "https://scccs-next-gen-git-main-leeroysukujr-6311s-projects.vercel.app",
-            "https://scccs-next-gen-leeroysukujr-source-projects.vercel.app",
-            "https://scccs-nextgen-q2ll.onrender.com",
-            "http://localhost:5173",
-            "http://localhost:3000"
-        ]
-        
-        if origin in allowed or not origin: # Allow internal/proxy requests
-            if origin:
-                response.headers['Access-Control-Allow-Origin'] = origin
-            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Workspace-ID, X-Requested-With, bypass-tunnel-reminder'
-            response.headers['Access-Control-Allow-Credentials'] = 'true'
-            response.headers['Access-Control-Max-Age'] = '3600'
-            response.headers['Access-Control-Expose-Headers'] = 'Content-Type, Authorization, X-Workspace-ID'
-            
         return response
 
     # CORS configuration - Senior Deployment Hardening
