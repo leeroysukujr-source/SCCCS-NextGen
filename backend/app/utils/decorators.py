@@ -97,6 +97,31 @@ def permission_required(permission_name):
                             has_permission = True
                             break
                             
+            # Check legacy role fallback (Tier 3)
+            # This handles users who haven't been fully migrated to RBAC roles yet
+            if not has_permission:
+                legacy_role = getattr(user, 'role', 'student')
+                # Define default permissions for legacy roles
+                legacy_permissions = {
+                    'admin': [
+                        'manage_workspace', 'manage_users', 'manage_classes', 
+                        'view_classes', 'view_content', 'create_content', 
+                        'publish_channel', 'manage_assignments'
+                    ],
+                    'teacher': [
+                        'manage_classes', 'view_classes', 'view_content', 
+                        'create_content', 'grade_assignments', 
+                        'publish_channel', 'manage_assignments'
+                    ],
+                    'student': [
+                        'view_content', 'view_classes', 'submit_assignments'
+                    ]
+                }
+                
+                if legacy_role in legacy_permissions:
+                    if permission_name in legacy_permissions[legacy_role]:
+                        has_permission = True
+                            
             if not has_permission:
                 return jsonify({
                     "error": "Forbidden",

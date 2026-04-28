@@ -709,10 +709,16 @@ def publish_channel(channel_id):
         return jsonify({'error': 'Channel not found'}), 404
     
     # Permission logic: Admin OR the creator of the channel
-    is_admin = user and (user.role == 'admin' or user.platform_role == 'SUPER_ADMIN')
-    is_creator = str(channel.created_by) == str(current_user_id)
+    # Include 'teacher' in the admin-like check for course management
+    is_admin = user and (user.role in ['admin', 'teacher'] or user.platform_role == 'SUPER_ADMIN')
+    
+    # Robust creator check (ensure types match for comparison)
+    is_creator = False
+    if channel.created_by is not None:
+        is_creator = str(channel.created_by) == str(current_user_id)
     
     if not is_admin and not is_creator:
+        print(f"📢 [Auth] Publish blocked: User {current_user_id} (Role: {user.role}) is not creator of Channel {channel_id} (CreatedBy: {channel.created_by})")
         return jsonify({
             'error': 'Forbidden',
             'details': 'You do not have permission to publish this channel. Only the creator or an administrator can publish course channels.'

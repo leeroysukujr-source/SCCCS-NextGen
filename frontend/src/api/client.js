@@ -113,9 +113,16 @@ if (typeof globalThis.__SCCCS_API_CLIENT__ === 'undefined') {
   // Request interceptor to add token
   globalThis.__SCCCS_API_CLIENT__.interceptors.request.use(
     (config) => {
-      const token = useAuthStore.getState().token
+      const state = useAuthStore.getState()
+      const token = state.token
+      const workspaceId = state.user?.workspace_id
+      
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
+      }
+      
+      if (workspaceId) {
+        config.headers['X-Workspace-ID'] = workspaceId
       }
       return config
     },

@@ -18,13 +18,10 @@ from app.utils.logger import log_error
 import threading
 from flask import current_app
 
-@presence_bp.route('/update', methods=['POST', 'OPTIONS'])
-@cross_origin()
+@presence_bp.route('/update', methods=['POST'])
 @jwt_required(optional=True)
 def update_presence():
     """Update user presence - Asynchronous and strictly non-blocking"""
-    if request.method == 'OPTIONS':
-        return jsonify({'status': 'ok'}), 200
         
     current_user_id = get_jwt_identity()
     if not current_user_id:

@@ -36,10 +36,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@files_bp.route('/upload', methods=['POST', 'OPTIONS'])
+@files_bp.route('/upload', methods=['POST'])
 def upload_file():
-    if request.method == 'OPTIONS':
-        return jsonify({'status': 'ok'}), 200
         
     try:
         from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity

@@ -106,6 +106,21 @@ def iron_sync():
                                 print(f"      Could not add {col}: {e}")
                                 conn.execute(text("ROLLBACK"))
 
+                # 4e. CRITICAL: Workspace Scoping Hardening (Production Recovery)
+                # Ensure workspace_id exists in all core entities
+                scoped_tables = ['channels', 'rooms', 'classes', 'groups', 'files']
+                for table in scoped_tables:
+                    if table in inspector.get_table_names():
+                        cols = [c['name'] for c in inspector.get_columns(table)]
+                        if 'workspace_id' not in cols:
+                            print(f"   🚨 Schema Breach Detected: Adding 'workspace_id' to {table}...")
+                            try:
+                                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN workspace_id INTEGER REFERENCES workspaces(id)"))
+                                conn.execute(text("COMMIT"))
+                            except Exception as e:
+                                print(f"      Could not add workspace_id to {table}: {e}")
+                                conn.execute(text("ROLLBACK"))
+
             # 5. FINAL PHYSICAL AUDIT
             print("\n5. Final Physical Audit...")
             existing_tables = inspector.get_table_names()

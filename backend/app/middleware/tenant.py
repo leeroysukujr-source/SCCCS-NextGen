@@ -33,8 +33,8 @@ def resolve_tenant():
     3. User's default workspace (if logged in and no header)
     """
     
-    # 1. Check Header
-    workspace_id = request.headers.get('X-Workspace-ID')
+    # 1. Check Header or Query Params
+    workspace_id = request.headers.get('X-Workspace-ID') or request.args.get('workspace_id')
     
     # 2. Check User Context (if authenticated via other middleware first)
     # Note: Dependent on auth middleware running before or after. 
