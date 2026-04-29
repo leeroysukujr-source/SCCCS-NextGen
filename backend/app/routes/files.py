@@ -152,18 +152,34 @@ def upload_file():
             from app.models import Lesson, Class, ClassMember
             lesson = Lesson.query.get(lesson_id)
             if not lesson:
+                print(f"[Upload] Lesson {lesson_id} not found")
                 return jsonify({'error': 'Lesson not found'}), 404
             
-            # Check if user is teacher/admin or member of the class
+            # Check if user is teacher/admin/super_admin or member of the class
             class_obj = Class.query.get(lesson.class_id)
             if not class_obj:
+                print(f"[Upload] Class {lesson.class_id} not found for lesson {lesson_id}")
                 return jsonify({'error': 'Class not found'}), 404
             
             member = ClassMember.query.filter_by(class_id=lesson.class_id, user_id=current_user_id).first()
             
-            # Only teachers/admins can upload course materials
-            if not (user.role in ['admin', 'teacher'] or class_obj.teacher_id == current_user_id or (member and member.role in ['teacher', 'ta'])):
-                return jsonify({'error': 'Only teachers can upload course materials'}), 403
+            # Robust permission check:
+            # 1. Super Admin
+            # 2. Global Teacher/Admin role
+            # 3. Creator of the lesson
+            # 4. Teacher/Owner of the class
+            # 5. Teacher/TA member of the class
+            is_authorized = (
+                user.role in ['admin', 'teacher', 'super_admin'] or 
+                user.platform_role == 'SUPER_ADMIN' or
+                lesson.created_by == current_user_id or
+                class_obj.teacher_id == current_user_id or
+                (member and member.role in ['teacher', 'ta'])
+            )
+
+            if not is_authorized:
+                print(f"[Upload] User {current_user_id} ({user.role}) denied upload for lesson {lesson_id}")
+                return jsonify({'error': 'Only teachers or admins can upload course materials'}), 403
         
         file_obj = File(
             filename=unique_filename,
@@ -441,7 +457,7 @@ def get_file(file_id):
     filename = file_obj.original_filename or 'file'
     ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
     
-    if ext == 'pdf': mime_type = 'application/pdf'
+    if ext == 'pdf' or 'pdf' in (mime_type or ''): mime_type = 'application/pdf'
     elif ext == 'doc': mime_type = 'application/msword'
     elif ext == 'docx': mime_type = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     elif ext == 'xls': mime_type = 'application/vnd.ms-excel'

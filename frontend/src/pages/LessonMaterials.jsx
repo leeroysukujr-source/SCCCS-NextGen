@@ -7,17 +7,23 @@ import { classesAPI } from '../api/classes'
 import { useAuthStore } from '../store/authStore'
 import DocumentViewer from '../components/DocumentViewer'
 import AIStudyAssistant from '../components/AIStudyAssistant'
-import { FiArrowRight, FiFile, FiDownload, FiEye, FiZap, FiBook, FiFileText } from 'react-icons/fi'
+import { FiArrowRight, FiFile, FiDownload, FiEye, FiZap, FiBook, FiFileText, FiUpload, FiTrash2, FiPlus } from 'react-icons/fi'
 import './LessonMaterials.css'
-import { useNotify } from '../components/NotificationProvider'
+import { useNotify, useConfirm } from '../components/NotificationProvider'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 export default function LessonMaterials() {
   const { lessonId } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuthStore()
+  const queryClient = useQueryClient()
+  const fileInputRef = useRef(null)
   const [selectedFile, setSelectedFile] = useState(null)
   const [showAI, setShowAI] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const notify = useNotify()
+  const confirm = useConfirm()
 
   const { data: lesson } = useQuery({
     queryKey: ['lesson', lessonId],
@@ -37,7 +43,6 @@ export default function LessonMaterials() {
     enabled: !!lessonId,
   })
 
-  // Check if AI should be opened from navigation state
   useEffect(() => {
     if (location.state?.openAI && materials.length > 0) {
       setShowAI(true)
@@ -47,7 +52,58 @@ export default function LessonMaterials() {
     }
   }, [location.state, materials])
 
-  const notify = useNotify()
+  const uploadMutation = useMutation({
+    mutationFn: async (file) => {
+      return await filesAPI.uploadFile(file, null, null, lessonId)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['lesson-materials', lessonId])
+      queryClient.invalidateQueries(['lesson', lessonId])
+      setUploading(false)
+      notify('success', 'File uploaded successfully')
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    },
+    onError: (error) => {
+      console.error('Upload error:', error)
+      notify('error', error.response?.data?.error || 'Failed to upload file')
+      setUploading(false)
+    }
+  })
+
+  const deleteFileMutation = useMutation({
+    mutationFn: (fileId) => filesAPI.deleteFile(fileId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['lesson-materials', lessonId])
+      queryClient.invalidateQueries(['lesson', lessonId])
+      notify('success', 'File deleted successfully')
+    },
+    onError: (error) => {
+      notify('error', error.response?.data?.error || 'Failed to delete file')
+    }
+  })
+
+  const handleFileUpload = async (e) => {
+    const files = Array.from(e.target.files)
+    if (files.length === 0) return
+
+    setUploading(true)
+    try {
+      for (const file of files) {
+        await uploadMutation.mutateAsync(file)
+      }
+    } catch (error) {
+      console.error('Error uploading files:', error)
+    }
+  }
+
+  const canManageMaterials = 
+    user?.role === 'admin' || 
+    user?.role === 'teacher' || 
+    user?.role === 'super_admin' ||
+    user?.platform_role === 'SUPER_ADMIN' ||
+    lesson?.created_by === user?.id
 
   const handleOpenFile = async (file) => {
     try {
@@ -112,6 +168,25 @@ export default function LessonMaterials() {
           <h1>{lesson.title}</h1>
           {classItem && <p className="class-name">{classItem.name}</p>}
         </div>
+        {canManageMaterials && (
+          <div className="header-actions">
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              onChange={handleFileUpload}
+              style={{ display: 'none' }}
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp4,.zip,.rar,.7z,.tar,.gz"
+            />
+            <button
+              className="btn-upload-materials"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+            >
+              <FiUpload /> {uploading ? 'Uploading...' : 'Upload Materials'}
+            </button>
+          </div>
+        )}
         {materials.length > 0 && (
           <button 
             className="ai-assistant-btn"
@@ -144,13 +219,33 @@ export default function LessonMaterials() {
           <h2>
             <FiBook /> Course Materials
           </h2>
-          <span className="material-count">{materials.length} file{materials.length !== 1 ? 's' : ''}</span>
+          <div className="section-meta">
+            <span className="material-count">{materials.length} file{materials.length !== 1 ? 's' : ''}</span>
+            {canManageMaterials && (
+              <button 
+                className="btn-add-materials"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                <FiPlus /> Add Files
+              </button>
+            )}
+          </div>
         </div>
 
         {materials.length === 0 ? (
           <div className="empty-materials">
             <FiFileText className="empty-icon" />
             <p>No course materials uploaded yet</p>
+            {canManageMaterials && (
+              <button 
+                className="btn-upload-empty"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                <FiUpload /> {uploading ? 'Uploading...' : 'Upload Materials'}
+              </button>
+            )}
           </div>
         ) : (
           <div className="materials-grid">
@@ -189,6 +284,19 @@ export default function LessonMaterials() {
                   >
                     <FiDownload />
                   </button>
+                  {canManageMaterials && (
+                    <button
+                      className="action-btn delete-btn"
+                      onClick={async (e) => {
+                        e.stopPropagation()
+                        const ok = await confirm('Are you sure you want to delete this file?')
+                        if (ok) deleteFileMutation.mutate(file.id)
+                      }}
+                      title="Delete File"
+                    >
+                      <FiTrash2 />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
