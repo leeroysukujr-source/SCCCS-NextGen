@@ -30,9 +30,12 @@ const KeepAlive = () => {
         // Initial ping on load
         pingBackend();
 
-        // Set up interval (5 minutes = 300,000 ms)
-        // Render usually spins down after 15 minutes of inactivity
-        const intervalId = setInterval(pingBackend, 300000);
+        // Set up interval (1 minute = 60,000 ms) for maximum responsiveness on defense day
+        const intervalId = setInterval(() => {
+            pingBackend();
+            // Also ping /api/health as a secondary path
+            axios.get(`${API_URL}/api/health`, { headers: { 'bypass-tunnel-reminder': 'true' }, timeout: 10000 }).catch(() => {});
+        }, 60000);
 
         return () => clearInterval(intervalId);
     }, []);
