@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import React, { useState, useEffect, useRef } from 'react';
 import { channelsAPI } from '../../api/channels';
 import { directMessagesAPI } from '../../api/directMessages';
 import { useSocket } from '../../contexts/SocketProvider';
@@ -13,34 +12,34 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
   const { user: currentUser } = useAuthStore();
   const { fetchUnreadCounts } = useChatStore();
   const { socket, status } = useSocket();
-  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState(window.location.pathname.includes('direct-messages') ? 'dms' : 'channels'); 
+  const [channels, setChannels] = useState([]);
+  const [dms, setDms] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  
-  // Use React Query for Channels
-  const { data: channels = [], isLoading: channelsLoading, error: channelsError } = useQuery({
-    queryKey: ['chat', 'channels'],
-    queryFn: async () => {
-      const data = await channelsAPI.getChannels();
-      return (Array.isArray(data) ? data : []).map(c => ({ 
+  const [error, setError] = useState(null);
+  const isFetchingRef = useRef(false);
+
+  const fetchData = async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    
+    try {
+      const [channelsData, conversationsData] = await Promise.all([
+        channelsAPI.getChannels().catch(e => { console.error('Channels fetch error:', e); return []; }),
+        directMessagesAPI.getConversations().catch(e => { console.error('DMs fetch error:', e); return []; })
+      ]);
+
+      setChannels((Array.isArray(channelsData) ? channelsData : []).map(c => ({ 
         ...c, 
         type: 'channel', 
         id: c.id, 
         name: c.name,
         last_message: c.last_message,
         unread_count: c.unread_count || 0
-      }));
-    },
-    staleTime: 60000, 
-    refetchInterval: 300000, 
-  });
+      })));
 
-  // Use React Query for DMs
-  const { data: dms = [], isLoading: dmsLoading, error: dmsError } = useQuery({
-    queryKey: ['chat', 'conversations'],
-    queryFn: async () => {
-      const data = await directMessagesAPI.getConversations();
-      return (Array.isArray(data) ? data : []).map(conv => ({ 
+      setDms((Array.isArray(conversationsData) ? conversationsData : []).map(conv => ({ 
         ...conv, 
         type: 'dm', 
         id: conv.user_id, 
@@ -48,25 +47,87 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
         last_message: conv.last_message,
         user: conv.user,
         unread_count: conv.unread_count || 0
-      }));
-    },
-    staleTime: 60000,
-    refetchInterval: 300000,
-  });
+      })));
 
-  const loading = channelsLoading || dmsLoading;
-  const error = channelsError || dmsError ? 'Could not load chats.' : null;
+      setError(null);
+      // Sync with global store
+      fetchUnreadCounts();
+    } catch (err) {
+      console.error('Failed to fetch chat list', err);
+      setError('Could not load chats.');
+    } finally {
+      setLoading(false);
+      isFetchingRef.current = false;
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   // Real-time Socket Listeners for Sidebar Updates
   useEffect(() => {
     if (socket) {
       const handleSocketMessage = (msg) => {
-        console.log('[ChatSidebar] Real-time message received, invalidating queries:', msg);
-        // Simply invalidate the queries to trigger a background refetch
+        console.log('[ChatSidebar] Real-time message received:', msg);
+        
+        // Handle Channel Message
         if (msg.channel_id) {
-          queryClient.invalidateQueries({ queryKey: ['chat', 'channels'] });
-        } else {
-          queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
+          setChannels(prev => {
+            const index = prev.findIndex(c => String(c.id) === String(msg.channel_id));
+            if (index === -1) return prev; // Not in a channel we track
+
+            const newChannels = [...prev];
+            const channel = { ...newChannels[index] };
+            
+            channel.last_message = {
+              content: msg.content,
+              created_at: msg.created_at || new Date().toISOString()
+            };
+
+            // Increment unread if not currently viewing this channel
+            if (selectedId !== channel.id || selectedType !== 'channel') {
+              channel.unread_count = (channel.unread_count || 0) + 1;
+            }
+
+            newChannels.splice(index, 1);
+            newChannels.unshift(channel); // Move to top
+            return newChannels;
+          });
+        } 
+        // Handle Direct Message
+        else if (msg.sender_id) {
+          setDms(prev => {
+            // In DMs, the 'id' in our state is the other user's ID
+            const otherUserId = String(msg.sender_id) === String(currentUser?.id) ? msg.recipient_id : msg.sender_id;
+            const index = prev.findIndex(d => String(d.id) === String(otherUserId));
+            
+            if (index === -1) {
+                // If new conversation, we should probably fetch data again or wait for poll
+                // But let's trigger a fetch to be safe
+                fetchData();
+                return prev;
+            }
+
+            const newDms = [...prev];
+            const dm = { ...newDms[index] };
+            
+            dm.last_message = {
+              content: msg.content,
+              created_at: msg.created_at || new Date().toISOString()
+            };
+
+            // Increment unread if message is FROM someone else and we aren't viewing them
+            if (String(msg.sender_id) !== String(currentUser?.id)) {
+                if (selectedId !== dm.id || selectedType !== 'dm') {
+                    dm.unread_count = (dm.unread_count || 0) + 1;
+                }
+            }
+
+            newDms.splice(index, 1);
+            newDms.unshift(dm); // Move to top
+            return newDms;
+          });
         }
       };
 
@@ -193,7 +254,7 @@ const ChatSidebar = ({ onSelectChat, selectedId, selectedType, onAction }) => {
         ) : error ? (
           <div className="sidebar-error">
             <p>{error}</p>
-            <button onClick={() => queryClient.invalidateQueries({ queryKey: ['chat'] })}>Retry</button>
+            <button onClick={fetchData}>Retry</button>
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="sidebar-empty">
