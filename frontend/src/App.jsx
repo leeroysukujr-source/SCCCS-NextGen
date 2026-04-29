@@ -70,6 +70,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import SystemSettingsBootstrapper from './components/SystemSettingsBootstrapper'
 import { BrandingProvider } from './contexts/BrandingContext'
 import { MeetingProvider } from './contexts/MeetingContext'
+import KeepAlive from './components/KeepAlive'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -138,6 +139,7 @@ function App() {
   return (
     <ErrorBoundary>
       <SystemSettingsBootstrapper />
+      <KeepAlive />
       <BrandingProvider>
         <MeetingProvider>
           <QueryClientProvider client={queryClient}>

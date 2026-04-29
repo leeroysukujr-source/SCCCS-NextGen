@@ -180,12 +180,29 @@ const SuperAdminDashboard = () => {
         fetchStats();
     };
 
+    const [isWakingUp, setIsWakingUp] = useState(false);
+    const [connectionError, setConnectionError] = useState(null);
+
     const fetchStats = async () => {
+        setIsWakingUp(true);
+        setConnectionError(null);
         try {
             const response = await apiClient.get('/superadmin/stats');
             setStats(response.data);
+            setIsWakingUp(false);
         } catch (error) {
             console.error('Error fetching stats:', error);
+            setConnectionError('Connection issues detected. Backend might be waking up.');
+            // Retry once after 5 seconds if it's likely a cold start
+            setTimeout(() => {
+                apiClient.get('/superadmin/stats')
+                    .then(res => {
+                        setStats(res.data);
+                        setConnectionError(null);
+                    })
+                    .catch(() => {})
+                    .finally(() => setIsWakingUp(false));
+            }, 5000);
         }
     };
 
@@ -1591,8 +1608,15 @@ const DashboardHome = ({
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 dark:text-slate-400">Database</span>
-                            <span className="text-blue-600 dark:text-blue-400 font-mono">Connected</span>
+                            <span className={`${connectionError ? 'text-red-500' : 'text-blue-600 dark:text-blue-400'} font-mono`}>
+                                {connectionError ? 'Degraded' : 'Connected'}
+                            </span>
                         </div>
+                        {isWakingUp && (
+                            <div className="mt-2 text-[10px] text-indigo-400 animate-pulse">
+                                System warming up... please wait.
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

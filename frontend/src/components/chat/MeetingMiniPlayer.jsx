@@ -4,8 +4,7 @@ import {
     ParticipantTile, 
     useParticipants, 
     useTracks,
-    RoomAudioRenderer,
-    TrackReferenceOrPlaceholder
+    RoomAudioRenderer
 } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 import { FaExpand, FaTimes, FaMicrophoneSlash, FaVideoSlash, FaHandPaper } from 'react-icons/fa';
