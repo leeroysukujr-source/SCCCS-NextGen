@@ -589,6 +589,8 @@ const SuperAdminDashboard = () => {
                             logsLoading={logsLoading}
                             stats={stats}
                             workspacesCount={workspaces.length}
+                            connectionError={connectionError}
+                            isWakingUp={isWakingUp}
                         />
                     )}
 
@@ -1535,7 +1537,9 @@ const DashboardHome = ({
     logs,
     logsLoading,
     stats,
-    workspacesCount
+    workspacesCount,
+    connectionError,
+    isWakingUp
 }) => (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <SuperAdminStats stats={stats} workspacesCount={workspacesCount} />
