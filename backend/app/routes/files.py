@@ -90,57 +90,68 @@ def upload_file():
         elif not mime_type:
             mime_type = 'application/octet-stream'
         
-        # Read file data
-        file_data = file.read()
-        file_size = len(file_data)
+        # Memory-efficient streaming for S3 upload
+        storage_url = None
         
-        # Check if encryption is needed (from channel if message_id provided)
-        is_encrypted = False
+        # Point: Optimization for Render (Avoid OOM on large files)
         channel_id = request.form.get('channel_id', type=int)
         lesson_id = request.form.get('lesson_id', type=int)
         
-        if channel_id:
-            channel = Channel.query.get(channel_id)
-            if channel and channel.is_encrypted and channel.encryption_key:
-                try:
-                    encryption_key = channel.encryption_key.encode('utf-8')
-                    file_data = encrypt_file_data(file_data, encryption_key)
-                    is_encrypted = True
-                except Exception as e:
-                    print(f"[Upload] Encryption failed: {str(e)}")
-                    # File encryption failed - continue without encryption
-                    pass
-        
-        # Cloud Storage Logic
-        storage_url = None
-        try:
-            from app.utils.storage import upload_fileobj, get_public_url
-            from flask import current_app
-            
-            if current_app.config.get('S3_ENDPOINT') and current_app.config.get('S3_BUCKET') and 'localhost' not in current_app.config.get('S3_ENDPOINT'):
-                # Upload to S3
-                file_stream = BytesIO(file_data)
-                folder = 'files'
-                if lesson_id: folder = 'materials'
-                elif channel_id: folder = f'channels/{channel_id}'
+        # If no encryption needed, stream directly to S3
+        if not channel_id:
+            try:
+                from app.utils.storage import upload_fileobj, get_public_url
+                from flask import current_app
                 
-                key = f"{folder}/{unique_filename}"
-                try:
+                if current_app.config.get('S3_ENDPOINT') and 'localhost' not in current_app.config.get('S3_ENDPOINT'):
+                    folder = 'materials' if lesson_id else 'general'
+                    key = f"{folder}/{unique_filename}"
+                    
+                    if upload_fileobj(file, key):
+                        storage_url = get_public_url(key)
+                        file_path = storage_url
+                        current_app.logger.info(f"[Upload] Streamed directly to cloud: {storage_url}")
+            except Exception as e:
+                current_app.logger.warning(f"[Upload] Cloud stream failed, falling back to buffered: {str(e)}")
+        
+        # Fallback: Read into memory (Required for encryption or if cloud stream failed)
+        if not storage_url:
+            file.seek(0)
+            file_data = file.read()
+            file_size = len(file_data)
+            
+            # Handle Encryption
+            is_encrypted = False
+            if channel_id:
+                channel = Channel.query.get(channel_id)
+                if channel and channel.is_encrypted and channel.encryption_key:
+                    try:
+                        from app.utils.encryption import encrypt_file_data
+                        encryption_key = channel.encryption_key.encode('utf-8')
+                        file_data = encrypt_file_data(file_data, encryption_key)
+                        is_encrypted = True
+                        file_size = len(file_data)
+                    except Exception as e:
+                        current_app.logger.error(f"[Upload] Encryption failed: {str(e)}")
+            
+            # Attempt Cloud Upload (Buffered)
+            try:
+                from app.utils.storage import upload_fileobj, get_public_url
+                if current_app.config.get('S3_ENDPOINT') and 'localhost' not in current_app.config.get('S3_ENDPOINT'):
+                    file_stream = BytesIO(file_data)
+                    folder = f'channels/{channel_id}' if channel_id else ('materials' if lesson_id else 'general')
+                    key = f"{folder}/{unique_filename}"
                     if upload_fileobj(file_stream, key):
                         storage_url = get_public_url(key)
                         file_path = storage_url
-                        print(f"[Upload] Successfully uploaded to cloud: {storage_url}")
-                except Exception as e:
-                    print(f"[Upload] Cloud storage upload failed: {str(e)}")
-        except Exception as storage_err:
-            print(f"[Upload] Storage system error: {storage_err}")
-
-        # Fallback to Local Save if not uploaded to cloud
-        if not storage_url:
-            print(f"[Upload] Saving locally to: {file_path}")
-            os.makedirs(os.path.dirname(file_path), exist_ok=True)
-            with open(file_path, 'wb') as f:
-                f.write(file_data)
+            except Exception as e:
+                current_app.logger.warning(f"[Upload] Buffered cloud upload failed: {str(e)}")
+            
+            # Local Save Fallback
+            if not storage_url:
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                with open(file_path, 'wb') as f:
+                    f.write(file_data)
         
         # Get current user
         user = User.query.get(current_user_id)
@@ -198,14 +209,22 @@ def upload_file():
         db.session.add(file_obj)
         db.session.commit()
         
-        return jsonify(file_obj.to_dict()), 201
+        resp = jsonify(file_obj.to_dict())
+        origin = request.headers.get('Origin', '*')
+        resp.headers['Access-Control-Allow-Origin'] = origin
+        resp.headers['Access-Control-Allow-Credentials'] = 'true'
+        return resp, 201
         
     except Exception as e:
         import traceback
         import sys
         print(f"!!! CRITICAL UPLOAD ERROR: {str(e)}", file=sys.stderr)
         traceback.print_exc()
-        return jsonify({'error': str(e), 'details': 'Critical internal server error during file upload'}), 500
+        resp = jsonify({'error': str(e), 'details': 'Critical internal server error during file upload'})
+        origin = request.headers.get('Origin', '*')
+        resp.headers['Access-Control-Allow-Origin'] = origin
+        resp.headers['Access-Control-Allow-Credentials'] = 'true'
+        return resp, 500
 
 from flask_cors import cross_origin
 
