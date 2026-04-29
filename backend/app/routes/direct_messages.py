@@ -226,30 +226,30 @@ def get_conversations():
         # Audit mode can be added separately if needed.
         
         # Regular users only see their own conversations
-        # Use model query directly - more reliable
         try:
-            # Query messages where the current user is either sender or recipient
-            all_user_messages = DirectMessage.query.filter(
+            # Query the latest message for each conversation involving the current user
+            from sqlalchemy import func
+            
+            # Subquery to find the max ID (latest message) for each pair of users
+            # We treat (sender, recipient) as equivalent to (recipient, sender) by sorting IDs
+            user_a = func.least(DirectMessage.sender_id, DirectMessage.recipient_id)
+            user_b = func.greatest(DirectMessage.sender_id, DirectMessage.recipient_id)
+            
+            last_msg_subquery = db.session.query(
+                func.max(DirectMessage.id).label('max_id')
+            ).filter(
                 (DirectMessage.sender_id == current_user_id) | 
                 (DirectMessage.recipient_id == current_user_id)
+            ).group_by(user_a, user_b).subquery()
+            
+            # Fetch the actual messages using the IDs from the subquery
+            last_messages_query = DirectMessage.query.filter(
+                DirectMessage.id.in_(db.session.query(last_msg_subquery.c.max_id))
             ).order_by(DirectMessage.created_at.desc()).all()
             
-            # Group by conversation partner and get last message for each
-            conversation_last_msg = {}
-            for msg in all_user_messages:
-                # Determine the other user in this conversation
-                other_user_id = msg.recipient_id if msg.sender_id == current_user_id else msg.sender_id
-                
-                # Store the most recent message for this conversation
-                if other_user_id not in conversation_last_msg:
-                    conversation_last_msg[other_user_id] = msg
-                elif msg.created_at and conversation_last_msg[other_user_id].created_at:
-                    if msg.created_at > conversation_last_msg[other_user_id].created_at:
-                        conversation_last_msg[other_user_id] = msg
-            
-            # Convert to list format - decrypt content for preview
+            # Group by conversation partner and decrypt content for preview
             last_messages = []
-            for other_user_id, msg in conversation_last_msg.items():
+            for msg in last_messages_query:
                 try:
                     preview_content = msg.content
                     if msg.content and msg.content != '[File]':
