@@ -48,13 +48,18 @@ def list_admins():
 @platform_super_admin_required
 def get_stats():
     """Get system-wide statistics for Super Admin"""
+    from flask import current_app
+    db_url = current_app.config.get('SQLALCHEMY_DATABASE_URI', '')
+    is_ephemeral = 'sqlite' in db_url
+    
     stats = {
         'total_admins': User.query.filter(User.role.ilike('admin')).count(),
         'total_teachers': User.query.filter(User.role.ilike('teacher')).count(),
         'total_students': User.query.filter(User.role.ilike('student')).count(),
         'total_workspaces': Workspace.query.count(),
         'active_users': User.query.filter_by(is_active=True).count(),
-        'total_logs': TwoFactorAudit.query.count() + AuditLog.query.count()
+        'total_logs': TwoFactorAudit.query.count() + AuditLog.query.count(),
+        'persistence_warning': is_ephemeral and not current_app.debug
     }
     return jsonify(stats), 200
 
