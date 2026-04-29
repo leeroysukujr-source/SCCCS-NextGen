@@ -140,6 +140,14 @@ const SuperAdminDashboard = () => {
     useEffect(() => {
         fetchAll();
         fetchFlags();
+        
+        // Live Streaming Analytics: Refresh stats and logs every 30 seconds
+        const pollInterval = setInterval(() => {
+            fetchStats();
+            fetchLogs();
+        }, 30000);
+
+        return () => clearInterval(pollInterval);
     }, []);
 
     useEffect(() => {

@@ -53,7 +53,7 @@ def get_stats():
     is_ephemeral = 'sqlite' in db_url
     
     stats = {
-        'total_admins': User.query.filter(User.role.ilike('admin')).count(),
+        'total_admins': User.query.filter(User.role.ilike('%admin%')).count(), # Includes 'admin' and 'super_admin'
         'total_teachers': User.query.filter(User.role.ilike('teacher')).count(),
         'total_students': User.query.filter(User.role.ilike('student')).count(),
         'total_workspaces': Workspace.query.count(),
