@@ -29,9 +29,9 @@ def get_s3_client():
 
         from botocore.config import Config
         s3_config = Config(
-            connect_timeout=5,
-            read_timeout=5,
-            retries={'max_attempts': 1}
+            connect_timeout=60,
+            read_timeout=60,
+            retries={'max_attempts': 3}
         )
         
         session = boto3.session.Session()

@@ -63,7 +63,10 @@ def system_status():
         
         return jsonify({
             'status': 'operational' if db_healthy else 'degraded',
-            'database': 'connected' if db_healthy else 'disconnected',
+            'database': {
+                'status': 'connected' if db_healthy else 'disconnected',
+                'type': 'postgres' if 'postgres' in current_app.config.get('SQLALCHEMY_DATABASE_URI', '') else 'sqlite'
+            },
             'redis': 'unknown',
             's3': 'unknown',
             'timestamp': datetime.utcnow().isoformat(),

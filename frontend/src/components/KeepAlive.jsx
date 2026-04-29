@@ -10,16 +10,16 @@ import { getApiUrl } from '../utils/api';
 const KeepAlive = () => {
     useEffect(() => {
         const API_URL = getApiUrl();
-        const HEALTH_ENDPOINT = `${API_URL}/health`;
+        const HEALTH_ENDPOINT = `${API_URL}/health`.replace('/api/health', '/health'); // Ensure root health
+        const API_HEALTH = `${API_URL}/health`; // Standard /api/health
 
         // Function to perform the ping
         const pingBackend = async () => {
             try {
-                // Use a simple fetch to avoid interceptor overhead if possible, 
-                // but axios is fine too since we want to keep the whole pipeline warm
+                // Use a longer timeout for Render cold starts
                 await axios.get(HEALTH_ENDPOINT, { 
                     headers: { 'bypass-tunnel-reminder': 'true' },
-                    timeout: 10000 
+                    timeout: 30000 // 30 seconds
                 });
                 console.log('[KeepAlive] 💓 Backend pinged successfully at', new Date().toLocaleTimeString());
             } catch (error) {
@@ -34,7 +34,7 @@ const KeepAlive = () => {
         const intervalId = setInterval(() => {
             pingBackend();
             // Also ping /api/health as a secondary path
-            axios.get(`${API_URL}/api/health`, { headers: { 'bypass-tunnel-reminder': 'true' }, timeout: 10000 }).catch(() => {});
+            axios.get(API_HEALTH, { headers: { 'bypass-tunnel-reminder': 'true' }, timeout: 30000 }).catch(() => {});
         }, 60000);
 
         return () => clearInterval(intervalId);
